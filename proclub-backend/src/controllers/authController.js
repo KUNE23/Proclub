@@ -1,0 +1,106 @@
+const prisma = require('../config/prisma')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
+
+const register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body
+
+    // cek user
+    const existingUser = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already used' })
+    }
+
+    // hash password
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const user = await prisma.user.create({
+      data: {
+        name,
+        email,
+        password: hashedPassword
+      }
+    })
+
+    res.json({ message: 'Register success', user })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' })
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password)
+
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Wrong password' })
+    }
+
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '1d' }
+    )
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { token }
+    })
+
+    return res.json({
+      message: 'Login success',
+      token
+    })
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
+const forgotpassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    })
+
+    if (!user) {
+      return res.status(400).json({ message: 'User not found' })
+    }
+
+    res.json({ message: 'Password reset link sent to your email' })
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+const logout = async (req, res) => {
+  try {
+    await prisma.user.update({
+      where: { id: req.user.id },
+      data: { token: null }
+    });
+    return res.status(200).json({ 
+      status: 'success',
+      message: 'Logout success' 
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message })
+  }
+}
+
+module.exports = { register, login, forgotpassword, logout }

@@ -1,0 +1,137 @@
+<script setup>
+import { ref } from 'vue'
+import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { 
+  LayoutDashboard, 
+  BookOpen, 
+  CheckSquare, 
+  User, 
+  LogOut, 
+  Menu, 
+  X, 
+  Bell 
+} from 'lucide-vue-next'
+
+const route = useRoute()
+const isSidebarOpen = ref(false)
+
+// Navigasi Utama Proclub
+const navigation = [
+  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Courses', href: '/courses-catalog', icon: BookOpen },
+  { name: 'Projects', href: '/project-submission', icon: CheckSquare },
+  { name: 'Profile', href: '/profile', icon: User },
+]
+
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+</script>
+
+<template>
+  <div class="min-h-screen bg-gray-50 flex">
+    
+    <div v-if="isSidebarOpen" 
+         class="fixed inset-0 z-40 bg-black/50 lg:hidden" 
+         @click="toggleSidebar">
+    </div>
+
+    <aside :class="[
+      'fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 transform transition-transform duration-300 lg:translate-x-0 lg:static lg:inset-0',
+      isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+    ]">
+      <div class="h-full flex flex-col">
+        <div class="p-6 flex items-center gap-3">
+          <div class="w-8 h-8 bg-[#2C7047] rounded-lg flex items-center justify-center text-white font-bold">
+            P
+          </div>
+          <span class="text-xl font-bold text-gray-800 tracking-tight">Proclub</span>
+        </div>
+
+        <nav class="flex-1 px-4 space-y-2 mt-4">
+          <RouterLink 
+            v-for="item in navigation" 
+            :key="item.name" 
+            :to="item.href"
+            :class="[
+              route.path === item.href 
+                ? 'bg-[#2C7047]/10 text-[#2C7047]' 
+                : 'text-gray-600 hover:bg-gray-100',
+              'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all'
+            ]"
+            @click="isSidebarOpen = false"
+          >
+            <component :is="item.icon" class="w-5 h-5" />
+            {{ item.name }}
+          </RouterLink>
+        </nav>
+
+        <div class="p-4 border-t border-gray-100">
+          <button class="flex items-center gap-3 px-4 py-3 w-full text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+            <LogOut class="w-5 h-5" />
+            <span class="font-medium">Logout</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
+      
+      <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 sticky top-0 z-30">
+        <button @click="toggleSidebar" class="lg:hidden p-2 text-gray-600">
+          <Menu v-if="!isSidebarOpen" class="w-6 h-6" />
+          <X v-else class="w-6 h-6" />
+        </button>
+
+        <div class="hidden md:block">
+          <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            STT Cipasung • Informatics Engineering
+          </h2>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <button class="p-2 text-gray-400 hover:text-[#2C7047] relative">
+            <Bell class="w-5 h-5" />
+            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+          </button>
+          <div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
+          <div class="flex items-center gap-3 pl-2">
+            <div class="text-right hidden sm:block">
+              <p class="text-sm font-semibold text-gray-800 leading-none">Alfiansyah Sibyanurrizki</p>
+              <p class="text-xs text-gray-500 mt-1">Semester II</p>
+            </div>
+            <img src="https://ui-avatars.com/api/?name=KUNE&background=2C7047&color=fff" 
+                 alt="Avatar" 
+                 class="w-9 h-9 rounded-full border border-gray-200" />
+          </div>
+        </div>
+      </header>
+
+      <main class="flex-1 overflow-y-auto lg:p-20">
+        <div class="mx-auto">
+          <RouterView />
+        </div>
+      </main>
+
+      <footer class="bg-white border-t border-gray-200 py-6 px-8">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+          <p class="text-sm text-gray-500 text-center">
+            © 2026 Proclub STT Cipasung. Built with 💚 for the community.
+          </p>
+          <div class="flex gap-6 text-sm font-medium text-gray-400">
+            <a href="#" class="hover:text-[#2C7047]">Documentation</a>
+            <a href="#" class="hover:text-[#2C7047]">Support</a>
+            <a href="#" class="hover:text-[#2C7047]">Privacy Policy</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  </div>
+</template>
+
+<style scoped>
+/* Transisi halus untuk Sidebar mobile */
+.translate-x-0 {
+  box-shadow: 10px 0 30px -10px rgba(0,0,0,0.1);
+}
+</style>

@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  admin
+  mentor
+  member
+}
+
+enum ProgressStatus {
+  locked
+  unlocked
+  completed
+}
+
+enum ProjectStatus {
+  pending
+  approved
+  rejected
+}
+
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(member)
+
+  progress  UserProgress[]
+  projects  Project[]
+
+  token     String?  @db.Text
+  createdAt DateTime @default(now())
+}
+
+model Course {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+
+  modules     Module[]
+  projects    Project[]
+}
+
+model Module {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String
+  order     Int
+
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id])
+
+  quizzes   Quiz[]
+  progress  UserProgress[]
+  projects  Project[]
+}
+
+model Quiz {
+  id            Int     @id @default(autoincrement())
+  question      String
+  options       Json
+  correctAnswer String
+
+  moduleId      Int
+  module        Module @relation(fields: [moduleId], references: [id])
+}
+
+model UserProgress {
+  id        Int            @id @default(autoincrement())
+  status    ProgressStatus @default(locked)
+  score     Float?
+
+  userId    Int
+  moduleId  Int
+
+  user      User   @relation(fields: [userId], references: [id])
+  module    Module @relation(fields: [moduleId], references: [id])
+
+  @@unique([userId, moduleId]) 
+}
+
+model Project {
+  id         Int            @id @default(autoincrement())
+  linkGithub String
+  note       String?
+  status     ProjectStatus  @default(pending)
+
+  userId     Int
+  courseId   Int
+  moduleId   Int?
+
+  user       User    @relation(fields: [userId], references: [id])
+  course     Course  @relation(fields: [courseId], references: [id])
+  module     Module? @relation(fields: [moduleId], references: [id])
+}
