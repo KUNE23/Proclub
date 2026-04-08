@@ -10,7 +10,9 @@
       <form @submit.prevent="handleLogin" class="space-y-5">
         <div>
           <label class="block text-sm font-bold text-gray-700 mb-1.5">Email address</label>
-          <input type="email" 
+          <input 
+          v-model="email"
+          type="email" 
           class="block w-full border border-gray-200 rounded-xl shadow-sm p-3.5 focus:ring-2 focus:ring-[#2C7047] focus:border-[#2C7047] transition-all bg-gray-50 focus:bg-white text-gray-900" 
           placeholder="Enter your email" 
           required />
@@ -20,17 +22,17 @@
             <label class="block text-sm font-bold text-gray-700">Password</label>
             <a href="#" class="text-xs font-semibold text-[#2C7047] hover:underline">Forgot password?</a>
           </div>
-          <input 
+          <input
+          v-model="password" 
           type="password" 
           class="block w-full border border-gray-200 rounded-xl shadow-sm p-3.5 focus:ring-2 focus:ring-[#2C7047] focus:border-[#2C7047] transition-all bg-gray-50 focus:bg-white text-gray-900" 
           placeholder="••••••••"
-          
           required />
         </div>
         
         <div class="pt-2">
-          <button type="submit" class="w-full bg-[#2C7047] text-white p-3.5 rounded-xl font-bold tracking-wide shadow-md shadow-[#2C7047]/20 hover:shadow-lg hover:bg-[#235838] hover:-translate-y-0.5 transition-all outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C7047]">
-            Sign In
+          <button :disable="isLoading" type="submit" class="w-full bg-[#2C7047] text-white p-3.5 rounded-xl font-bold tracking-wide shadow-md shadow-[#2C7047]/20 hover:shadow-lg hover:bg-[#235838] hover:-translate-y-0.5 transition-all outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2C7047]">
+            {{ isLoading ? 'Logging in...' : 'Sign In' }}
           </button>
         </div>
       </form>
@@ -43,11 +45,30 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router';
-const router = useRouter();
+import { ref } from 'vue';
+import { useRouter } from 'vue-router'; 
+import api from '../api';
 
-const handleLogin = () => {
-  // Mock login and redirect
-  router.push('/');
+const isLoading = ref(false);
+const router = useRouter();
+const email = ref('');  
+const password = ref('');
+
+const handleLogin = async () => {
+  isLoading.value = true;
+  try {
+    const response = await api.post('/auth/login', {
+      email: email.value,
+      password: password.value
+    });
+    
+    localStorage.setItem('accessToken', response.data.token);
+    
+    router.push('/'); 
+  } catch (error) {
+    const message = error.response?.data?.message || 'Login failed';
+    alert(message);
+    console.error('Login error:', error);
+  }
 };
 </script>
