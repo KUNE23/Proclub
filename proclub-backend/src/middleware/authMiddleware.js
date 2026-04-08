@@ -19,7 +19,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'Session expired or logged out' });
     }
 
-    req.user = decoded; 
+    req.user = user; 
     return next();
   } catch (error) {
    return res.status(401).json({ 

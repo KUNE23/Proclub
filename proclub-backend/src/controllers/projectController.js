@@ -1,9 +1,10 @@
 const prisma = require('../config/prisma')
-
+const xss = require('xss');
 const submitProject = async (req, res) => {
   try {
     const userId = req.user.id;
     let { linkGithub, note, courseId, moduleId } = req.body;
+    const cleanNote = xss(note);
 
     courseId = Number(courseId);
     moduleId = moduleId ? Number(moduleId) : null;
@@ -21,11 +22,11 @@ const submitProject = async (req, res) => {
         return res.status(404).json({ message: 'Module not found in this course' });
       }
     }
-
+    
     const project = await prisma.project.create({
       data: {
         linkGithub,
-        note,
+        note: cleanNote,
         userId,
         courseId,
         moduleId 

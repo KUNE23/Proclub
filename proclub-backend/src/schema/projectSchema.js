@@ -10,11 +10,21 @@ const submitProjectSchema = z.object({
     .refine((val) => val.includes('github.com'), {
       message: "Hanya link GitHub yang diperbolehkan",
     }),
+
     note: 
     z.string()
-    .trim()
     .min(2, "Note must be at least 2 characters")
-    .max(255, "Note must be at most 255 characters"),
-})
+    .trim()
+    .max(255, "Note must be at most 255 characters")
+    .transform((val) => val.replace(/<[^>]*>?/gm, '')),
+
+    courseId:
+    z.number(),
+
+    moduleId: 
+    z.number()
+    .optional(),
+
+  });
 
 module.exports = { submitProjectSchema };

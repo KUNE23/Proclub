@@ -6,7 +6,6 @@ const register = async (req, res) => {
   try {
     const { name, email, password } = req.body
 
-    // cek user
     const existingUser = await prisma.user.findUnique({
       where: { email }
     })
@@ -15,7 +14,6 @@ const register = async (req, res) => {
       return res.status(400).json({ message: 'Email already used' })
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const user = await prisma.user.create({
@@ -46,9 +44,8 @@ const login = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password)
 
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Wrong password' })
-    }
+  if (!isMatch) 
+    return res.status(401).json({ message: 'Invalid credentials' });
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
@@ -58,7 +55,7 @@ const login = async (req, res) => {
 
     await prisma.user.update({
       where: { id: user.id },
-      data: { token }
+      data: { token: token }
     })
 
     return res.json({
