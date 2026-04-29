@@ -1,40 +1,106 @@
 const prisma = require('../config/prisma')
 
+const buildImagePath = (file) => {
+  if (!file) return undefined
+  return `uploads/courses/${file.filename}`
+}
+
 const createCourse = async (req, res) => {
   try {
-    const { title, description } = req.body
+    const { title, description, categoryId } = req.body
 
-    if (!title) {
+    if (!title || !title.trim()) {
       return res.status(400).json({ message: 'Title is required' })
     }
 
+    let categoryConnect = undefined
+    if (categoryId !== undefined && categoryId !== null && categoryId !== '') {
+      const parsedCategoryId = Number(categoryId)
+      if (Number.isNaN(parsedCategoryId)) {
+        return res.status(400).json({ message: 'categoryId must be a valid integer' })
+      }
+
+      const category = await prisma.category.findUnique({
+        where: { id: parsedCategoryId }
+      })
+
+      if (!category) {
+        return res.status(400).json({ message: 'Category not found' })
+      }
+
+      categoryConnect = { connect: { id: parsedCategoryId } }
+    }
+
+    const image = buildImagePath(req.file)
+
     const course = await prisma.course.create({
       data: {
-        title,
-        description
+        title: title.trim(),
+        description: description?.trim() ?? null,
+        ...(categoryConnect && { category: categoryConnect }),
+        ...(image && { image })
+      },
+      include: {
+        category: {
+          select: {
+            id: true,
+            cat_name: true
+          }
+        }
       }
     })
 
-    res.status(201).json({ message: 'Course created', course })
+    return res.status(201).json({
+      message: 'Course created successfully',
+      course
+    })
   } catch (error) {
-    res.status(500).json({ error: error.message })
+    console.error('Error createCourse:', error)
+    return res.status(500).json({
+      message: 'Internal Server Error',
+      error: error.message
+    })
   }
 }
 
 const getCourses = async (req, res) => {
   try {
-    const courses = await prisma.course.findMany()
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const skip = (page - 1) * limit
 
-    if(courses.length === 0) {
-      return res.status(404).json({ 
-        status: 'fail',
-        message: 'No courses found' 
-      })
-    }
-    
-    return res.status(200).json({ 
+    const [courses, totalData] = await Promise.all([
+      prisma.course.findMany({
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+        select: {
+          id: true,
+          title: true,
+          description: true,
+          image: true,
+          createdAt: true,
+          category: {
+            select: {
+              id: true,
+              cat_name: true
+            }
+          }
+        }
+      }),
+      prisma.course.count()
+    ])
+
+    const totalPages = Math.ceil(totalData / limit)
+
+    return res.status(200).json({
       status: 'success',
-      courses 
+      data: courses,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalData
+      }
     })
   } catch (error) {
     return res.status(500).json({ error: error.message })
@@ -54,36 +120,43 @@ const getCourseById = async (req, res) => {
       include: {
         modules: {
           orderBy: { order: 'asc' }
+        },
+        category: {
+          select: {
+            id: true,
+            cat_name: true
+          }
         }
       }
     })
 
     if (!course) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         status: 'fail',
-        message: 'Course not found' })
+        message: 'Course not found'
+      })
     }
 
-    return res.status(200).json({ 
+    return res.status(200).json({
       status: 'success',
-      course 
+      course
     })
   } catch (error) {
-      return res.status(500).json({ error: error.message })
+    return res.status(500).json({ error: error.message })
   }
 }
 
 const updateCourse = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
-    const { title, description } = req.body
+    const { title, description, categoryId } = req.body
 
     if (Number.isNaN(courseId)) {
       return res.status(400).json({ message: 'Invalid course ID' })
     }
 
-    if (!title && description === undefined) {
-      return res.status(400).json({ message: 'At least one field is required to update' })
+    if (!title && description === undefined && categoryId === undefined && !req.file) {
+      return res.status(400).json({ message: 'At least one field or image is required to update' })
     }
 
     const existingCourse = await prisma.course.findUnique({
@@ -94,17 +167,61 @@ const updateCourse = async (req, res) => {
       return res.status(404).json({ message: 'Course not found' })
     }
 
+    const data = {}
+
+    if (title !== undefined) {
+      if (!title.trim()) {
+        return res.status(400).json({ message: 'Title cannot be empty' })
+      }
+      data.title = title.trim()
+    }
+
+    if (description !== undefined) {
+      data.description = description?.trim() ?? null
+    }
+
+    if (categoryId !== undefined) {
+      if (categoryId === null || categoryId === '') {
+        data.category = { disconnect: true }
+      } else {
+        const parsedCategoryId = Number(categoryId)
+        if (Number.isNaN(parsedCategoryId)) {
+          return res.status(400).json({ message: 'categoryId must be a valid integer' })
+        }
+
+        const category = await prisma.category.findUnique({
+          where: { id: parsedCategoryId }
+        })
+
+        if (!category) {
+          return res.status(400).json({ message: 'Category not found' })
+        }
+
+        data.category = { connect: { id: parsedCategoryId } }
+      }
+    }
+
+    if (req.file) {
+      data.image = buildImagePath(req.file)
+    }
+
     const course = await prisma.course.update({
       where: { id: courseId },
-      data: {
-        title: title ?? existingCourse.title,
-        description: description ?? existingCourse.description
+      data,
+      include: {
+        category: {
+          select: {
+            id: true,
+            cat_name: true
+          }
+        }
       }
     })
 
     return res.status(200).json({ message: 'Course updated', course })
   } catch (error) {
-   return res.status(500).json({ error: error.message })
+    console.error('Error updateCourse:', error)
+    return res.status(500).json({ error: error.message })
   }
 }
 
@@ -141,3 +258,4 @@ module.exports = {
   updateCourse,
   deleteCourse
 }
+

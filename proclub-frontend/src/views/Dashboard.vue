@@ -30,7 +30,7 @@
               Welcome back, <span class="text-[#2C7047]">{{ user.name }}</span>!
             </h2>
             <p class="text-gray-500 mt-2 text-sm md:text-base border-gray-100 pb-2">
-              {{ user.subtitle }}
+            Perjalanan belajarmu terus berkembang. Berikut adalah progres belajarmu saat ini.
             </p>
           </div>
 
@@ -132,14 +132,25 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import api from '../api/index.js'
+import { useToast } from 'vue-toastification'
 
+const toast = useToast()
 const isLoading = ref(true)
+const UserName = ref('');
 
-// Reactive Data Definitions
+const fetchUserName = async () => {
+  try {
+    const response = await api.get('/profile'); 
+    UserName.value = response.data.name;
+  } catch (error) {
+    console.error("Gagal mengambil nama user:", error);
+  }
+};
+
 const user = ref({
-  name: 'Alfi',
+  name: UserName,
   subtitle: 'Your botanical journey is flourishing. Here is your current progress.',
-  avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=256&q=80'
 })
 
 const featuredCourse = ref({
@@ -179,9 +190,16 @@ const recommendedCourses = ref([
 ])
 
 onMounted(() => {
-  // Simulate a network request
+  const didJustLogin = window.history.state?.loginSuccess
+  fetchUserName();
   setTimeout(() => {
     isLoading.value = false
+
+    if (didJustLogin) {
+      toast.success('Login berhasil! Selamat datang kembali ', {
+        timeout: 4000,
+      })
+    }
   }, 1200)
 })
 </script>

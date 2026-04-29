@@ -1,6 +1,8 @@
 <script setup>
-import { ref } from 'vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import api from '../api/index.js'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -13,9 +15,38 @@ import {
 } from 'lucide-vue-next'
 
 const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 const isSidebarOpen = ref(false)
+const isLoggingOut = ref(false)
+const userName = ref('');
+const userRole = ref('');
 
-// Navigasi Utama Proclub
+const handleLogout = async () => {
+  isLoggingOut.value = true
+  try {
+    await api.post('/auth/logout')
+  } catch (error) {
+    console.warn('Logout API error:', error)
+  } finally {
+    localStorage.removeItem('accessToken')
+    toast.success('Berhasil logout. Sampai jumpa!')
+    isLoggingOut.value = false
+    router.push('/login')
+  }
+}
+
+const fetchUserProfile = async () => {
+  try {
+    const response = await api.get('/profile'); 
+    userName.value = response.data.name;
+    userRole.value = response.data.role;
+  } catch (error) {
+    console.error("Gagal mengambil profil:", error);
+    router.push('/login');
+  }
+};
+
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Courses', href: '/courses-catalog', icon: BookOpen },
@@ -26,6 +57,10 @@ const navigation = [
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
 }
+
+onMounted(() => {
+  fetchUserProfile();
+});
 </script>
 
 <template>
@@ -42,8 +77,8 @@ const toggleSidebar = () => {
     ]">
       <div class="h-full flex flex-col">
         <div class="p-6 flex items-center gap-3">
-          <div class="w-8 h-8 bg-[#2C7047] rounded-lg flex items-center justify-center text-white font-bold">
-            P
+          <div class="w-8 h-8 bg-[#FFFFF] rounded-lg flex items-center justify-center text-white font-bold">
+            <img src="/proclub.png" alt="Logo" class="w-full h-full object-contain" width="100" height="100"/>
           </div>
           <span class="text-xl font-bold text-gray-800 tracking-tight">Proclub</span>
         </div>
@@ -67,9 +102,12 @@ const toggleSidebar = () => {
         </nav>
 
         <div class="p-4 border-t border-gray-100">
-          <button class="flex items-center gap-3 px-4 py-3 w-full text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all">
+        <button 
+            @click="handleLogout"
+            :disabled="isLoggingOut"
+            class="flex items-center gap-3 px-4 py-3 w-full text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
             <LogOut class="w-5 h-5" />
-            <span class="font-medium">Logout</span>
+            <span class="font-medium">{{ isLoggingOut ? 'Logging out...' : 'Logout' }}</span>
           </button>
         </div>
       </div>
@@ -97,8 +135,8 @@ const toggleSidebar = () => {
           <div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
           <div class="flex items-center gap-3 pl-2">
             <div class="text-right hidden sm:block">
-              <p class="text-sm font-semibold text-gray-800 leading-none">Alfiansyah Sibyanurrizki</p>
-              <p class="text-xs text-gray-500 mt-1">Semester II</p>
+              <p class="text-sm font-semibold text-gray-800 leading-none">{{ userName || 'Loading...'}}</p>
+              <p class="text-xs text-gray-500 mt-1">{{ userRole || 'Loading...'}}</p>
             </div>
             <img src="https://ui-avatars.com/api/?name=KUNE&background=2C7047&color=fff" 
                  alt="Avatar" 
@@ -119,7 +157,7 @@ const toggleSidebar = () => {
             © 2026 Proclub STT Cipasung. Built with 💚 for the community.
           </p>
           <div class="flex gap-6 text-sm font-medium text-gray-400">
-            <a href="#" class="hover:text-[#2C7047]">Documentation</a>
+            <a href="#" class="hover:text-[#2C7047]">Instagram</a>
             <a href="#" class="hover:text-[#2C7047]">Support</a>
             <a href="#" class="hover:text-[#2C7047]">Privacy Policy</a>
           </div>

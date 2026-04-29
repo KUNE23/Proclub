@@ -21,17 +21,27 @@
       </div>
 
       <div class="text-center mb-10">
-        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Welcome back</h1>
-        <p class="text-gray-500 mt-2 font-medium">Please enter your details to sign in.</p>
+        <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Create Account</h1>
+        <p class="text-gray-500 mt-2 font-medium">Begin your journey start witth the Proclub collective today.</p>
       </div>
       
-      <form @submit.prevent="handleLogin" class="space-y-6">
+      <form @submit.prevent="handleRegister" class="space-y-6">
+        <div>
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Name</label>
+          <input 
+            v-model="name"
+            type="text" 
+            autofocus
+            class="block w-full border border-gray-200 rounded-2xl shadow-sm p-4 focus:ring-2 focus:ring-[#2C7047]/20 focus:border-[#2C7047] transition-all bg-gray-50/50 focus:bg-white text-gray-900 outline-none" 
+            placeholder="Name" 
+            required 
+          />
+        </div>
         <div>
           <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Email address</label>
           <input 
             v-model="email"
             type="email" 
-            autofocus
             class="block w-full border border-gray-200 rounded-2xl shadow-sm p-4 focus:ring-2 focus:ring-[#2C7047]/20 focus:border-[#2C7047] transition-all bg-gray-50/50 focus:bg-white text-gray-900 outline-none" 
             placeholder="name@example.com" 
             required 
@@ -41,7 +51,6 @@
         <div>
           <div class="flex justify-between items-center mb-2 ml-1">
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Password</label>
-            <a href="#" class="text-xs font-bold text-[#2C7047] hover:text-[#235838] transition-colors">Forgot password?</a>
           </div>
           <input
             v-model="password" 
@@ -62,14 +71,14 @@
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            {{ isLoading ? 'Signing in...' : 'Sign In' }}
+            {{ isLoading ? 'Signing up...' : 'Sign Up' }}
           </button>
         </div>
       </form>
       
       <div class="mt-10 text-center text-sm font-medium text-gray-500">
-        Don't have an account? 
-        <a href="/register" class="text-[#2C7047] font-bold hover:underline decoration-2 underline-offset-4">Sign up for free</a>
+        Already have an account? 
+        <a href="/login" class="text-[#2C7047] font-bold hover:underline decoration-2 underline-offset-4">Sign in here</a>
       </div>
     </div>
   </div>
@@ -86,18 +95,20 @@ const isLoading = ref(false);
 const router = useRouter();
 const email = ref('');  
 const password = ref('');
+const name = ref('');
 
-const handleLogin = async () => {
+const handleRegister = async () => {
   isLoading.value = true;
   try {
-    const response = await api.post('auth/login', {
+    const response = await api.post('auth/register', {
+      name: name.value,
       email: email.value,
       password: password.value
     });
   
     localStorage.setItem('accessToken', response.data.token);
 
-    toast.success('Login Berhasil! Selamat datang kembali.');
+    toast.success('Register Berhasil! Selamat datang di Proclub.');
 
     await router.push('/');
     

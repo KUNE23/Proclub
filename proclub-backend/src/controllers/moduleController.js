@@ -4,6 +4,7 @@ const createModule = async (req, res) => {
   try {
     const courseId = Number(req.params.courseId)
     const { title, content, order } = req.body
+    const orderNumber = order !== undefined ? Number(order) : undefined
 
     if (Number.isNaN(courseId)) {
       return res.status(400).json({ message: 'Invalid course ID' })
@@ -11,6 +12,10 @@ const createModule = async (req, res) => {
 
     if (!title || !content || order === undefined) {
       return res.status(400).json({ message: 'Title, content, and order are required' })
+    }
+
+    if (Number.isNaN(orderNumber) || !Number.isInteger(orderNumber)) {
+      return res.status(400).json({ message: 'Order must be an integer' })
     }
 
     const course = await prisma.course.findUnique({
@@ -25,7 +30,7 @@ const createModule = async (req, res) => {
       data: {
         title,
         content,
-        order,
+        order: orderNumber,
         courseId
       }
     })
@@ -46,6 +51,11 @@ const getModulesByCourse = async (req, res) => {
 
     const modules = await prisma.module.findMany({
       where: { courseId },
+      select: {
+    id: true,
+    title: true,
+    order: true
+  },
       orderBy: { order: 'asc' }
     });
 
@@ -69,6 +79,7 @@ const updateModule = async (req, res) => {
   try {
     const moduleId = Number(req.params.id)
     const { title, content, order } = req.body
+    const orderNumber = order !== undefined ? Number(order) : undefined
 
     if (Number.isNaN(moduleId)) {
       return res.status(400).json({ message: 'Invalid module ID' })
@@ -76,6 +87,10 @@ const updateModule = async (req, res) => {
 
     if (!title && !content && order === undefined) {
       return res.status(400).json({ message: 'At least one field is required to update' })
+    }
+
+    if (order !== undefined && (Number.isNaN(orderNumber) || !Number.isInteger(orderNumber))) {
+      return res.status(400).json({ message: 'Order must be an integer' })
     }
 
     const existingModule = await prisma.module.findUnique({
@@ -91,7 +106,7 @@ const updateModule = async (req, res) => {
       data: {
         title: title ?? existingModule.title,
         content: content ?? existingModule.content,
-        order: order === undefined ? existingModule.order : order
+        order: order === undefined ? existingModule.order : orderNumber
       }
     })
 

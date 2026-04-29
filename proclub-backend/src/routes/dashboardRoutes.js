@@ -7,7 +7,6 @@ const {
   getCourseModulesWithProgress
 } = require('../controllers/dashboardController')
 
-
 router.get('/dashboard', authMiddleware, getDashboard)
 router.get('/courses/:courseId/modules/progress', authMiddleware, getCourseModulesWithProgress)
 

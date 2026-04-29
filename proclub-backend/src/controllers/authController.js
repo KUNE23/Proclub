@@ -39,13 +39,14 @@ const login = async (req, res) => {
     })
 
     if (!user) {
-      return res.status(400).json({ message: 'User not found' })
+      return res.status(401).json({ message: 'Wrong Email or Password' })
     }
 
     const isMatch = await bcrypt.compare(password, user.password)
 
-  if (!isMatch) 
-    return res.status(401).json({ message: 'Invalid credentials' });
+    if (!isMatch) {
+      return res.status(401).json({ message: 'Wrong Email or Password' })
+    }
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
@@ -63,10 +64,10 @@ const login = async (req, res) => {
       token
     })
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    console.error(error)
+    return res.status(500).json({ message: 'Internal Server Error' })
   }
 }
-
 const forgotpassword = async (req, res) => {
   try {
     const { email } = req.body
@@ -74,7 +75,7 @@ const forgotpassword = async (req, res) => {
     const user = await prisma.user.findUnique({
       where: { email }
     })
-
+d
     if (!user) {
       return res.status(400).json({ message: 'User not found' })
     }
@@ -82,7 +83,7 @@ const forgotpassword = async (req, res) => {
     res.json({ message: 'Password reset link sent to your email' })
   } catch (error) {
     res.status(500).json({ error: error.message })
-  }
+  }d
 }
 
 const logout = async (req, res) => {

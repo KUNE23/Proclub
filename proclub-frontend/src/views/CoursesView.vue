@@ -23,16 +23,26 @@
         <div v-else class="mx-auto px-5 md:px-0 py-5">
 
           <!-- Page Header -->
-          <div class="mb-8">
-            <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#2C7047] mb-2">Knowledge Grove</p>
-            <h2 class="text-3xl lg:text-4xl font-black text-[#1A2E20] leading-tight">Explore Our Curriculum</h2>
-            <p class="text-gray-500 text-sm mt-3 max-w-xl leading-relaxed">
-              A curated collection of industry-leading courses designed for the modern creative professional. Master the craft of digital botany and precision design.
-            </p>
+          <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#2C7047] mb-2">Ruang Belajar</p>
+              <h2 class="text-3xl lg:text-4xl font-black text-[#1A2E20] leading-tight">Jelajahi Kurikulum Proclub</h2>
+              <p class="text-gray-500 text-sm mt-3 max-w-xl leading-relaxed">
+                Kumpulan materi pembelajaran terkurasi yang dirancang untuk membantu kamu mengembangkan skill di bidang teknologi, mulai dari Frontend hingga Backend. Belajar secara terstruktur, praktis, dan relevan dengan kebutuhan industri saat ini.
+              </p>
+            </div>
+          </div>
+
+          <!-- Error Banner -->
+          <div v-if="fetchError" class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Gagal memuat data dari server. <button @click="fetchCourses" class="underline font-medium">Coba lagi</button></span>
           </div>
 
           <!-- Category Filters -->
-          <div class="flex flex-wrap gap-2 mb-10">
+          <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="cat in categories"
               :key="cat"
@@ -55,9 +65,9 @@
             >
               <!-- Image -->
               <div class="aspect-[4/3] w-full overflow-hidden relative">
-                <img :src="course.image_url" :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img :src="`http://localhost:3000/${course.image}`" :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-4 left-4 px-3 py-1 bg-[#2C7047]/90 text-white text-[10px] font-bold rounded-md uppercase tracking-wider backdrop-blur-sm">
-                  {{ course.category }}
+                  {{ typeof course.category === 'object' ? course.category.cat_name : course.category }}
                 </span>
               </div>
 
@@ -66,10 +76,6 @@
                 <h3 class="font-bold text-[#1A2E20] text-lg leading-snug mb-2">{{ course.title }}</h3>
                 <p class="text-gray-500 text-sm leading-relaxed mb-5 flex-1">{{ course.description }}</p>
                 <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-1.5 text-xs text-gray-400 font-medium">
-                    <span class="w-2 h-2 rounded-full" :class="course.is_enrolled ? 'bg-[#2C7047]' : 'bg-red-400'"></span>
-                    {{ course.lessonCount }} Lessons
-                  </div>
                   <router-link
                     :to="`/courses/${course.id}`"
                     class="px-5 py-2 bg-[#2C7047] hover:bg-[#235838] text-white text-xs font-bold rounded-lg transition-colors shadow-sm shadow-[#2C7047]/20"
@@ -92,7 +98,6 @@
               Clear Filters
             </button>
           </div>
-
         </div>
       </div>
     </div>
@@ -100,97 +105,81 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
+import api from '../api/index.js'
 
 const isLoading = ref(true)
-const searchQuery = ref('')
+const fetchError = ref(false)
 const activeCategory = ref('All')
+const searchQuery = ref('')
+const categories = ref(['All'])
 
-const categories = ref(['All', 'Fundamentals', 'Frontend', 'UI Design', 'Photography'])
+const courses = ref([])
+const currentPage = ref(1)
+const limit = ref(6)
 
-const sidebarMenu = ref([
-  { name: 'Gallery', path: '/atelier', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>' },
-  { name: 'Exhibits', path: '/courses-catalog', active: true, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>' },
-  { name: 'Atelier', path: '/atelier', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>' },
-  { name: 'Archive', path: '/atelier', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"></path></svg>' },
-  { name: 'Settings', path: '/atelier', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>' },
-])
+const fetchCategories = async () => {
+  try {
+    const response = await api.get('/categories');
+    
+    const raw = response.data.data || [];
+    
+    const names = raw.map(c => {
+      if (typeof c === 'string') return c;
+      return c.cat_name; 
+    });
+    
+    categories.value = ['All', ...names];
+  } catch (error) {
+    console.error('Gagal mengambil kategori:', error);
+  }
+};
 
-const courses = ref([
-  {
-    id: 1,
-    title: 'The Theory of Organic Form',
-    category: 'Fundamentals',
-    image_url: 'https://images.unsplash.com/photo-1477554193778-9562c28588c0?auto=format&fit=crop&w=600&q=80',
-    description: "Learn the mathematical principles behind nature's most intricate designs and apply them to digital architecture.",
-    level: 'Beginner',
-    lessonCount: 12,
-    is_enrolled: true,
-  },
-  {
-    id: 2,
-    title: 'Architectural React Components',
-    category: 'Frontend',
-    image_url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=600&q=80',
-    description: 'Building scalable design systems that breathe. Deep dive into headless UI and motion principles for the modern web.',
-    level: 'Intermediate',
-    lessonCount: 24,
-    is_enrolled: true,
-  },
-  {
-    id: 3,
-    title: 'The Editorial Interface',
-    category: 'UI Design',
-    image_url: 'https://images.unsplash.com/photo-1558655146-d09347e92766?auto=format&fit=crop&w=600&q=80',
-    description: 'Mastering negative space and typography-first design. Move beyond grids to create high-impact gallery experiences.',
-    level: 'Intermediate',
-    lessonCount: 18,
-    is_enrolled: false,
-  },
-  {
-    id: 4,
-    title: 'Macro Botanical Composition',
-    category: 'Photography',
-    image_url: 'https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=600&q=80',
-    description: 'Capture the hidden world. Expert techniques for lighting, focus stacking, and post-production for plant photography.',
-    level: 'Beginner',
-    lessonCount: 8,
-    is_enrolled: false,
-  },
-  {
-    id: 5,
-    title: 'Color Theory: The Evergreen Palette',
-    category: 'Fundamentals',
-    image_url: 'https://images.unsplash.com/photo-1501004318855-fce7bae9c8d3?auto=format&fit=crop&w=600&q=80',
-    description: 'Developing a professional eye for tonal harmony. Using natural pigments as inspiration for digital brand identities.',
-    level: 'Beginner',
-    lessonCount: 10,
-    is_enrolled: true,
-  },
-  {
-    id: 6,
-    title: 'Motion Design for Luxury Apps',
-    category: 'UI Design',
-    image_url: 'https://images.unsplash.com/photo-1550439062-609e1531270e?auto=format&fit=crop&w=600&q=80',
-    description: 'Mastering the subtle art of animation. Creating interfaces that feel responsive, organic, and premium through movement.',
-    level: 'Intermediate',
-    lessonCount: 16,
-    is_enrolled: false,
-  },
-])
+const fetchCourses = async () => {
+  isLoading.value = true
+  fetchError.value = false
+  try {
+    const response = await api.get('/courses', {
+      params: {
+        page: currentPage.value,
+        limit: limit.value,
+        category: activeCategory.value !== 'All' ? activeCategory.value : undefined
+      }
+    })
+    courses.value = response.data.data ?? []
+  } catch (error) {
+    console.error('Gagal mengambil data kursus:', error)
+    courses.value = []
+    fetchError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
 
 const filteredCourses = computed(() => {
   return courses.value.filter(c => {
-    const matchesCategory = activeCategory.value === 'All' || c.category === activeCategory.value
+    const categoryName = typeof c.category === 'object' ? c.category.cat_name : c.category;
+    
+    const matchesCategory = activeCategory.value === 'All' || categoryName === activeCategory.value;
+    
     const matchesSearch = c.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      c.description.toLowerCase().includes(searchQuery.value.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+                          c.description.toLowerCase().includes(searchQuery.value.toLowerCase());
+    
+    return matchesCategory && matchesSearch;
+  });
+});
+
+watch(activeCategory, () => {
+  currentPage.value = 1
+  fetchCourses()
 })
 
-onMounted(() => {
-  setTimeout(() => {
-    isLoading.value = false
-  }, 1000)
+watch(currentPage, () => {
+  fetchCourses()
+})
+
+onMounted(async () => {
+  await fetchCategories()
+  fetchCourses()
 })
 </script>
