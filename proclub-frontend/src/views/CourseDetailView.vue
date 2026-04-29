@@ -95,7 +95,7 @@
                       <!-- Right side label -->
                       <div class="shrink-0 pt-3">
                         <span v-if="mod.status === 'completed'" class="text-xs text-gray-400 font-medium">Completed</span>
-                        <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
+                        <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}/lesson/${mod.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
                           Resume <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </router-link>  
                         <svg v-else class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
