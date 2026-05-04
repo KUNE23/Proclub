@@ -9,7 +9,6 @@ import QuizView from '../views/QuizView.vue'
 import QuizResultView from '../views/QuizResultView.vue'
 import ProjectSubmissionView from '../views/ProjectSubmissionView.vue'
 import ProfileView from '../views/ProfileView.vue'
-import LessonView from '../views/LessonView.vue'
 import Register from '../views/Register.vue'
 
 const router = createRouter({
@@ -65,7 +64,7 @@ const router = createRouter({
       meta: { guestOnly: true }
     },
     {
-      path: '/module/:id?',
+      path: '/courses/:courseId/modules/:moduleId',
       name: 'ModuleView',
       component: ModuleView,
       meta: { requiresAuth: true }
@@ -74,12 +73,6 @@ const router = createRouter({
       path: '/quiz-result/:id?',
       name: 'QuizResult',
       component: QuizResultView,
-      meta: { requiresAuth: true }
-    },
-    {
-      path: '/courses/:courseId/lesson/:moduleId',
-      name: 'LessonView',
-      component: LessonView,
       meta: { requiresAuth: true }
     },
   ]

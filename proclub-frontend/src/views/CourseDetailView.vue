@@ -95,7 +95,7 @@
                       <!-- Right side label -->
                       <div class="shrink-0 pt-3">
                         <span v-if="mod.status === 'completed'" class="text-xs text-gray-400 font-medium">Completed</span>
-                        <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}/lesson/${mod.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
+                        <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}/modules/${mod.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
                           Resume <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
                         </router-link>  
                         <svg v-else class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
@@ -142,14 +142,12 @@ const isLoading = ref(true)
 const fetchError = ref(false)
 const expandedModules = ref([])
 
-// Toggle lesson expansion
 const toggleModule = (id) => {
   const idx = expandedModules.value.indexOf(id)
   if (idx > -1) expandedModules.value.splice(idx, 1)
   else expandedModules.value.push(id)
 }
 
-// Course Data
 const course = ref({
   id: '',
   title: '',
@@ -159,17 +157,14 @@ const course = ref({
   coverImage: '',
 })
 
-// Modules Data
 const modules = ref([])
 
-// Mentor
 const mentor = ref({
   name: '-',
   role: '-',
   avatar: '',
 })
 
-// Course Insights (derived from API data)
 const courseInsights = computed(() => [
   {
     label: 'Estimate Duration',
@@ -193,7 +188,6 @@ const courseInsights = computed(() => [
   },
 ])
 
-// Map module status from API (API tidak kirim status/locked, default 'current')
 const mapModuleStatus = (mod) => {
   if (mod.is_locked ?? mod.locked) return 'locked'
   if (mod.status) return mod.status
@@ -208,7 +202,6 @@ const fetchCourseDetail = async () => {
     const response = await api.get(`/courses/${id}`)
     const data = response.data.data ?? response.data
 
-    // Map course fields
     course.value = {
       id: data.id ?? data._id ?? id,
       title: data.title ?? '',
@@ -222,7 +215,6 @@ const fetchCourseDetail = async () => {
       has_certificate: data.has_certificate ?? true,
     }
 
-    // Map mentor fields
     if (data.mentor || data.instructor) {
       const m = data.mentor ?? data.instructor
       mentor.value = {
@@ -232,10 +224,8 @@ const fetchCourseDetail = async () => {
       }
     }
 
-    // Fetch modules dari endpoint terpisah
     let rawModules = data.modules ?? data.syllabus ?? []
 
-    // Pastikan rawModules adalah array
     if (!Array.isArray(rawModules)) {
       rawModules = rawModules ? [rawModules] : []
     }
@@ -245,7 +235,6 @@ const fetchCourseDetail = async () => {
         const modRes = await api.get(`/courses/${id}/modules`)
         const modData = modRes.data
 
-        // Handle berbagai shape response: array langsung, .data, .modules
         if (Array.isArray(modData)) {
           rawModules = modData
         } else if (Array.isArray(modData?.data)) {
@@ -261,7 +250,6 @@ const fetchCourseDetail = async () => {
       }
     }
 
-    // Sesuaikan dengan struktur API: { id, title, content, order, courseId }
     modules.value = [...rawModules]
       .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
       .map((mod, idx) => ({
@@ -273,8 +261,7 @@ const fetchCourseDetail = async () => {
         status: mapModuleStatus(mod),
         is_locked: mod.is_locked ?? mod.locked ?? false,
       }))
-
-    // Auto-expand semua module (tidak ada is_locked dari API)
+      
     expandedModules.value = modules.value.map(m => m.id)
   } catch (error) {
     console.error('Gagal mengambil detail kursus:', error)

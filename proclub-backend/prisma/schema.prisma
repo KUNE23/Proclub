@@ -3,8 +3,112 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int            @id @default(autoincrement())
+  name      String
+  email     String         @unique
+  password  String
+  role      Role           @default(member)
+  token     String?
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  projects  Project[]
+  progress  UserProgress[]
+
+  @@index([role])
+}
+
+model Course {
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  image       String?
+  categoryId  Int?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  category    Category? @relation(fields: [categoryId], references: [id])
+  modules     Module[]
+  projects    Project[]
+
+  @@index([title])
+  @@index([categoryId])
+}
+
+model Module {
+  id        Int            @id @default(autoincrement())
+  title     String
+  content   String
+  order     Int
+  courseId  Int
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  course    Course         @relation(fields: [courseId], references: [id])
+  projects  Project[]
+  quizzes   Quiz[]
+  progress  UserProgress[]
+
+  @@index([courseId])
+}
+
+model Quiz {
+  id            Int      @id @default(autoincrement())
+  question      String
+  options       Json
+  correctAnswer String
+  moduleId      Int
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  module        Module   @relation(fields: [moduleId], references: [id])
+
+  @@index([moduleId])
+}
+
+model UserProgress {
+  id        Int            @id @default(autoincrement())
+  status    ProgressStatus @default(locked)
+  score     Float?
+  userId    Int
+  moduleId  Int
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+  module    Module         @relation(fields: [moduleId], references: [id])
+  user      User           @relation(fields: [userId], references: [id])
+
+  @@unique([userId, moduleId])
+  @@index([userId])
+}
+
+model Project {
+  id         Int           @id @default(autoincrement())
+  linkGithub String
+  note       String?
+  status     ProjectStatus @default(pending)
+  userId     Int
+  courseId   Int
+  moduleId   Int?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+  course     Course        @relation(fields: [courseId], references: [id])
+  module     Module?       @relation(fields: [moduleId], references: [id])
+  user       User          @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([courseId])
+  @@index([status])
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  cat_name  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  courses   Course[]
+
+  @@index([cat_name])
 }
 
 enum Role {
@@ -23,140 +127,4 @@ enum ProjectStatus {
   pending
   approved
   rejected
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(member)
-  token     String?  @db.Text
-
-  progress  UserProgress[]
-  projects  Project[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([role]) 
-}
-
-model Course {
-  id          Int      @id @default(autoincrement())
-  title       String
-  description String?
-  image       String?
-  categoryId  Int?
-
-  category    Category? @relation(fields: [categoryId], references: [id])
-  modules     Module[]
-  projects    Project[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([title])
-  @@index([categoryId])
-}
-
-model Module {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String   @db.LongText
-  order     Int
-
-  courseId  Int
-  course    Course   @relation(fields: [courseId], references: [id])
-
-  quizzes   Quiz[]
-  progress  UserProgress[]
-  projects  Project[]
-  lessons   Lesson[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([courseId])
-}
-
-model Quiz {
-  id            Int      @id @default(autoincrement())
-  question      String
-  options       Json
-  correctAnswer String
-
-  moduleId      Int
-  module        Module @relation(fields: [moduleId], references: [id])
-
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([moduleId])
-}
-
-model UserProgress {
-  id        Int            @id @default(autoincrement())
-  status    ProgressStatus @default(locked)
-  score     Float?
-
-  userId    Int
-  moduleId  Int
-
-  user      User   @relation(fields: [userId], references: [id])
-  module    Module @relation(fields: [moduleId], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([userId, moduleId]) 
-  @@index([userId])
-}
-
-model Project {
-  id          Int            @id @default(autoincrement())
-  linkGithub  String
-  note        String?
-  status      ProjectStatus  @default(pending)
-
-  userId      Int
-  courseId    Int
-  moduleId    Int?
-
-  user        User    @relation(fields: [userId], references: [id])
-  course      Course  @relation(fields: [courseId], references: [id])
-  module      Module? @relation(fields: [moduleId], references: [id])
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([userId])
-  @@index([courseId])
-  @@index([status])
-}
-
-model Category {
-  id          Int       @id @default(autoincrement())
-  cat_name    String
-
-  courses     Course[]
-
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  @@index([cat_name])
-}
-
-model Lesson {
-  id          Int       @id @default(autoincrement())
-  title       String    
-  content     String    @db.Text
-
-  moduleId    Int
-  module      Module    @relation(fields: [moduleId], references: [id])
-
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  @@index([moduleId])
 }
