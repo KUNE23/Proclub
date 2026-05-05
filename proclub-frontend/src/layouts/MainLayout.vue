@@ -76,12 +76,25 @@ onMounted(() => {
       isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
     ]">
       <div class="h-full flex flex-col">
-        <div class="p-6 flex items-center gap-3">
-          <div class="w-8 h-8 bg-[#FFFFF] rounded-lg flex items-center justify-center text-white font-bold">
-            <img src="/proclub.png" alt="Logo" class="w-full h-full object-contain" width="100" height="100"/>
-          </div>
-          <span class="text-xl font-bold text-gray-800 tracking-tight">Proclub</span>
-        </div>
+       <div class="p-8 flex flex-col items-center gap-4">
+
+  <div class="w-16 h-16 flex items-center justify-center">
+    <img 
+      src="/proclub.png" 
+      alt="Logo Proclub" 
+      class="w-full h-full object-contain"
+    />
+  </div>
+  
+  <div class="flex flex-col items-center">
+    <span class="text-2xl font-black text-[#1A2E20] tracking-tight">
+      Proclub
+    </span>
+    <span class="text-sm font-medium text-gray-500 uppercase tracking-[0.2em] -mt-1">
+      Learning Hub
+    </span>
+  </div>
+</div>
 
         <nav class="flex-1 px-4 space-y-2 mt-4">
           <RouterLink 
@@ -168,7 +181,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Transisi halus untuk Sidebar mobile */
 .translate-x-0 {
   box-shadow: 10px 0 30px -10px rgba(0,0,0,0.1);
 }

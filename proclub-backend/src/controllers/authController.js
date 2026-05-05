@@ -32,42 +32,51 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body;
 
     const user = await prisma.user.findUnique({
       where: { email }
-    })
+    });
 
     if (!user) {
-      return res.status(401).json({ message: 'Wrong Email or Password' })
+      return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      return res.status(401).json({ message: 'Wrong Email or Password' })
+      return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1d' }
-    )
+    );
 
+    // OPSIONAL: Hapus update token ke DB jika tidak benar-benar diperlukan untuk validasi manual
+    /* 
     await prisma.user.update({
       where: { id: user.id },
       data: { token: token }
-    })
+    }) 
+    */
 
     return res.json({
       message: 'Login success',
-      token
-    })
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role 
+      }
+    });
   } catch (error) {
-    console.error(error)
-    return res.status(500).json({ message: 'Internal Server Error' })
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
   }
 }
+
 const forgotpassword = async (req, res) => {
   try {
     const { email } = req.body

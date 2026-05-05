@@ -96,11 +96,15 @@ const handleLogin = async () => {
     });
   
     localStorage.setItem('accessToken', response.data.token);
-
+    localStorage.setItem('user', JSON.stringify(response.data.user));
+    
     toast.success('Login Berhasil! Selamat datang kembali.');
 
-    await router.push('/');
-    
+    if (response.data.user.role === 'admin') {
+      router.push('/admin');
+    } else {
+      router.push('/');
+    }
   } catch (error) {
     const status = error.response?.status;
     const serverMessage = error.response?.data?.message;

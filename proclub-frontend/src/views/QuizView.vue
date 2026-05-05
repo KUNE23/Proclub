@@ -3,10 +3,8 @@
 
     <div class="flex flex-1">
 
-      <!-- ===== MAIN QUIZ AREA ===== -->
       <main class="flex-1">
 
-        <!-- Loading State -->
         <div v-if="isLoading" class="animate-pulse max-w-2xl mx-auto p-8 lg:p-12 space-y-6 mt-8">
           <div class="h-6 bg-gray-200 rounded w-1/3 mx-auto"></div>
           <div class="h-10 bg-gray-200 rounded w-2/3 mx-auto"></div>
@@ -18,16 +16,13 @@
           <div class="h-20 bg-gray-200 rounded-xl"></div>
         </div>
 
-        <!-- ===== QUIZ IN PROGRESS ===== -->
         <div v-else-if="!showResults" class="mx-auto px-5 md:px-0 py-5">
 
-          <!-- Quiz Title -->
           <div class="text-center mb-8">
             <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#2C7047] mb-2">Knowledge Assessment</p>
             <h1 class="text-2xl font-bold text-[#1A2E20]">{{ quizTitle }}</h1>
           </div>
 
-          <!-- Progress Bar -->
           <div class="mb-10">
             <div class="flex justify-between items-center mb-2">
               <span class="text-[13px] font-semibold text-[#1A2E20]">Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
@@ -38,14 +33,12 @@
             </div>
           </div>
 
-          <!-- Question Card -->
           <div class="bg-[#F5F8F6] rounded-2xl p-6 lg:p-8 mb-8 border border-[#E6EFE9]">
             <p class="text-lg font-semibold text-[#1A2E20] leading-relaxed">
               {{ currentQuestion.text }}
             </p>
           </div>
 
-          <!-- Answer Options -->
           <div class="space-y-3 mb-10">
             <button
               v-for="(option, optIdx) in currentQuestion.options"
@@ -56,7 +49,6 @@
                 ? 'border-[#2C7047] bg-[#F2F7F4] shadow-sm shadow-[#2C7047]/10'
                 : 'border-[#E6EFE9] bg-white hover:border-[#2C7047]/40 hover:shadow-sm'"
             >
-              <!-- Option Letter Badge -->
               <span
                 class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold shrink-0 transition-colors"
                 :class="userAnswers[currentQuestionIndex] === optIdx
@@ -66,20 +58,17 @@
                 {{ optionLetters[optIdx] }}
               </span>
 
-              <!-- Option Text -->
               <span class="text-[15px] font-medium flex-1"
                 :class="userAnswers[currentQuestionIndex] === optIdx ? 'text-[#1A2E20]' : 'text-gray-700'">
                 {{ option }}
               </span>
 
-              <!-- Selected Checkmark -->
               <div v-if="userAnswers[currentQuestionIndex] === optIdx" class="w-6 h-6 rounded-full bg-[#2C7047] flex items-center justify-center shrink-0">
                 <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
               </div>
             </button>
           </div>
 
-          <!-- Navigation Buttons -->
           <div class="flex items-center justify-between">
             <button
               @click="prevQuestion"
@@ -119,10 +108,8 @@
           </div>
         </div>
         
-        <!-- ===== RESULTS SCREEN ===== -->
         <div v-else class="mx-auto px-5 md:px-0 py-5 text-center">
 
-          <!-- Result Icon -->
           <div class="mb-6">
             <div v-if="hasPassed" class="w-24 h-24 rounded-full bg-[#D1E6DA] flex items-center justify-center mx-auto shadow-lg shadow-[#2C7047]/10">
               <svg class="w-12 h-12 text-[#2C7047]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -132,7 +119,6 @@
             </div>
           </div>
 
-          <!-- Result Title -->
           <h2 class="text-3xl font-black text-[#1A2E20] mb-3">
             {{ hasPassed ? 'Excellent Work!' : 'Almost There!' }}
           </h2>
@@ -143,7 +129,6 @@
             }}
           </p>
 
-          <!-- Score Card -->
           <div class="bg-white rounded-2xl border border-[#E6EFE9] p-8 mb-8 shadow-sm inline-block mx-auto">
             <div class="text-5xl font-black mb-2" :class="hasPassed ? 'text-[#2C7047]' : 'text-orange-500'">
               {{ score }}%
@@ -156,7 +141,6 @@
             </div>
           </div>
 
-          <!-- Answer Breakdown -->
           <div class="bg-[#F5F8F6] rounded-2xl border border-[#E6EFE9] p-6 mb-8 text-left max-w-md mx-auto">
             <h4 class="font-bold text-[#1A2E20] text-sm mb-4">Answer Breakdown</h4>
             <div class="space-y-2">
@@ -173,7 +157,6 @@
             </div>
           </div>
 
-          <!-- Action Buttons -->
           <div class="flex items-center justify-center gap-4">
             <button v-if="!hasPassed" @click="retryQuiz" class="px-6 py-3 bg-[#2C7047] hover:bg-[#235838] text-white rounded-xl text-sm font-bold transition-colors shadow-md shadow-[#2C7047]/20 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -201,14 +184,12 @@ const showResults = ref(false)
 const currentQuestionIndex = ref(0)
 const optionLetters = ['A', 'B', 'C', 'D', 'E']
 
-// Top Nav
 const topNavLinks = ref([
   { name: 'Dashboard', path: '/atelier', active: false },
   { name: 'Courses', path: '/courses-catalog', active: true },
   { name: 'Resources', path: '/atelier', active: false },
 ])
 
-// Quiz Data
 const quizTitle = ref('Quiz: Module 3 Knowledge Check')
 
 const questions = ref([
@@ -286,10 +267,8 @@ const questions = ref([
   },
 ])
 
-// User Answers — keyed by question index
 const userAnswers = ref({})
 
-// Computed
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value])
 const progressPercent = computed(() => Math.round(((currentQuestionIndex.value + 1) / questions.value.length) * 100))
 
@@ -304,7 +283,6 @@ const correctCount = computed(() => {
 const score = computed(() => Math.round((correctCount.value / questions.value.length) * 100))
 const hasPassed = computed(() => score.value >= 70)
 
-// Methods
 function selectOption(optIdx) {
   userAnswers.value[currentQuestionIndex.value] = optIdx
 }

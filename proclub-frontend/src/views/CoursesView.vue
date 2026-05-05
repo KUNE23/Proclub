@@ -1,13 +1,10 @@
 <template>
   <div class="bg-[#FAFCFB] font-sans antialiased text-gray-800">
 
-    <!-- ===== MAIN ===== -->
     <div class="flex-1 flex flex-col overflow-hidden">
 
-      <!-- Scrollable Body -->
       <div class="flex-1 overflow-y-auto">
 
-        <!-- Loading Skeleton -->
         <div v-if="isLoading" class="animate-pulse p-8 lg:p-12 max-w-7xl mx-auto space-y-8">
           <div class="h-10 bg-gray-200 rounded w-1/3"></div>
           <div class="h-5 bg-gray-200 rounded w-2/3"></div>
@@ -19,10 +16,8 @@
           </div>
         </div>
 
-        <!-- Loaded Content --> 
         <div v-else class="mx-auto px-5 md:px-0 py-5">
 
-          <!-- Page Header -->
           <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <p class="text-[10px] font-bold uppercase tracking-[0.25em] text-[#2C7047] mb-2">Ruang Belajar</p>
@@ -33,7 +28,6 @@
             </div>
           </div>
 
-          <!-- Error Banner -->
           <div v-if="fetchError" class="mb-6 flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -41,7 +35,6 @@
             <span>Gagal memuat data dari server. <button @click="fetchCourses" class="underline font-medium">Coba lagi</button></span>
           </div>
 
-          <!-- Category Filters -->
           <div class="flex flex-wrap gap-2 mb-6">
             <button
               v-for="cat in categories"
@@ -56,14 +49,13 @@
             </button>
           </div>
 
-          <!-- Course Grid -->
           <div v-if="filteredCourses.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
             <div
               v-for="course in filteredCourses"
               :key="course.id"
               class="bg-white rounded-2xl border border-[#E6EFE9] overflow-hidden group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col"
             >
-              <!-- Image -->
+
               <div class="aspect-[4/3] w-full overflow-hidden relative">
                 <img :src="`http://localhost:3000/${course.image}`" :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-4 left-4 px-3 py-1 bg-[#2C7047]/90 text-white text-[10px] font-bold rounded-md uppercase tracking-wider backdrop-blur-sm">
@@ -71,7 +63,6 @@
                 </span>
               </div>
 
-              <!-- Content -->
               <div class="p-6 flex-1 flex flex-col">
                 <h3 class="font-bold text-[#1A2E20] text-lg leading-snug mb-2">{{ course.title }}</h3>
                 <p class="text-gray-500 text-sm leading-relaxed mb-5 flex-1">{{ course.description }}</p>
@@ -87,7 +78,6 @@
             </div>
           </div>
 
-          <!-- Empty State -->
           <div v-else class="text-center py-20">
             <div class="w-20 h-20 rounded-full bg-[#F2F7F4] flex items-center justify-center mx-auto mb-5">
               <svg class="w-10 h-10 text-[#2C7047]/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>

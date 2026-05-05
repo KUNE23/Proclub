@@ -15,9 +15,9 @@ const authMiddleware = async (req, res, next) => {
       where: { id: decoded.id }
     });
 
-    if (!user || user.token !== token) {
-      return res.status(401).json({ message: 'Session expired or logged out' });
-    }
+    // if (!user || user.token !== token) {
+    //   return res.status(401).json({ message: 'Session expired or logged out' });
+    // }
 
     req.user = user; 
     return next();

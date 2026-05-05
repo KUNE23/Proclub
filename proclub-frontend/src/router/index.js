@@ -11,6 +11,14 @@ import ProjectSubmissionView from '../views/ProjectSubmissionView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import Register from '../views/Register.vue'
 
+import AdminLayout from '../layouts/AdminLayout.vue'
+import AdminDashboard from '../views/admin/AdminDashboard.vue'
+import AdminUsers from '../views/admin/AdminUsers.vue'
+import AdminUserEdit from '../views/admin/AdminUserEdit.vue'
+import AdminCourses from '../views/admin/AdminCourses.vue'
+import AdminLessonEditor from '../views/admin/AdminLessonEditor.vue'
+import AdminQuizzes from '../views/admin/AdminQuizzes.vue'
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -75,19 +83,83 @@ const router = createRouter({
       component: QuizResultView,
       meta: { requiresAuth: true }
     },
+    {
+      path: '/admin',
+      component: AdminLayout,
+      meta: { requiresAuth: true, requiresAdmin: true },
+      children: [
+        {
+          path: '',
+          name: 'AdminDashboard',
+          component: AdminDashboard
+        },
+        {
+          path: 'courses',
+          name: 'AdminCourses',
+          component: AdminCourses
+        },
+        {
+          path: 'users',
+          name: 'AdminUsers',
+          component: AdminUsers
+        },
+        {
+          path: 'users/edit/:id',
+          name: 'AdminUserEdit',
+          component: AdminUserEdit
+        },
+        {
+          path: 'users/create',
+          name: 'AdminUserCreate',
+          component: AdminUserEdit
+        },
+        {
+          path: 'lessons/edit',
+          name: 'AdminLessonEditor',
+          component: AdminLessonEditor
+        },
+        {
+          path: 'quizzes',
+          name: 'AdminQuizzes',
+          component: AdminQuizzes
+        }
+      ]
+    }
   ]
 })
 
-router.beforeEach((to, from) => {
+router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('accessToken');
 
+  const userRaw = localStorage.getItem('user');
+  let userData = {};
+
+  if (userRaw && userRaw !== "undefined") {
+    try {
+      userData = JSON.parse(userRaw);
+    } catch (e) {
+      console.error("Gagal parse JSON user:", e);
+      userData = {};
+    }
+  }
+
   if (to.meta.requiresAuth && !token) {
-    return '/login';
+    return next('/login');
+  }
+
+  if (to.meta.requiresAdmin) {
+
+    const role = userData?.role?.toLowerCase();
+
+    if (role !== 'admin') {
+      return next('/');
+    }
   }
 
   if (to.path === '/login' && token) {
-    return '/';
+    return next('/');
   }
 
+  next();
 });
 export default router

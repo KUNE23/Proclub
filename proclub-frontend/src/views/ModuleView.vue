@@ -32,28 +32,6 @@
 
     <div class="flex flex-1 overflow-hidden">
       <aside class="w-64 bg-white border-r border-[#E6EFE9] flex flex-col shrink-0 overflow-hidden">
-        <div class="p-5 border-b border-[#E6EFE9]">
-          <div class="flex items-center gap-3 mb-3">
-            <div class="w-9 h-9 rounded-xl bg-[#2C7047] flex items-center justify-center shrink-0">
-              <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M12 2C8 2 4 5 4 10c0 4.5 3.5 10 8 12 4.5-2 8-7.5 8-12 0-5-4-8-8-10z"></path>
-              </svg>
-            </div>
-            <div class="min-w-0">
-              <h2 class="text-sm font-bold text-[#1A2E20] truncate">{{ courseTitle }}</h2>
-              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">Course Syllabus</p>
-            </div>
-          </div>
-          <div class="mt-1">
-            <div class="flex justify-between items-center mb-1.5">
-              <span class="text-[10px] font-bold uppercase tracking-wider text-gray-400">{{ progressPercent }}% Complete</span>
-            </div>
-            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-[#2C7047] rounded-full transition-all duration-700 ease-out" :style="{ width: progressPercent + '%' }"></div>
-            </div>
-          </div>
-        </div>
-
         <nav class="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
           <button
             v-for="(module, index) in allModules"

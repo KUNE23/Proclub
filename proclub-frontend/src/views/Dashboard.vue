@@ -1,10 +1,8 @@
 <template>
   <div class="bg-[#FAFAFA] font-sans antialiased text-gray-800">
   
-    <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-hidden bg-[#FAFCFB]">
 
-        <!-- Loading State Skeleton -->
         <div v-if="isLoading" class="animate-pulse space-y-10 max-w-6xl mx-auto">
            <div class="h-10 bg-gray-200 rounded w-1/3"></div>
            <div class="h-64 bg-gray-200 rounded-3xl w-full"></div>
@@ -21,10 +19,8 @@
            </div>
         </div>
 
-        <!-- Rendered Real State -->
         <div v-else class="mx-auto px-5 md:px-0 py-5">
           
-          <!-- Welcome Intro -->
           <div class="mb-10">
             <h2 class="text-3xl font-bold text-gray-800 tracking-tight">
               Welcome back, <span class="text-[#2C7047]">{{ user.name }}</span>!
@@ -34,11 +30,10 @@
             </p>
           </div>
 
-          <!-- Featured Course Row -->
           <div class="bg-white rounded-[2rem] border border-[#E6EFE9] flex flex-col md:flex-row overflow-hidden mb-10 shadow-sm shrink-0">
-            <!-- Image Side -->
+      
             <div class="w-full md:w-1/2 bg-[#F8F9FA] relative min-h-[250px] flex items-center justify-center p-8 border-b md:border-b-0 md:border-r border-[#E6EFE9]">
-              <!-- Mock Laptop Asset wrapper -->
+           
                <div class="relative w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-gray-900/5">
                  <img :src="featuredCourse.image" alt="Course Cover" class="w-full aspect-[4/3] object-cover" />
                  <div class="absolute inset-0 bg-black/40 flex items-center justify-center flex-col text-white">
@@ -48,7 +43,6 @@
                </div>
             </div>
 
-            <!-- Content Side -->
             <div class="w-full md:w-1/2 p-10 flex flex-col justify-center">
               <div class="flex items-center gap-3 mb-4">
                 <span class="px-3 py-1 bg-[#D1E6DA] text-[#2C7047] text-xs font-bold rounded-full uppercase tracking-wide">
@@ -81,7 +75,6 @@
             </div>
           </div>
 
-          <!-- Stats Row -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             <div v-for="(stat, index) in stats" :key="index" class="bg-white border border-[#E6EFE9] rounded-2xl p-6 flex flex-col justify-between shadow-sm shadow-[#E6EFE9]/30">
               <div class="flex items-start gap-4">
@@ -94,7 +87,6 @@
             </div>
           </div>
 
-          <!-- Recommended For You Row -->
           <div>
             <div class="flex items-end justify-between mb-6">
               <div>
@@ -159,7 +151,7 @@ const featuredCourse = ref({
   title: 'Advanced UI Design Principles',
   description: 'Master the art of organic precision in digital interfaces. This module covers advanced tonal layering and editorial styling techniques inspired by nature.',
   progress: 65,
-  image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80' // modern laptop/coding
+  image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80'
 })
 
 const stats = ref([
@@ -173,19 +165,19 @@ const recommendedCourses = ref([
     id: 1, 
     title: 'Digital Illustration Masterclass', 
     description: 'Learn to capture the intricate details of the natural world through advanced digital brush techniques.', 
-    image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80' // coding/tech
+    image: 'https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=600&q=80' 
   },
   { 
     id: 2, 
     title: 'Strategic Brand Design', 
     description: 'Build enduring identities that breathe life into organizations through botanical-inspired design philosophy.', 
-    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80' // generic tech planning
+    image: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80' 
   },
   { 
     id: 3, 
     title: 'Botanical Macro Photography', 
     description: 'A deep dive into close-up nature photography. Capture the unseen textures of the forest floor.', 
-    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80' // students tech collab
+    image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=600&q=80'
   }
 ])
 

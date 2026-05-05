@@ -1,13 +1,10 @@
 <template>
   <div class="flex bg-[#FAFCFB] font-sans antialiased text-gray-800">
 
-    <!-- ===== MAIN AREA ===== -->
     <div class="flex-1 flex flex-col">
 
-      <!-- Scrollable Main Content -->
       <div class="flex-1">
 
-        <!-- Loading State -->
         <div v-if="isLoading" class="animate-pulse p-8 lg:p-12 max-w-7xl mx-auto space-y-8">
           <div class="h-72 bg-gray-200 rounded-3xl"></div>
           <div class="flex gap-8">
@@ -24,7 +21,6 @@
           </div>
         </div>
 
-        <!-- Error Banner -->
         <div v-if="fetchError && !isLoading" class="mx-auto px-5 md:px-0 py-5">
           <div class="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-4">
             <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -34,10 +30,8 @@
           </div>
         </div>
 
-        <!-- Loaded Content -->
         <div v-else-if="!isLoading" class="mx-auto px-5 md:px-0 py-5">
 
-            <!-- Page Header -->
           <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h2 class="text-3xl lg:text-4xl font-black text-[#1A2E20] leading-tight">Materi & Modul Pembelajaran</h2>
@@ -47,11 +41,9 @@
             </div>
           </div>
 
-          <!-- Body: Syllabus + Insights -->
           <div class="mx-auto p-4 lg:px-12 lg:py-10 py-5">
             <div class="flex flex-col lg:flex-row gap-8">
 
-              <!-- LEFT: Course Syllabus (scrollable) -->
               <div class="flex-1 min-w-0">
                 <h2 class="text-2xl font-bold text-[#1A2E20] mb-6">Silabus Materi</h2>
 
@@ -66,19 +58,11 @@
                         ? 'border-[#E6EFE9] bg-white'
                         : 'border-[#E6EFE9] bg-[#FAFCFB] opacity-70'"
                   >
-                    <!-- Module Header -->
+
                     <div class="px-6 py-5 flex items-start gap-4 cursor-pointer" @click="!mod.is_locked && toggleModule(mod.id)">
-                      <!-- Status Icon -->
+                      
                       <div class="mt-0.5 shrink-0">
-                        <div v-if="mod.status === 'completed'" class="w-8 h-8 rounded-full bg-[#2C7047] flex items-center justify-center">
-                          <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
-                        </div>
-                        <div v-else-if="mod.status === 'current'" class="w-8 h-8 rounded-full bg-[#2C7047]/10 border-2 border-[#2C7047] flex items-center justify-center">
-                          <svg class="w-4 h-4 text-[#2C7047]" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"></path></svg>
-                        </div>
-                        <div v-else class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                          <svg class="w-4 h-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                        </div>
+                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-check-icon lucide-book-check"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/></svg>
                       </div>
 
                       <div class="flex-1 min-w-0">
@@ -92,7 +76,6 @@
                         <h3 class="font-bold text-[#1A2E20] text-[15px] leading-snug">{{ mod.title }}</h3>
                       </div>
 
-                      <!-- Right side label -->
                       <div class="shrink-0 pt-3">
                         <span v-if="mod.status === 'completed'" class="text-xs text-gray-400 font-medium">Completed</span>
                         <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}/modules/${mod.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
@@ -106,10 +89,8 @@
                 </div>
               </div>
 
-              <!-- RIGHT SIDEBAR: Course Insights -->
               <div class="w-full lg:w-72 shrink-0 space-y-6">
 
-                <!-- Course Insights Card -->
                 <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
                   <h3 class="font-bold text-[#1A2E20] text-base mb-5">Course Insights</h3>
                   <div class="space-y-4">

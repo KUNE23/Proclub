@@ -1,7 +1,6 @@
 <template>
   <div class="flex flex-col h-screen bg-[#FAFCFB] font-sans antialiased text-gray-800">
 
-    <!-- ===== TOP NAVIGATION ===== -->
     <header class="h-14 px-6 flex items-center justify-between bg-white border-b border-[#E6EFE9] shrink-0 z-20">
       <div class="flex items-center gap-8">
         <router-link to="/atelier" class="text-[15px] font-extrabold text-[#1A2E20] tracking-tight">Lumina Academy</router-link>
@@ -25,7 +24,6 @@
 
     <div class="flex flex-1 overflow-hidden">
 
-      <!-- ===== LEFT SIDEBAR ===== -->
       <aside class="w-56 bg-white border-r border-[#E6EFE9] flex flex-col justify-between shrink-0">
         <div>
           <div class="px-6 pt-6 pb-4">
@@ -53,7 +51,6 @@
         </div>
       </aside>
 
-      <!-- ===== MAIN CONTENT ===== -->
       <main class="flex-1 overflow-y-auto">
 
         <!-- Loading -->
@@ -71,10 +68,8 @@
           <div class="h-48 bg-gray-200 rounded-2xl mt-6"></div>
         </div>
 
-        <!-- ===== SUCCESS STATE ===== -->
         <div v-else-if="quizResult.isPassed" class="max-w-4xl mx-auto px-6 lg:px-12 py-10 lg:py-14">
 
-          <!-- Hero Text -->
           <div class="text-center mb-10">
             <p class="text-[10px] font-bold uppercase tracking-[0.3em] text-[#2C7047] mb-3">Module Complete</p>
             <h1 class="text-3xl lg:text-5xl font-black text-[#1A2E20] leading-tight">
@@ -85,12 +80,10 @@
             </p>
           </div>
 
-          <!-- Score + Stats Row -->
           <div class="flex flex-col lg:flex-row gap-6 mb-10">
 
-            <!-- Score Card -->
             <div class="flex-1 bg-white rounded-2xl border border-[#E6EFE9] p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
-              <!-- Badge -->
+       
               <div class="flex items-center gap-2 mb-4">
                 <div class="w-6 h-6 rounded-full bg-[#2C7047] flex items-center justify-center">
                   <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path></svg>
@@ -98,13 +91,11 @@
                 <span class="text-[11px] font-bold uppercase tracking-wider text-[#2C7047]">Assessment Passed</span>
               </div>
 
-              <!-- Score -->
               <div class="flex items-end justify-between">
                 <div>
                   <div class="text-7xl font-black text-[#1A2E20] leading-none">{{ quizResult.scorePercent }}%</div>
                   <p class="text-sm text-gray-500 mt-2 font-medium">{{ quizResult.correctAnswers }} out of {{ quizResult.totalQuestions }} correct answers</p>
 
-                  <!-- Action Buttons -->
                   <div class="flex items-center gap-3 mt-6">
                     <router-link to="/module" class="bg-[#2C7047] hover:bg-[#235838] text-white px-6 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-colors shadow-md shadow-[#2C7047]/20">
                       Continue to Next Module
@@ -116,16 +107,14 @@
                   </div>
                 </div>
 
-                <!-- Decorative Botanical Image -->
                 <div class="hidden md:block w-40 h-40 rounded-xl overflow-hidden opacity-80 shrink-0 ml-4">
                   <img src="https://images.unsplash.com/photo-1459411552884-841db9b3cc2a?auto=format&fit=crop&w=300&q=70" alt="Botanical" class="w-full h-full object-cover" />
                 </div>
               </div>
             </div>
 
-            <!-- Right Stat Cards -->
             <div class="w-full lg:w-64 shrink-0 space-y-6">
-              <!-- Time Spent -->
+              
               <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                   <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Time Spent</span>
@@ -135,7 +124,6 @@
                 <p class="text-xs text-gray-400 mt-1">{{ quizResult.timeComparison }}</p>
               </div>
 
-              <!-- Accuracy -->
               <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
                 <div class="flex items-center justify-between mb-3">
                   <span class="text-[10px] font-bold uppercase tracking-wider text-gray-500">Accuracy</span>
@@ -147,7 +135,6 @@
             </div>
           </div>
 
-          <!-- Conceptual Mastery Breakdown -->
           <div class="bg-white rounded-2xl border border-[#E6EFE9] p-8 shadow-sm mb-10">
             <h3 class="text-xl font-bold text-[#1A2E20] mb-1">Conceptual Mastery</h3>
             <p class="text-sm text-gray-500 mb-6">How you performed in specific subject areas</p>
@@ -166,7 +153,6 @@
             </div>
           </div>
 
-          <!-- Share / Certificate Row -->
           <div class="flex flex-col md:flex-row items-center justify-between gap-4 bg-[#F5F8F6] rounded-2xl border border-[#E6EFE9] p-6">
             <div>
               <h4 class="font-bold text-[#1A2E20] text-sm">Share Your Achievement</h4>
@@ -185,10 +171,8 @@
           </div>
         </div>
 
-        <!-- ===== FAILURE STATE ===== -->
         <div v-else class="max-w-2xl mx-auto px-6 lg:px-8 py-12 lg:py-16 text-center">
 
-          <!-- Icon -->
           <div class="w-24 h-24 rounded-full bg-orange-100 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-orange-500/10">
             <svg class="w-12 h-12 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path></svg>
           </div>
@@ -199,7 +183,6 @@
             {{ quizResult.failureMessage }}
           </p>
 
-          <!-- Score Card -->
           <div class="bg-white rounded-2xl border border-[#E6EFE9] p-8 mb-8 shadow-sm inline-block mx-auto">
             <div class="text-6xl font-black text-orange-500 leading-none">{{ quizResult.scorePercent }}%</div>
             <p class="text-sm text-gray-500 mt-2 font-medium">{{ quizResult.correctAnswers }} of {{ quizResult.totalQuestions }} correct</p>
@@ -209,7 +192,6 @@
             </div>
           </div>
 
-          <!-- Feedback -->
           <div class="bg-[#F5F8F6] rounded-2xl border border-[#E6EFE9] p-6 mb-8 text-left max-w-md mx-auto">
             <h4 class="font-bold text-[#1A2E20] text-sm mb-2 flex items-center gap-2">
               <svg class="w-4 h-4 text-[#2C7047]" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
@@ -218,7 +200,6 @@
             <p class="text-sm text-gray-600 leading-relaxed">{{ quizResult.feedbackText }}</p>
           </div>
 
-          <!-- Topic Breakdown (Failure) -->
           <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 mb-8 text-left max-w-md mx-auto shadow-sm">
             <h4 class="font-bold text-[#1A2E20] text-sm mb-4">Areas to Review</h4>
             <div class="space-y-4">
@@ -236,7 +217,6 @@
             </div>
           </div>
 
-          <!-- Action Buttons -->
           <div class="flex items-center justify-center gap-4">
             <router-link to="/quiz" class="px-6 py-3 bg-[#2C7047] hover:bg-[#235838] text-white rounded-xl text-sm font-bold transition-colors shadow-md shadow-[#2C7047]/20 flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
@@ -249,7 +229,6 @@
           </div>
         </div>
 
-        <!-- Footer -->
         <footer class="border-t border-[#E6EFE9] bg-[#F5F8F6] py-6 mt-auto">
           <div class="max-w-4xl mx-auto text-center">
             <div class="flex items-center justify-center gap-6 text-xs text-gray-400 mb-2">
@@ -270,14 +249,12 @@ import { ref, onMounted } from 'vue'
 
 const isLoading = ref(true)
 
-// Top Nav
 const topNavLinks = ref([
   { name: 'Dashboard', path: '/atelier', active: true },
   { name: 'Courses', path: '/courses-catalog', active: false },
   { name: 'Resources', path: '/atelier', active: false },
 ])
 
-// Sidebar
 const sidebarMenu = ref([
   { name: 'Current Quiz', active: true, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>' },
   { name: 'My Learning', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>' },
@@ -285,32 +262,26 @@ const sidebarMenu = ref([
   { name: 'Settings', active: false, icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>' },
 ])
 
-// ===== Quiz Result Data (API-Ready) =====
 const quizResult = ref({
-  // Core score data
-  isPassed: true, // Toggle this to false to see the failure state
+
+  isPassed: true,
   scorePercent: 80,
   correctAnswers: 8,
   totalQuestions: 10,
   passingScore: 70,
 
-  // Module context
   moduleName: 'Flora Taxonomy',
 
-  // Messages
   successMessage: 'Your understanding of botanical structures and classification systems has been thoroughly validated. You have met the mastery requirements for this chapter.',
   failureMessage: "You didn't quite meet the passing threshold this time. Review the material below and give it another try — you're close to mastery!",
 
-  // Stats
   timeSpent: '12:45',
   timeComparison: '3 minutes faster than average',
   accuracyRank: 'Top 15%',
   accuracyNote: 'Compared to Lumina Academy peers',
 
-  // Feedback for failure state
   feedbackText: "You're great at Morphological Structures,  but need more practice in Historical Classifications and Native Species Identification. Focus on Chapters 2.3 and 3.1 for the best improvement.",
 
-  // Topic breakdown
   topicBreakdown: [
     { name: 'Morphological Structures', score: 100 },
     { name: 'Historical Classifications', score: 60 },
