@@ -5,6 +5,7 @@ const path = require('path')
 require('dotenv').config()
 
 const app = express()
+
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
@@ -15,7 +16,7 @@ app.use(cors({
   credentials: true
 }))
 app.use(express.json())
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')))
 
 const authRoutes = require('./routes/authRoutes')
 const courseRoutes = require('./routes/courseRoutes')
@@ -25,17 +26,15 @@ const projectRoutes = require('./routes/projectRoutes')
 const quizRoutes = require('./routes/quizRoutes') 
 const userRoutes = require('./routes/userRoutes')
 const categoryRoutes = require('./routes/categoryRoutes') 
-const lessonRoutes = require('./routes/lessonRoutes')
 
 app.use('/api/auth', authRoutes)
-app.use('/api', courseRoutes)
 app.use('/api', dashboardRoutes)
-app.use('/api', moduleRoutes)
+app.use('/api', categoryRoutes)
 app.use('/api', projectRoutes)
+app.use('/api', courseRoutes)
+app.use('/api', moduleRoutes)
 app.use('/api', quizRoutes)
 app.use('/api', userRoutes)
-app.use('/api', categoryRoutes)
-app.use('/api', lessonRoutes)
 
 app.use((err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {

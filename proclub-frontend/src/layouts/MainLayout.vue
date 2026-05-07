@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import api from '../api/index.js'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
@@ -21,6 +21,25 @@ const isSidebarOpen = ref(false)
 const isLoggingOut = ref(false)
 const userName = ref('');
 const userRole = ref('');
+const showProfileMenu = ref(false)
+const profileRef = ref(null)
+
+const toggleProfileMenu = () => {
+  showProfileMenu.value = !showProfileMenu.value
+}
+
+const handleClickOutside = (e) => {
+  if (profileRef.value && !profileRef.value.contains(e.target)) {
+    showProfileMenu.value = false
+  }
+}
+
+const initials = computed(() => {
+  if (!userName.value) return 'U'
+  const parts = userName.value.trim().split(' ').filter(Boolean)
+  if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+  return parts[0].slice(0, 2).toUpperCase()
+})
 
 const handleLogout = async () => {
   isLoggingOut.value = true
@@ -29,11 +48,23 @@ const handleLogout = async () => {
   } catch (error) {
     console.warn('Logout API error:', error)
   } finally {
-    localStorage.removeItem('accessToken')
-    toast.success('Berhasil logout. Sampai jumpa!')
-    isLoggingOut.value = false
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+  toast.success('Berhasil logout. Sampai jumpa!')
+  isLoggingOut.value = false
     router.push('/login')
   }
+}
+
+const loadFromStorage = () => {
+  try {
+    const raw = localStorage.getItem('user')
+    if (raw && raw !== 'undefined') {
+      const u = JSON.parse(raw)
+      userName.value = u.name || ''
+      userRole.value = u.role || ''
+    }
+  } catch {}
 }
 
 const fetchUserProfile = async () => {
@@ -41,6 +72,12 @@ const fetchUserProfile = async () => {
     const response = await api.get('/profile'); 
     userName.value = response.data.name;
     userRole.value = response.data.role;
+    // Keep storage in sync
+    const raw = localStorage.getItem('user')
+    if (raw) {
+      const u = JSON.parse(raw)
+      localStorage.setItem('user', JSON.stringify({ ...u, name: userName.value, role: userRole.value }))
+    }
   } catch (error) {
     console.error("Gagal mengambil profil:", error);
     router.push('/login');
@@ -51,7 +88,6 @@ const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Courses', href: '/courses-catalog', icon: BookOpen },
   { name: 'Projects', href: '/project-submission', icon: CheckSquare },
-  { name: 'Profile', href: '/profile', icon: User },
 ]
 
 const toggleSidebar = () => {
@@ -59,8 +95,14 @@ const toggleSidebar = () => {
 }
 
 onMounted(() => {
+  loadFromStorage();
   fetchUserProfile();
+  document.addEventListener('click', handleClickOutside)
 });
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside)
+})
 </script>
 
 <template>
@@ -114,15 +156,7 @@ onMounted(() => {
           </RouterLink>
         </nav>
 
-        <div class="p-4 border-t border-gray-100">
-        <button 
-            @click="handleLogout"
-            :disabled="isLoggingOut"
-            class="flex items-center gap-3 px-4 py-3 w-full text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            <LogOut class="w-5 h-5" />
-            <span class="font-medium">{{ isLoggingOut ? 'Logging out...' : 'Logout' }}</span>
-          </button>
-        </div>
+
       </div>
     </aside>
 
@@ -146,14 +180,53 @@ onMounted(() => {
             <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
           </button>
           <div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
-          <div class="flex items-center gap-3 pl-2">
-            <div class="text-right hidden sm:block">
-              <p class="text-sm font-semibold text-gray-800 leading-none">{{ userName || 'Loading...'}}</p>
-              <p class="text-xs text-gray-500 mt-1">{{ userRole || 'Loading...'}}</p>
-            </div>
-            <img src="https://ui-avatars.com/api/?name=KUNE&background=2C7047&color=fff" 
-                 alt="Avatar" 
-                 class="w-9 h-9 rounded-full border border-gray-200" />
+          <div class="relative pl-2" ref="profileRef">
+            <button 
+              @click="toggleProfileMenu"
+              class="flex items-center gap-3 hover:bg-gray-50 px-2 py-1.5 rounded-xl transition-colors"
+            >
+              <div class="text-right hidden sm:block">
+                <p class="text-sm font-semibold text-gray-800 leading-none capitalize">{{ userName || 'User'}}</p>
+                <p class="text-xs text-gray-500 mt-1 lowercase">{{ userRole || 'Member'}}</p>
+              </div>
+              <div class="w-9 h-9 rounded-full bg-[#2C7047] flex items-center justify-center text-white text-[13px] font-bold border border-gray-200 shrink-0">
+                {{ initials }}
+              </div>
+              <svg class="w-4 h-4 text-gray-400 transition-transform duration-200" :class="showProfileMenu ? '-rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 translate-y-2"
+            >
+              <div v-if="showProfileMenu" class="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 overflow-hidden z-50">
+                <div class="p-2">
+                  <router-link 
+                    to="/profile" 
+                    @click="showProfileMenu = false"
+                    class="flex items-center gap-2.5 px-3 py-2 text-[13px] font-semibold text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
+                  >
+                    <User class="w-4 h-4" />
+                    My Profile
+                  </router-link>
+                  <div class="h-px bg-gray-100 my-1"></div>
+                  <button 
+                    @click="handleLogout"
+                    :disabled="isLoggingOut"
+                    class="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] font-semibold text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                  >
+                    <LogOut class="w-4 h-4" />
+                    {{ isLoggingOut ? 'Logging out...' : 'Logout' }}
+                  </button>
+                </div>
+              </div>
+            </Transition>
           </div>
         </div>
       </header>

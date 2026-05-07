@@ -2,13 +2,9 @@ const prisma = require('../config/prisma');
 
 const getCategories = async (req, res) => {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: {
-        id: 'asc'
-      }
-    });
+    const categories = await prisma.category.findMany();
 
-    return res.json({
+    return res.status(200).json({
       status: 'success',
       data: categories
     });

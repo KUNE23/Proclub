@@ -24,10 +24,9 @@
           <div class="w-12 h-12 rounded-xl bg-[#F0FDF4] flex items-center justify-center text-[#16A34A]">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
           </div>
-          <span class="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2.5 py-1 rounded-full">+12%</span>
         </div>
         <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Courses</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">148</h3>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.courses }}</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
@@ -35,32 +34,29 @@
           <div class="w-12 h-12 rounded-xl bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
           </div>
-          <span class="text-[11px] font-bold text-[#3B82F6] bg-[#EFF6FF] px-2.5 py-1 rounded-full">+4.2%</span>
         </div>
         <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Users</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">3,842</h3>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.users }}</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
         <div class="flex justify-between items-start mb-6">
           <div class="w-12 h-12 rounded-xl bg-[#FFF7ED] flex items-center justify-center text-[#F97316]">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
           </div>
-          <span class="text-[11px] font-bold text-[#F97316] flex items-center gap-1.5"><span class="w-1.5 h-1.5 rounded-full bg-[#F97316]"></span>Live</span>
         </div>
-        <p class="text-[13px] text-gray-500 font-semibold mb-1">Active Students</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">1,204</h3>
+        <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Categories</p>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.categories }}</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
         <div class="flex justify-between items-start mb-6">
           <div class="w-12 h-12 rounded-xl bg-[#F0FDF4] flex items-center justify-center text-[#16A34A]">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
           </div>
-          <span class="text-[11px] font-bold text-[#16A34A] bg-[#F0FDF4] px-2.5 py-1 rounded-full">+24%</span>
         </div>
-        <p class="text-[13px] text-gray-500 font-semibold mb-1">Completed Courses</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">956</h3>
+        <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Modules</p>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.modules }}</h3>
       </div>
     </div>
 
@@ -138,7 +134,6 @@
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm flex flex-col">
         <div class="flex items-center justify-between mb-6">
           <h2 class="text-[17px] font-bold text-[#1A2E20]">Recent Activities</h2>
-          <button class="text-[11px] font-bold text-[#157134] hover:underline tracking-wide">View All</button>
         </div>
         
         <div class="space-y-6 flex-1">
@@ -191,19 +186,51 @@
         <button class="w-full mt-6 py-3 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors tracking-widest uppercase border-t border-[#E6EFE9]">LOAD MORE HISTORY</button>
       </div>
     </div>
-    
-    <div class="bg-[#125B32] rounded-2xl p-10 text-white relative overflow-hidden shadow-lg shadow-[#125B32]/20">
-      <div class="relative z-10 md:w-1/2">
-        <h2 class="text-2xl font-bold mb-3">Drive User Growth</h2>
-        <p class="text-green-50 text-[15px] mb-8 leading-relaxed max-w-md">Launch new collaborative modules and boost student retention rates by up to 35% with our latest toolsets.</p>
-        <button class="px-6 py-2.5 bg-white text-[#125B32] text-sm font-bold rounded-lg shadow-md hover:bg-green-50 transition-colors">Explore Strategy</button>
-      </div>
-
-      <div class="absolute inset-0 bg-gradient-to-r from-[#125B32] via-[#125B32]/90 to-transparent z-0"></div>
-      <img src="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=1200&q=80" alt="Students" class="absolute right-0 top-0 h-full w-2/3 object-cover opacity-60 mix-blend-overlay">
-    </div>
   </div>
 </template>
 
 <script setup>
+import { ref, onMounted, reactive } from 'vue'
+import api from '../../api/index.js'
+
+const stats = reactive({
+  courses: 0,
+  users: 0,
+  categories: 0,
+  modules: 0
+})
+
+const fetchStats = async () => {
+  try {
+    const [coursesRes, usersRes, categoriesRes] = await Promise.all([
+      api.get('/courses'),
+      api.get('/'),
+      api.get('/categories')
+    ])
+
+    const coursesData = coursesRes.data.data || coursesRes.data
+    stats.courses = Array.isArray(coursesData) ? coursesData.length : 0
+    
+    let modCount = 0
+    if (Array.isArray(coursesData)) {
+      coursesData.forEach(c => {
+        if (c.modules) modCount += c.modules.length
+      })
+    }
+    stats.modules = modCount
+
+    const usersData = usersRes.data.users || usersRes.data.data || usersRes.data
+    stats.users = Array.isArray(usersData) ? usersData.length : 0
+
+    const categoriesData = categoriesRes.data.data || categoriesRes.data
+    stats.categories = Array.isArray(categoriesData) ? categoriesData.length : 0
+
+  } catch (error) {
+    console.error('Failed to fetch dashboard stats:', error)
+  }
+}
+
+onMounted(() => {
+  fetchStats()
+})
 </script>

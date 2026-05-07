@@ -18,6 +18,9 @@ import AdminUserEdit from '../views/admin/AdminUserEdit.vue'
 import AdminCourses from '../views/admin/AdminCourses.vue'
 import AdminLessonEditor from '../views/admin/AdminLessonEditor.vue'
 import AdminQuizzes from '../views/admin/AdminQuizzes.vue'
+import AdminCategories from '../views/admin/categories/Index.vue'
+import AdminModules from '../views/admin/modules/Index.vue'
+import AdminSettings from '../views/admin/AdminSettings.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -99,6 +102,11 @@ const router = createRouter({
           component: AdminCourses
         },
         {
+          path: 'courses/:id/modules',
+          name: 'AdminModules',
+          component: AdminModules
+        },
+        {
           path: 'users',
           name: 'AdminUsers',
           component: AdminUsers
@@ -122,6 +130,16 @@ const router = createRouter({
           path: 'quizzes',
           name: 'AdminQuizzes',
           component: AdminQuizzes
+        },
+        {
+          path: 'categories',
+          name: 'AdminCategories',
+          component: AdminCategories
+        },
+        {
+          path: 'settings',
+          name: 'AdminSettings',
+          component: AdminSettings
         }
       ]
     }
@@ -129,7 +147,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('accessToken');
+  const token = localStorage.getItem('token');
 
   const userRaw = localStorage.getItem('user');
   let userData = {};

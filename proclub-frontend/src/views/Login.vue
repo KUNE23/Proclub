@@ -95,7 +95,7 @@ const handleLogin = async () => {
       password: password.value
     });
   
-    localStorage.setItem('accessToken', response.data.token);
+    localStorage.setItem('token', response.data.token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
     
     toast.success('Login Berhasil! Selamat datang kembali.');

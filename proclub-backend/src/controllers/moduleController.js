@@ -54,6 +54,7 @@ const getModulesByCourse = async (req, res) => {
       select: {
     id: true,
     title: true,
+    content: true,
     order: true
   },
       orderBy: { order: 'asc' }

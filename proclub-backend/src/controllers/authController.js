@@ -54,17 +54,14 @@ const login = async (req, res) => {
       { expiresIn: '1d' }
     );
 
-    // OPSIONAL: Hapus update token ke DB jika tidak benar-benar diperlukan untuk validasi manual
-    /* 
-    await prisma.user.update({
+     await prisma.user.update({
       where: { id: user.id },
       data: { token: token }
     }) 
-    */
 
     return res.json({
       message: 'Login success',
-      token,
+      token: token,
       user: {
         id: user.id,
         email: user.email,

@@ -1,276 +1,479 @@
 <template>
   <div class="p-8 max-w-7xl mx-auto space-y-6">
-
     <div class="flex items-center justify-between">
       <div>
         <h1 class="text-2xl font-bold text-[#1A2E20]">Courses Management</h1>
         <p class="text-gray-500 mt-1 text-[13px]">Manage and monitor your educational curriculum from one central hub.</p>
       </div>
-      <button class="px-4 py-2.5 bg-[#0A733F] text-white rounded-lg text-sm font-semibold hover:bg-[#085a31] flex items-center gap-2 transition-colors shadow-sm">
+      <button @click="openCreateModal" class="px-4 py-2.5 bg-[#0A733F] text-white rounded-lg text-sm font-semibold hover:bg-[#085a31] flex items-center gap-2 transition-colors shadow-sm">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
         Create New Course
       </button>
     </div>
 
-    <div class="grid grid-cols-4 gap-6">
-      <div class="bg-white p-5 rounded-2xl border border-[#E6EFE9] shadow-sm">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-[#F0FDF4] flex items-center justify-center text-[#16A34A]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          </div>
-          <span class="text-[11px] font-bold text-[#16A34A]">+12%</span>
-        </div>
-        <p class="text-[12px] text-gray-500 font-medium mb-0.5">Total Courses</p>
-        <h3 class="text-2xl font-bold text-[#1A2E20]">42</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-[#E6EFE9] shadow-sm">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-[#FFF1F2] flex items-center justify-center text-[#E11D48]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          </div>
-          <span class="text-[11px] font-bold text-[#16A34A]">+8.2%</span>
-        </div>
-        <p class="text-[12px] text-gray-500 font-medium mb-0.5">Total Enrollment</p>
-        <h3 class="text-2xl font-bold text-[#1A2E20]">12,840</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-[#E6EFE9] shadow-sm">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-[#EFF6FF] flex items-center justify-center text-[#3B82F6]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-          </div>
-          <span class="text-[11px] font-bold text-[#E11D48]">-2%</span>
-        </div>
-        <p class="text-[12px] text-gray-500 font-medium mb-0.5">Avg. Completion</p>
-        <h3 class="text-2xl font-bold text-[#1A2E20]">68.4%</h3>
-      </div>
-
-      <div class="bg-white p-5 rounded-2xl border border-[#E6EFE9] shadow-sm">
-        <div class="flex justify-between items-start mb-4">
-          <div class="w-10 h-10 rounded-lg bg-[#FFF7ED] flex items-center justify-center text-[#F97316]">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg>
-          </div>
-          <span class="text-[11px] font-bold text-[#16A34A]">+0.5</span>
-        </div>
-        <p class="text-[12px] text-gray-500 font-medium mb-0.5">Student Rating</p>
-        <h3 class="text-2xl font-bold text-[#1A2E20]">4.9/5</h3>
-      </div>
-    </div>
-
     <div class="flex items-center gap-3 mb-6">
       <div class="relative flex-1">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-        <input type="text" placeholder="Filter by course name or instructor..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E6EFE9] rounded-xl text-[13px] focus:outline-none focus:border-[#0A733F] focus:ring-1 focus:ring-[#0A733F] transition-shadow">
+        <input v-model="search" type="text" placeholder="Filter by course name or category..." class="w-full pl-9 pr-4 py-2.5 bg-white border border-[#E6EFE9] rounded-xl text-[13px] focus:outline-none focus:border-[#0A733F] focus:ring-1 focus:ring-[#0A733F] transition-shadow">
       </div>
       <div class="flex items-center gap-3 shrink-0">
-        <select class="appearance-none bg-white border border-[#E6EFE9] rounded-xl px-4 py-2.5 pr-8 text-[13px] font-medium text-gray-700 focus:outline-none focus:border-[#0A733F]">
-          <option>All Categories</option>
-          <option>Development</option>
-          <option>Design</option>
-          <option>Marketing</option>
+        <select v-model="filterCategory" class="appearance-none bg-white border border-[#E6EFE9] rounded-xl px-4 py-2.5 pr-8 text-[13px] font-medium text-gray-700 focus:outline-none focus:border-[#0A733F]">
+          <option value="">All Categories</option>
+          <option v-for="cat in uniqueCategories" :key="cat" :value="cat">{{ cat }}</option>
         </select>
-        <select class="appearance-none bg-white border border-[#E6EFE9] rounded-xl px-4 py-2.5 pr-8 text-[13px] font-medium text-gray-700 focus:outline-none focus:border-[#0A733F]">
-          <option>Status: All</option>
-          <option>Published</option>
-          <option>Draft</option>
-        </select>
-        <button class="px-4 py-2.5 bg-white border border-[#E6EFE9] rounded-xl text-[13px] font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-          More Filters
-        </button>
       </div>
     </div>
 
     <div class="bg-white rounded-xl border border-[#E6EFE9] overflow-hidden shadow-sm">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-white border-b border-[#E6EFE9]">
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest w-[40%]">Title</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Category</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-center">Modules</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Enrolled</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Status</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-[#E6EFE9]">
-          <tr v-for="course in courses" :key="course.id" class="hover:bg-gray-50 transition-colors">
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" :class="course.iconBg">
-                  <div v-html="course.icon" class="w-5 h-5" :class="course.iconColor"></div>
-                </div>
+      <div v-if="loading" class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3">
+          <div class="w-8 h-8 border-2 border-[#0A733F] border-t-transparent rounded-full animate-spin"></div>
+          <span class="text-[13px] text-gray-500">Loading courses...</span>
+        </div>
+      </div>
+
+      <div v-else-if="fetchError" class="flex items-center justify-center py-20">
+        <div class="flex flex-col items-center gap-3 text-center">
+          <div class="w-12 h-12 rounded-full bg-red-50 flex items-center justify-center">
+            <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          </div>
+          <p class="text-[14px] font-medium text-gray-700">Failed to load courses</p>
+          <p class="text-[13px] text-gray-500">{{ fetchError }}</p>
+          <button @click="fetchCourses" class="px-4 py-2 bg-[#0A733F] text-white text-[13px] font-medium rounded-lg hover:bg-[#085a31] transition-colors">Retry</button>
+        </div>
+      </div>
+
+      <template v-else>
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-white border-b border-[#E6EFE9]">
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest w-[40%]">Title</th>
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Category</th>
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Image</th>
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Created At</th>
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-[#E6EFE9]">
+            <tr v-if="filteredCourses.length === 0">
+              <td colspan="5" class="py-16 text-center text-[13px] text-gray-400">No courses found.</td>
+            </tr>
+            <tr v-for="course in paginatedCourses" :key="course.id" class="hover:bg-gray-50 transition-colors">
+              <td class="py-4 px-6">
                 <div>
                   <p class="text-[14px] font-bold text-[#1A2E20] leading-snug">{{ course.title }}</p>
-                  <p class="text-[11px] text-gray-500 mt-0.5">by {{ course.instructor }}</p>
+                  <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-1 max-w-xs">{{ course.description }}</p>
                 </div>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium bg-[#F3F4F6] text-gray-700">
-                {{ course.category }}
-              </span>
-            </td>
-            <td class="py-4 px-6 text-center">
-              <span class="text-[13px] font-medium text-gray-800">{{ course.modules }}</span>
-            </td>
-            <td class="py-4 px-6">
-              <div class="flex items-center gap-2">
-                <div class="flex -space-x-2">
-                  <img v-for="(avatar, i) in course.enrolledAvatars" :key="i" :src="avatar" class="w-6 h-6 rounded-full border-2 border-white object-cover">
+              </td>
+              <td class="py-4 px-6">
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium bg-[#F3F4F6] text-gray-700">
+                  {{ course.category?.cat_name || '-' }}
+                </span>
+              </td>
+              <td class="py-4 px-6">
+                <div class="w-14 h-10 rounded-lg overflow-hidden border border-[#E6EFE9] bg-gray-50">
+                  <img v-if="course.image" :src="getImageUrl(course.image)" :alt="course.title" class="w-full h-full object-cover" @error="onImgError">
+                  <div v-else class="w-full h-full flex items-center justify-center bg-gray-100 text-[9px] text-gray-400 uppercase font-bold">No IMG</div>
                 </div>
-                <span class="text-[13px] font-medium text-gray-600">{{ course.enrolledCount }}</span>
-              </div>
-            </td>
-            <td class="py-4 px-6">
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold"
-                :class="{
-                  'bg-[#F0FDF4] text-[#16A34A]': course.status === 'Published',
-                  'bg-[#F3F4F6] text-gray-600': course.status === 'Draft',
-                }">
-                <span class="w-1.5 h-1.5 rounded-full" :class="course.status === 'Published' ? 'bg-[#16A34A]' : 'bg-gray-400'"></span>
-                {{ course.status }}
-              </span>
-            </td>
-            <td class="py-4 px-6 text-right">
-              <div class="flex items-center justify-end gap-2">
-                <button class="p-1.5 text-gray-400 hover:text-gray-700 transition-colors" title="View">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                </button>
-                <button class="p-1.5 text-gray-400 hover:text-gray-700 transition-colors" title="Edit">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                </button>
-                <button class="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="py-4 px-6">
+                <span class="text-[12px] text-gray-500">{{ formatDate(course.createdAt) }}</span>
+              </td>
+              <td class="py-4 px-6 text-right">
+                <div class="flex items-center justify-end gap-2">
+                  <router-link :to="`/admin/courses/${course.id}/modules`" class="px-3 py-1.5 text-[11px] font-semibold text-[#0A733F] bg-[#F0FDF4] rounded-lg hover:bg-[#dcfce7] transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                    Modules
+                  </router-link>
+                  <button @click="openViewModal(course)" class="p-1.5 text-gray-400 hover:text-[#0A733F] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  </button>
+                  <button @click="openEditModal(course)" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                  </button>
+                  <button @click="confirmDelete(course)" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
 
-      <div class="p-4 border-t border-[#E6EFE9] flex items-center justify-between bg-white">
-        <span class="text-[12px] text-gray-500 font-medium">Showing 1 to 10 of 42 courses</span>
-        <div class="flex items-center gap-1">
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#E6EFE9] text-gray-400 hover:text-gray-600 disabled:opacity-50" disabled>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
-          </button>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#0A733F] text-white text-[12px] font-bold">1</button>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-600 text-[12px] font-bold">2</button>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-600 text-[12px] font-bold">3</button>
-          <span class="w-8 h-8 flex items-center justify-center text-gray-400 text-[12px]">...</span>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-600 text-[12px] font-bold">5</button>
-          <button class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#E6EFE9] text-gray-400 hover:text-gray-600">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-3 gap-6 pt-2">
-
-      <div class="col-span-2 bg-[#0A733F] rounded-2xl p-8 text-white relative overflow-hidden shadow-lg">
-        <div class="relative z-10 w-2/3">
-          <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-[10px] font-bold tracking-widest uppercase mb-4 backdrop-blur-sm">Course of the month</span>
-          <h2 class="text-2xl font-bold mb-3">Full Stack Engineering Bootcamp</h2>
-          <p class="text-green-50 text-[14px] mb-8 leading-relaxed max-w-sm">Our most popular course just got a major update with Next.js 14 and advanced backend patterns.</p>
-          <button class="px-5 py-2 bg-white text-[#0A733F] text-[13px] font-bold rounded-lg shadow-sm hover:bg-green-50 transition-colors">Manage Content</button>
-        </div>
-
-        <div class="absolute inset-0 bg-gradient-to-r from-[#0A733F] via-[#0A733F]/80 to-transparent z-0"></div>
-        <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1200&q=80" alt="Code on screens" class="absolute right-0 top-0 h-full w-2/3 object-cover opacity-60 mix-blend-overlay">
-      </div>
-
-      <div class="bg-white rounded-2xl p-6 border border-[#E6EFE9] shadow-sm flex flex-col">
-        <h3 class="text-[17px] font-bold text-[#1A2E20] mb-6">Quick Insights</h3>
-        
-        <div class="space-y-6">
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-[13px] font-medium text-gray-500">Active Students</span>
-              <span class="text-[13px] font-bold text-[#1A2E20]">8.4k</span>
-            </div>
-            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-[#16A34A] rounded-full" style="width: 75%"></div>
-            </div>
-          </div>
-          
-          <div>
-            <div class="flex justify-between items-center mb-2">
-              <span class="text-[13px] font-medium text-gray-500">Revenue Goals</span>
-              <span class="text-[13px] font-bold text-[#1A2E20]">$12,400 / $15k</span>
-            </div>
-            <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
-              <div class="h-full bg-[#E11D48] rounded-full" style="width: 82%"></div>
-            </div>
+        <div class="p-4 border-t border-[#E6EFE9] flex items-center justify-between bg-white">
+          <span class="text-[12px] text-gray-500 font-medium">
+            Showing {{ (currentPage - 1) * perPage + 1 }}–{{ Math.min(currentPage * perPage, filteredCourses.length) }} of {{ filteredCourses.length }} courses
+          </span>
+          <div class="flex items-center gap-1">
+            <button @click="currentPage--" :disabled="currentPage === 1" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#E6EFE9] text-gray-400 hover:text-gray-600 disabled:opacity-40">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+            </button>
+            <button v-for="page in totalPages" :key="page" @click="currentPage = page"
+              class="w-8 h-8 flex items-center justify-center rounded-lg text-[12px] font-bold transition-colors"
+              :class="page === currentPage ? 'bg-[#0A733F] text-white' : 'hover:bg-gray-50 text-gray-600'">
+              {{ page }}
+            </button>
+            <button @click="currentPage++" :disabled="currentPage === totalPages" class="w-8 h-8 flex items-center justify-center rounded-lg border border-[#E6EFE9] text-gray-400 hover:text-gray-600 disabled:opacity-40">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+            </button>
           </div>
         </div>
-
-        <button class="mt-auto flex items-center justify-center gap-2 w-full pt-6 text-[13px] font-bold text-[#0A733F] hover:text-[#085a31] transition-colors group">
-          View Detailed Analytics
-          <svg class="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-        </button>
-      </div>
+      </template>
     </div>
+
+    <Teleport to="body">
+      <div v-if="showFormModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="closeFormModal"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto z-10">
+          <div class="flex items-center justify-between p-6 border-b border-[#E6EFE9]">
+            <div>
+              <h2 class="text-lg font-bold text-[#1A2E20]">{{ isEditing ? 'Edit Course' : 'Create New Course' }}</h2>
+              <p class="text-[12px] text-gray-500 mt-0.5">{{ isEditing ? 'Update the course information below.' : 'Fill in the details to add a new course.' }}</p>
+            </div>
+            <button @click="closeFormModal" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+          </div>
+
+          <div class="p-6 space-y-5">
+            <div>
+              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Course Title <span class="text-red-500">*</span></label>
+              <input v-model="form.title" type="text" placeholder="e.g. Advanced React Patterns"
+                class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow"
+                :class="formErrors.title ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'">
+              <p v-if="formErrors.title" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.title }}</p>
+            </div>
+
+            <div>
+              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Description <span class="text-red-500">*</span></label>
+              <textarea v-model="form.description" rows="3" placeholder="Describe what students will learn in this course..."
+                class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow resize-none"
+                :class="formErrors.description ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'"></textarea>
+              <div class="flex items-center justify-between mt-1">
+                <p v-if="formErrors.description" class="text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.description }}</p>
+                <span class="ml-auto text-[11px]" :class="form.description.length > 500 ? 'text-red-400' : 'text-gray-400'">{{ form.description.length }}/500</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Category ID <span class="text-red-500">*</span></label>
+              <input v-model.number="form.categoryId" type="number" min="1" placeholder="e.g. 1"
+                class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow"
+                :class="formErrors.categoryId ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'">
+              <p v-if="formErrors.categoryId" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.categoryId }}</p>
+            </div>
+
+            <div>
+              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Course Image <span v-if="!isEditing" class="text-red-500">*</span></label>
+              <div @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false" @drop.prevent="handleDrop" @click="$refs.fileInput.click()"
+                class="relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all"
+                :class="[dragOver ? 'border-[#0A733F] bg-[#F0FDF4]' : 'border-[#E6EFE9] hover:border-[#0A733F] hover:bg-[#F0FDF4]/50', formErrors.image ? 'border-red-300 bg-red-50' : '']">
+                <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" @change="handleFileChange">
+                <div v-if="imagePreview" class="flex flex-col items-center gap-3">
+                  <img :src="imagePreview" class="max-h-40 rounded-lg object-contain shadow-md">
+                  <button @click.stop="removeImage" class="px-3 py-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Remove Image</button>
+                </div>
+                <div v-else class="flex flex-col items-center gap-2">
+                  <div class="w-12 h-12 rounded-xl bg-[#F0FDF4] flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#0A733F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                  </div>
+                  <p class="text-[13px] font-semibold text-gray-700">Click to upload or drag & drop</p>
+                  <p class="text-[11px] text-gray-400 mt-0.5">JPG, PNG, WEBP, GIF — max 2 MB</p>
+                </div>
+              </div>
+              <p v-if="formErrors.image" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.image }}</p>
+            </div>
+
+            <div v-if="submitError" class="p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2">
+              <p class="text-[12px] text-red-700">{{ submitError }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 p-6 border-t border-[#E6EFE9]">
+            <button @click="closeFormModal" class="px-5 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
+            <button @click="submitForm" :disabled="submitting" class="px-6 py-2.5 text-[13px] font-semibold text-white bg-[#0A733F] rounded-xl hover:bg-[#085a31] transition-colors flex items-center gap-2 disabled:opacity-60">
+              <div v-if="submitting" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              {{ submitting ? 'Saving...' : (isEditing ? 'Update Course' : 'Create Course') }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="showViewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showViewModal = false"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 overflow-hidden">
+          <div v-if="selectedCourse?.image" class="h-44 overflow-hidden bg-gray-100">
+            <img :src="getImageUrl(selectedCourse.image)" :alt="selectedCourse.title" class="w-full h-full object-cover" @error="onImgError">
+          </div>
+          <div class="p-6">
+            <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#F0FDF4] text-[#16A34A] mb-2">{{ selectedCourse?.category?.cat_name || 'Uncategorized' }}</span>
+            <h3 class="text-xl font-bold text-[#1A2E20]">{{ selectedCourse?.title }}</h3>
+            <p class="mt-4 text-[13px] text-gray-600 leading-relaxed">{{ selectedCourse?.description }}</p>
+            <div class="mt-6 flex gap-3">
+              <button @click="openEditModal(selectedCourse); showViewModal = false" class="flex-1 py-2.5 text-[13px] font-semibold text-white bg-[#0A733F] rounded-xl hover:bg-[#085a31] transition-colors">Edit Course</button>
+              <button @click="showViewModal = false" class="px-5 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 p-6">
+          <h3 class="text-[16px] font-bold text-[#1A2E20]">Delete Course</h3>
+          <p class="text-[13px] text-gray-600 my-4">Are you sure you want to delete <span class="font-semibold text-[#1A2E20]">"{{ courseToDelete?.title }}"</span>?</p>
+          <div v-if="deleteError" class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">{{ deleteError }}</div>
+          <div class="flex gap-3">
+            <button @click="showDeleteModal = false" class="flex-1 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
+            <button @click="deleteCourse" :disabled="deleting" class="flex-1 py-2.5 text-[13px] font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors">
+              {{ deleting ? 'Deleting...' : 'Yes, Delete' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <Transition enter-active-class="transition-all duration-300" enter-from-class="translate-y-4 opacity-0" enter-to-class="translate-y-0 opacity-100" leave-active-class="transition-all duration-200" leave-from-class="translate-y-0 opacity-100" leave-to-class="translate-y-4 opacity-0">
+        <div v-if="toast.show" class="fixed bottom-6 right-6 z-[100] flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl text-white text-[13px] font-semibold" :class="toast.type === 'success' ? 'bg-[#0A733F]' : 'bg-red-600'">
+          {{ toast.message }}
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 
-const courses = ref([
-  { 
-    id: 1, 
-    title: 'Advanced React Patterns', 
-    instructor: 'Sarah Jenkins', 
-    category: 'Development', 
-    modules: 12, 
-    enrolledCount: '1,240',
-    enrolledAvatars: ['https://i.pravatar.cc/150?u=a1', 'https://i.pravatar.cc/150?u=a2'],
-    status: 'Published',
-    iconBg: 'bg-[#F0FDF4]',
-    iconColor: 'text-[#16A34A]',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>'
-  },
-  { 
-    id: 2, 
-    title: 'UI/UX Design Masterclass', 
-    instructor: 'Marcus Thorne', 
-    category: 'Design', 
-    modules: 24, 
-    enrolledCount: '3,450',
-    enrolledAvatars: ['https://i.pravatar.cc/150?u=a3', 'https://i.pravatar.cc/150?u=a4', 'https://ui-avatars.com/api/?name=+80&background=F3F4F6&color=374151'],
-    status: 'Draft',
-    iconBg: 'bg-[#FFF1F2]',
-    iconColor: 'text-[#E11D48]',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>'
-  },
-  { 
-    id: 3, 
-    title: 'Growth Marketing 101', 
-    instructor: 'Elena Rodriguez', 
-    category: 'Marketing', 
-    modules: 8, 
-    enrolledCount: '892',
-    enrolledAvatars: ['https://i.pravatar.cc/150?u=a5', 'https://i.pravatar.cc/150?u=a6'],
-    status: 'Published',
-    iconBg: 'bg-[#EFF6FF]',
-    iconColor: 'text-[#3B82F6]',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>'
-  },
-  { 
-    id: 4, 
-    title: 'Database Architecture', 
-    instructor: 'Simon Petrov', 
-    category: 'Development', 
-    modules: 15, 
-    enrolledCount: '156',
-    enrolledAvatars: ['https://ui-avatars.com/api/?name=SP&background=F3F4F6&color=374151'],
-    status: 'Draft',
-    iconBg: 'bg-[#FFF7ED]',
-    iconColor: 'text-[#F97316]',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>'
-  },
-])
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
+const API = `${BASE_URL}/courses`
+
+const getAuthHeaders = () => {
+  const token = localStorage.getItem('token')
+  return token ? { 'Authorization': `Bearer ${token}` } : {}
+}
+
+const getImageUrl = (path) => {
+  if (!path) return ''
+  return path.startsWith('http') ? path : `${BASE_URL}/${path}`
+}
+
+const courses = ref([])
+const loading = ref(false)
+const fetchError = ref('')
+const search = ref('')
+const filterCategory = ref('')
+const currentPage = ref(1)
+const perPage = 10
+
+const showFormModal = ref(false)
+const showViewModal = ref(false)
+const showDeleteModal = ref(false)
+const isEditing = ref(false)
+const submitting = ref(false)
+const deleting = ref(false)
+const submitError = ref('')
+const deleteError = ref('')
+
+const selectedCourse = ref(null)
+const courseToDelete = ref(null)
+
+const dragOver = ref(false)
+const imageFile = ref(null)
+const imagePreview = ref('')
+const fileInput = ref(null)
+
+const toast = reactive({ show: false, message: '', type: 'success' })
+
+const form = reactive({ title: '', description: '', categoryId: '' })
+const formErrors = reactive({ title: '', description: '', categoryId: '', image: '' })
+
+const uniqueCategories = computed(() => {
+  const cats = courses.value.map(c => c.category?.cat_name).filter(Boolean)
+  return [...new Set(cats)]
+})
+
+const filteredCourses = computed(() => {
+  return courses.value.filter(c => {
+    const matchSearch = !search.value || c.title.toLowerCase().includes(search.value.toLowerCase()) || c.category?.cat_name?.toLowerCase().includes(search.value.toLowerCase())
+    const matchCat = !filterCategory.value || c.category?.cat_name === filterCategory.value
+    return matchSearch && matchCat
+  })
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredCourses.value.length / perPage)))
+
+const paginatedCourses = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  return filteredCourses.value.slice(start, start + perPage)
+})
+
+async function fetchCourses() {
+  loading.value = true
+  fetchError.value = ''
+  try {
+    const res = await fetch(API, { headers: getAuthHeaders() })
+    if (!res.ok) throw new Error(`Server responded with ${res.status}`)
+    const json = await res.json()
+    courses.value = json.data ?? json
+  } catch (err) {
+    fetchError.value = err.message || 'Unable to connect to the server.'
+  } finally {
+    loading.value = false
+  }
+}
+
+async function submitForm() {
+  if (!validateForm()) return
+  submitting.value = true
+  submitError.value = ''
+
+  try {
+    const formData = new FormData()
+    formData.append('title', form.title.trim())
+    formData.append('description', form.description.trim())
+    formData.append('categoryId', form.categoryId)
+    if (imageFile.value) formData.append('image', imageFile.value)
+
+    const url = isEditing.value ? `${API}/${selectedCourse.value.id}` : API
+    const method = isEditing.value ? 'PUT' : 'POST'
+
+    const res = await fetch(url, { 
+      method, 
+      body: formData, 
+      headers: getAuthHeaders() 
+    })
+    
+    const json = await res.json().catch(() => ({}))
+    if (!res.ok) throw new Error(json.message || `Error ${res.status}`)
+
+    showToast(isEditing.value ? 'Course updated successfully!' : 'Course created successfully!')
+    closeFormModal()
+    await fetchCourses()
+  } catch (err) {
+    submitError.value = err.message || 'Something went wrong. Please try again.'
+  } finally {
+    submitting.value = false
+  }
+}
+
+async function deleteCourse() {
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    const res = await fetch(`${API}/${courseToDelete.value.id}`, { 
+      method: 'DELETE', 
+      headers: getAuthHeaders() 
+    })
+    if (!res.ok) {
+      const json = await res.json().catch(() => ({}))
+      throw new Error(json.message || `Error ${res.status}`)
+    }
+    showToast('Course deleted successfully!', 'success')
+    showDeleteModal.value = false
+    await fetchCourses()
+  } catch (err) {
+    deleteError.value = err.message || 'Failed to delete.'
+  } finally {
+    deleting.value = false
+  }
+}
+
+function validateForm() {
+  clearErrors()
+  let valid = true
+  if (!form.title.trim()) { formErrors.title = 'Title required.'; valid = false }
+  if (!form.description.trim()) { formErrors.description = 'Description required.'; valid = false }
+  if (!form.categoryId) { formErrors.categoryId = 'Category ID required.'; valid = false }
+  if (!isEditing.value && !imageFile.value) { formErrors.image = 'Image required.'; valid = false }
+  return valid
+}
+
+function clearErrors() { Object.keys(formErrors).forEach(k => formErrors[k] = '') }
+
+function handleFileChange(e) {
+  const file = e.target.files?.[0]
+  if (file) processImageFile(file)
+}
+
+function handleDrop(e) {
+  dragOver.value = false
+  const file = e.dataTransfer.files?.[0]
+  if (file) processImageFile(file)
+}
+
+function processImageFile(file) {
+  if (file.size > 2 * 1024 * 1024) { formErrors.image = 'Max 2MB.'; return }
+  imageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => imagePreview.value = e.target.result
+  reader.readAsDataURL(file)
+}
+
+function removeImage() {
+  imageFile.value = null
+  imagePreview.value = ''
+}
+
+function onImgError(e) {
+  e.target.style.display = 'none'
+}
+
+function openCreateModal() {
+  isEditing.value = false
+  resetForm()
+  showFormModal.value = true
+}
+
+function openEditModal(course) {
+  isEditing.value = true
+  selectedCourse.value = course
+  form.title = course.title
+  form.description = course.description
+  form.categoryId = course.category?.id || ''
+  imagePreview.value = ''
+  imageFile.value = null
+  clearErrors()
+  showFormModal.value = true
+}
+
+function openViewModal(course) {
+  selectedCourse.value = course
+  showViewModal.value = true
+}
+
+function confirmDelete(course) {
+  courseToDelete.value = course
+  showDeleteModal.value = true
+}
+
+function closeFormModal() {
+  showFormModal.value = false
+}
+
+function resetForm() {
+  form.title = ''
+  form.description = ''
+  form.categoryId = ''
+  imageFile.value = null
+  imagePreview.value = ''
+}
+
+function formatDate(iso) {
+  return iso ? new Date(iso).toLocaleDateString('id-ID') : '-'
+}
+
+function showToast(message, type = 'success') {
+  toast.message = message
+  toast.type = type
+  toast.show = true
+  setTimeout(() => toast.show = false, 3000)
+}
+
+onMounted(fetchCourses)
 </script>

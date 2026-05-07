@@ -8,8 +8,9 @@ const { createCategorySchema, updateCategorySchema } = require('../schema/catego
 
 router.get('/categories', authMiddleware, getCategories);
 
+router.put('/categories/:id', authMiddleware, roleMiddleware(['admin']), validate(updateCategorySchema), updateCategory);
+
 router.post('/categories', authMiddleware, roleMiddleware(['admin']), validate(createCategorySchema), createCategory);
 
-router.put('/categories/:id', authMiddleware, roleMiddleware(['admin']), validate(updateCategorySchema), updateCategory);
 
 module.exports = router;
