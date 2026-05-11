@@ -244,16 +244,13 @@ const updateProfile = async (req, res) => {
     if (email) updateData.email = email;
 
     if (newPassword) {
-      if (!currentPassword) {
-        return res.status(400).json({ message: 'Password saat ini diperlukan untuk mengubah password' });
-      }
-      
-      const isMatch = await bcrypt.compare(currentPassword, req.user.password);
-      if (!isMatch) {
-        return res.status(400).json({ message: 'Password saat ini salah' });
-      }
-      
-      updateData.password = await bcrypt.hash(newPassword, 10);
+      const userInDb = await prisma.user.findUnique({ where: { id: req.user.id } });
+  
+ const isMatch = await bcrypt.compare(currentPassword, userInDb.password);
+  if (!isMatch) {
+    return res.status(400).json({ message: 'Password saat ini salah' });
+  }
+  updateData.password = await bcrypt.hash(newPassword, 10);
     }
 
     const user = await prisma.user.update({

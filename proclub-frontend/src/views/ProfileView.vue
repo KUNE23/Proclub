@@ -35,13 +35,12 @@
             </div>
           </div>
           <div class="flex items-center gap-3 w-full md:w-auto">
-            <button class="flex-1 md:flex-none px-6 py-2.5 bg-white border border-[#E6EFE9] text-[#1A2E20] rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
+            <router-link to="/edit-profile" class="flex-1 md:flex-none px-6 py-2.5 bg-white border border-[#E6EFE9] text-[#1A2E20] rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors">
               Edit Profile
-            </button>
+            </router-link>
           </div>
         </div>
 
-        <!-- Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm flex items-center gap-4">
             <div class="w-12 h-12 rounded-xl bg-[#F0FDF4] flex items-center justify-center shrink-0 text-[#16A34A]">
@@ -63,7 +62,6 @@
           </div>
         </div>
 
-        <!-- Course List -->
         <div class="space-y-6">
           <div class="flex items-center justify-between border-b border-[#E6EFE9] pb-4">
             <h2 class="text-xl font-bold text-[#1A2E20]">Ongoing Courses</h2>

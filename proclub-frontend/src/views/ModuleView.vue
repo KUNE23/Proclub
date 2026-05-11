@@ -37,9 +37,12 @@
             v-for="(module, index) in allModules"
             :key="module.id"
             @click="selectModule(module, index)"
-            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] transition-all duration-200 group relative"
+            :disabled="!canAccess(index)"
+            class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-left text-[13px] transition-all duration-200 group relative disabled:cursor-not-allowed"
             :class="[
-              activeModule && module.id === activeModule.id
+              !canAccess(index)
+                ? 'opacity-50 pointer-events-none text-gray-400'
+                : activeModule && module.id === activeModule.id
                 ? 'bg-[#F2F7F4] text-[#2C7047] font-semibold'
                 : 'text-gray-600 hover:bg-gray-50 hover:text-[#2C7047] cursor-pointer',
             ]"
@@ -48,7 +51,23 @@
               :class="activeModule && module.id === activeModule.id ? 'text-[#2C7047]' : 'text-gray-400'">
               {{ String(index + 1).padStart(2, '0') }}
             </span>
-            <span class="truncate">{{ module.title }}</span>
+            <span class="truncate flex-1">{{ module.title }}</span>
+            <svg
+              v-if="!canAccess(index)"
+              class="w-4 h-4 text-gray-400 shrink-0"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M12 1C6.48 1 2 5.48 2 11s4.48 10 10 10 10-4.48 10-10S17.52 1 12 1zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 7 15.5 7 14 7.67 14 8.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 7 8.5 7 7 7.67 7 8.5 7.67 10 8.5 10zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+            </svg>
+            <svg
+              v-else-if="moduleProgress[module.id]?.status === 'completed'"
+              class="w-4 h-4 text-green-500 shrink-0"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+            </svg>
           </button>
         </nav>
       </aside>
@@ -77,10 +96,18 @@
                 Keep track of your progress by marking this module as finished.
               </p>
               <button
-                class="bg-[#2C7047] hover:bg-[#235838] text-white px-8 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto shadow-lg shadow-[#2C7047]/25 transition-all duration-200"
+                @click="handleComplete"
+                :disabled="isCompleting || (activeModule && moduleProgress[activeModule.id]?.status === 'completed')"
+                class="bg-[#2C7047] hover:bg-[#235838] disabled:bg-gray-400 disabled:cursor-not-allowed text-white px-8 py-3.5 rounded-xl text-sm font-bold flex items-center gap-2 mx-auto shadow-lg shadow-[#2C7047]/25 transition-all duration-200"
               >
-                Mark as Complete
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg v-if="isCompleting" class="animate-spin w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span v-else-if="activeModule && moduleProgress[activeModule.id]?.status === 'completed'">
+                  ✓ Completed
+                </span>
+                <span v-else>
+                  Mark as Complete
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </span>
               </button>
             </div>
           </div>
@@ -93,57 +120,168 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import api from '../api/index.js'
 
 const route = useRoute()
+const toast = useToast()
 const isLoading = ref(true)
+const isCompleting = ref(false)
 const allModules = ref([])
 const activeModule = ref(null)
 const courseId = ref(null)
 const courseTitle = ref('')
 const currentModuleIndex = ref(0)
+const moduleProgress = ref({})
 
 const progressPercent = computed(() => {
   if (!allModules.value || allModules.value.length === 0) return 0
-  return Math.round(((currentModuleIndex.value + 1) / allModules.value.length) * 100)
+  const completedCount = allModules.value.filter(
+    m => moduleProgress.value[m.id]?.status === 'completed'
+  ).length
+  return Math.round(((completedCount + 1) / allModules.value.length) * 100)
 })
 
+const canAccess = (index) => {
+  if (index === 0) return true
+  
+  const previousModule = allModules.value[index - 1]
+  if (!previousModule) return false
+  
+  const previousProgress = moduleProgress.value[previousModule.id]
+  return previousProgress?.status === 'completed'
+}
+
 async function fetchData() {
-  const id = route.params.courseId;
-  courseId.value = id;
-  isLoading.value = true;
+  const id = route.params.courseId
+  courseId.value = id
+  isLoading.value = true
   
   try {
-    const res = await api.get(`/courses/${id}`);
-    console.log("Raw Response:", res.data);
+    const res = await api.get(`/courses/${id}`)
 
-    const data = res.data.data || res.data; 
+    const data = res.data.data || res.data
     
-    courseTitle.value = data.title || (data.course && data.course.title);
+    courseTitle.value = data.title || (data.course && data.course.title)
 
-    const rawModules = data.modules || (data.course && data.course.modules);
-    allModules.value = Array.isArray(rawModules) ? rawModules : [];
+    const rawModules = data.modules || (data.course && data.course.modules)
+    allModules.value = Array.isArray(rawModules) ? rawModules : []
 
-    console.log("Final Modules Value:", allModules.value);
+    await fetchModuleProgress()
 
     if (allModules.value.length > 0) {
-      const moduleIdFromUrl = route.params.moduleId;
-      const foundIndex = allModules.value.findIndex(m => m.id == moduleIdFromUrl);
-      const targetIndex = foundIndex !== -1 ? foundIndex : 0;
+      const moduleIdFromUrl = route.params.moduleId
+      const foundIndex = allModules.value.findIndex(m => m.id == moduleIdFromUrl)
+      const targetIndex = foundIndex !== -1 ? foundIndex : 0
       
-      activeModule.value = allModules.value[targetIndex];
-      currentModuleIndex.value = targetIndex;
+      if (canAccess(targetIndex)) {
+        activeModule.value = allModules.value[targetIndex]
+        currentModuleIndex.value = targetIndex
+      } else {
+        activeModule.value = allModules.value[0]
+        currentModuleIndex.value = 0
+        toast.warning('Selesaikan modul sebelumnya terlebih dahulu!', {
+          timeout: 3000
+        })
+      }
     }
   } catch (error) {
-    console.error("Gagal memuat data:", error);
+    console.error('Gagal memuat data:', error)
+    toast.error('Gagal memuat data kursus', { timeout: 3000 })
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
 }
+
+async function fetchModuleProgress() {
+  try {
+    allModules.value.forEach(module => {
+      if (!moduleProgress.value[module.id]) {
+        moduleProgress.value[module.id] = {
+          status: 'locked',
+          score: null
+        }
+      }
+    })
+
+    for (const module of allModules.value) {
+      try {
+        const res = await api.get(
+          `/courses/${courseId.value}/modules/${module.id}`,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+          }
+        )
+        
+        if (res.data.progress) {
+          moduleProgress.value[module.id] = res.data.progress
+        } else if (module.order === 1) {
+          moduleProgress.value[module.id] = { status: 'unlocked', score: null }
+        }
+      } catch (err) {
+        if (err.response?.status === 403) {
+          moduleProgress.value[module.id] = { status: 'locked', score: null }
+        } else if (module.order === 1) {
+          moduleProgress.value[module.id] = { status: 'unlocked', score: null }
+        }
+      }
+    }
+  } catch (error) {
+    console.error('Gagal memuat progres modul:', error)
+  }
+}
+
 function selectModule(module, index) {
+  if (!canAccess(index)) {
+    toast.error('Selesaikan modul sebelumnya!', { timeout: 2000 })
+    return
+  }
+
   activeModule.value = module
   currentModuleIndex.value = index
   window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+async function handleComplete() {
+  if (!activeModule.value) return
+
+  isCompleting.value = true
+
+  try {
+    const res = await api.post(
+      `/modules/${activeModule.value.id}/complete`,
+      { score: null },
+      {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      }
+    )
+
+    moduleProgress.value[activeModule.value.id] = {
+      status: 'completed',
+      score: res.data.progress?.score || null
+    }
+
+    toast.success('Progres disimpan!', { timeout: 2000 })
+
+    setTimeout(() => {
+      if (currentModuleIndex.value < allModules.value.length - 1) {
+        const nextModule = allModules.value[currentModuleIndex.value + 1]
+        selectModule(nextModule, currentModuleIndex.value + 1)
+      }
+    }, 500)
+  } catch (error) {
+    console.error('Gagal menyimpan progres:', error)
+    toast.error(
+      error.response?.data?.message || 'Gagal menyimpan progres',
+      { timeout: 3000 }
+    )
+  } finally {
+    isCompleting.value = false
+  }
 }
 
 onMounted(() => {

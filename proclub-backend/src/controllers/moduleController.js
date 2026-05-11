@@ -143,9 +143,94 @@ const deleteModule = async (req, res) => {
   }
 }
 
+const updateProgress = async (req, res) => {
+  try {
+    const moduleId = Number(req.params.id)
+    const userId = req.user.id
+    const { score } = req.body
+
+    if (Number.isNaN(moduleId)) {
+      return res.status(400).json({ message: 'Invalid module ID' })
+    }
+
+    const module = await prisma.module.findUnique({
+      where: { id: moduleId }
+    })
+
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' })
+    }
+
+    const userProgress = await prisma.userProgress.upsert({
+      where: {
+        userId_moduleId: {
+          userId: Number(userId),
+          moduleId: Number(moduleId)
+        }
+      },
+      update: {
+        status: 'completed',
+        score: score ?? undefined
+      },
+      create: {
+        userId: Number(userId),
+        moduleId: Number(moduleId),
+        status: 'completed',
+        score: score ?? undefined
+      }
+    })
+
+    return res.status(200).json({
+      message: 'Progres disimpan!',
+      status: 'success',
+      progress: userProgress
+    })
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
+const getModuleDetail = async (req, res) => {
+  try {
+    const { courseId, moduleId } = req.params
+    const userId = req.user.id
+
+    const module = await prisma.module.findUnique({
+      where: { id: Number(moduleId) },
+      include: {
+        quizzes: true,
+        course: true
+      }
+    })
+
+    if (!module) {
+      return res.status(404).json({ message: 'Module not found' })
+    }
+
+    const userProgress = await prisma.userProgress.findUnique({
+      where: {
+        userId_moduleId: {
+          userId: Number(userId),
+          moduleId: Number(moduleId)
+        }
+      }
+    })
+
+    return res.status(200).json({
+      status: 'success',
+      module,
+      progress: userProgress
+    })
+  } catch (error) {
+    return res.status(500).json({ error: error.message })
+  }
+}
+
 module.exports = {
   createModule,
   getModulesByCourse,
   updateModule,
-  deleteModule
+  deleteModule,
+  updateProgress,
+  getModuleDetail
 }

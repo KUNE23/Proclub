@@ -50,7 +50,7 @@
               <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest w-[40%]">Title</th>
               <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Category</th>
               <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Image</th>
-              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Created At</th>
+              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Created </th>
               <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
             </tr>
           </thead>

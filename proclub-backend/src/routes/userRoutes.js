@@ -11,8 +11,8 @@ router.put('/profile', authMiddleware, validate(updateProfileSchema), updateProf
 
 router.post('/', authMiddleware, roleMiddleware(['admin']), validate(createUserSchema), createUser);
 router.get('/', authMiddleware, roleMiddleware(['admin']), getUsers);
-router.get('/:id', authMiddleware, roleMiddleware(['admin']), getUserById);
 router.put('/:id', authMiddleware, roleMiddleware(['admin']), validate(updateUserSchema), updateUser);
+router.get('/:id', authMiddleware, roleMiddleware(['admin']), getUserById);
 router.delete('/:id', authMiddleware, roleMiddleware(['admin']), deleteUser);
 
 module.exports = router;
