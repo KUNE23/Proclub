@@ -142,7 +142,7 @@ const updateUser = async (req, res) => {
       return res.status(400).json({ message: 'ID tidak valid' });
     }
 
-    const { name, email, password, role } = req.body;
+    const { name, email, currentPassword, password, role } = req.body;
 
     const userExists = await prisma.user.findUnique({
       where: { id: userId }
@@ -165,7 +165,19 @@ const updateUser = async (req, res) => {
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (role) updateData.role = role;
-    if (password) updateData.password = await bcrypt.hash(password, 10);
+    
+    if (password) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Password saat ini diperlukan untuk mengubah password' });
+      }
+      
+      const isMatch = await bcrypt.compare(currentPassword, userExists.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Password saat ini salah' });
+      }
+      
+      updateData.password = await bcrypt.hash(password, 10);
+    }
 
     const user = await prisma.user.update({
       where: { id: userId },
@@ -216,7 +228,7 @@ const deleteUser = async (req, res) => {
 
 const updateProfile = async (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, currentPassword, newPassword } = req.body;
 
     if (email && email !== req.user.email) {
       const emailExists = await prisma.user.findUnique({
@@ -230,6 +242,19 @@ const updateProfile = async (req, res) => {
     const updateData = {};
     if (name) updateData.name = name;
     if (email) updateData.email = email;
+
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ message: 'Password saat ini diperlukan untuk mengubah password' });
+      }
+      
+      const isMatch = await bcrypt.compare(currentPassword, req.user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'Password saat ini salah' });
+      }
+      
+      updateData.password = await bcrypt.hash(newPassword, 10);
+    }
 
     const user = await prisma.user.update({
       where: { id: req.user.id },

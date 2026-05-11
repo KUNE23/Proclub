@@ -80,7 +80,7 @@
             </div>
             <span class="text-[10px] font-bold text-gray-400 tracking-wider">MON</span>
           </div>
-    
+          
           <div class="flex flex-col items-center gap-3 flex-1 h-full">
             <div class="w-full h-full flex flex-col justify-end gap-1">
               <div class="w-full bg-[#F0F4F2] rounded-t-lg h-[15%]"></div>
