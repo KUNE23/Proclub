@@ -57,7 +57,7 @@
             >
 
               <div class="aspect-[4/3] w-full overflow-hidden relative">
-                <img :src="`http://localhost:3000/api/${course.image}`" :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                <img :src="`http://localhost:3000/${course.image}`" :alt="course.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <span class="absolute top-4 left-4 px-3 py-1 bg-[#2C7047]/90 text-white text-[10px] font-bold rounded-md uppercase tracking-wider backdrop-blur-sm">
                   {{ typeof course.category === 'object' ? course.category.cat_name : course.category }}
                 </span>

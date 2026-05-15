@@ -6,7 +6,8 @@
         <h1 class="text-3xl font-bold text-[#1A2E20]">Welcome back, Admin</h1>
         <p class="text-gray-500 mt-1.5 text-[15px]">Here's what happened in the Proclub Learning Hub since your last login.</p>
       </div>
-      <div class="flex items-center gap-3">
+      <!-- Button export belum dibutuhkan, tetapi mungkin nanti dibutuhkan -->
+      <!-- <div class="flex items-center gap-3">
         <button class="px-4 py-2.5 bg-white border border-[#E6EFE9] rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
           Export Reports
@@ -15,7 +16,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
           New Course
         </button>
-      </div>
+      </div> -->
     </div>
 
     <div class="grid grid-cols-4 gap-6">
@@ -26,7 +27,7 @@
           </div>
         </div>
         <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Courses</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.courses }}</h3>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.totalCourses }}</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
@@ -36,7 +37,7 @@
           </div>
         </div>
         <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Users</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.users }}</h3>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.totalUsers }}</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
@@ -45,8 +46,8 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
           </div>
         </div>
-        <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Categories</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.categories }}</h3>
+        <p class="text-[13px] text-gray-500 font-semibold mb-1">Average Progress</p>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.averageProgress }} %</h3>
       </div>
 
       <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm">
@@ -56,20 +57,67 @@
           </div>
         </div>
         <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Modules</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ stats.modules }}</h3>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.totalModules }}</h3>
       </div>
     </div>
 
     <div class="grid grid-cols-3 gap-6">
       <!-- Chart -->
       <div class="col-span-2 bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-8">
-          <h2 class="text-[17px] font-bold text-[#1A2E20]">User Engagement & Progress</h2>
-          <div class="flex bg-[#F9FAFB] p-1 rounded-lg border border-[#E6EFE9]">
-            <button class="px-3 py-1.5 text-[11px] font-bold bg-white shadow-sm rounded-md text-gray-700 tracking-wide">Weekly</button>
-            <button class="px-3 py-1.5 text-[11px] font-bold text-gray-500 hover:text-gray-700 tracking-wide">Monthly</button>
-          </div>
+        <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h3 class="text-lg font-bold text-[#1A2E20]">
+        User Engagement & Progress
+      </h3>
+
+      <p class="text-sm text-gray-400 mt-1">
+        Student completion statistics and engagement
+      </p>
+    </div>
+  </div>
+
+  <div class="space-y-5">
+    <div
+      v-for="user in userEngagement"
+      :key="user.id"
+      class="p-4 border border-[#E6EFE9] rounded-2xl"
+    >
+      <div class="flex items-center justify-between mb-3">
+        <div>
+          <h4 class="font-bold text-[#1A2E20]">
+            {{ user.name }}
+          </h4>
+
+          <p class="text-xs text-gray-400 mt-1">
+            {{ user.email }}
+          </p>
         </div>
+
+        <span class="text-sm font-bold text-[#16A34A]">
+          {{ user.percentage }}%
+        </span>
+      </div>
+
+      <div class="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
+        <div
+          class="h-full bg-[#16A34A] rounded-full transition-all duration-700"
+          :style="{ width: user.percentage + '%' }"
+        ></div>
+      </div>
+
+      <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
+        <span>
+          Completed {{ user.completedModules }} Modules
+        </span>
+
+        <span>
+          Total {{ user.totalModules }} Modules
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
         
         <div class="flex-1 min-h-[220px] flex items-end justify-between gap-6 px-2 mt-auto">
     
@@ -131,76 +179,98 @@
         </div>
       </div>
 
-      <div class="bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm flex flex-col">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-[17px] font-bold text-[#1A2E20]">Recent Activities</h2>
-        </div>
-        
-        <div class="space-y-6 flex-1">
-  
-          <div class="flex gap-4">
-            <div class="w-9 h-9 rounded-full bg-[#EFF6FF] flex items-center justify-center shrink-0 text-[#3B82F6]">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
-            </div>
-            <div>
-              <p class="text-[13px] font-bold text-[#1A2E20] leading-snug">New enrollment in "UI Design Masterclass"</p>
-              <p class="text-[12px] text-gray-500 mt-1">Sarah Jenkins just joined the course.</p>
-              <p class="text-[10px] text-gray-400 mt-2">2 minutes ago</p>
-            </div>
-          </div>
+     <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h3 class="text-lg font-bold text-[#1A2E20]">
+        Recent Activities
+      </h3>
 
-          <div class="flex gap-4">
-            <div class="w-9 h-9 rounded-full bg-[#F0FDF4] flex items-center justify-center shrink-0 text-[#16A34A]">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <div>
-              <p class="text-[13px] font-bold text-[#1A2E20] leading-snug">Quiz Submission: "Advanced React"</p>
-              <p class="text-[12px] text-gray-500 mt-1">Marcus Aurelius scored 98% in Module 4.</p>
-              <p class="text-[10px] text-gray-400 mt-2">14 minutes ago</p>
-            </div>
-          </div>
+      <p class="text-sm text-gray-400 mt-1">
+        Latest user learning activities
+      </p>
+    </div>
+  </div>
 
-          <div class="flex gap-4">
-            <div class="w-9 h-9 rounded-full bg-[#FAF5FF] flex items-center justify-center shrink-0 text-[#9333EA]">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-            </div>
-            <div>
-              <p class="text-[13px] font-bold text-[#1A2E20] leading-snug">Course Completed</p>
-              <p class="text-[12px] text-gray-500 mt-1">Elena Rodriguez finished "Fullstack Dev Bootcamp".</p>
-              <p class="text-[10px] text-gray-400 mt-2">1 hour ago</p>
-            </div>
-          </div>
+  <div class="space-y-4">
+    <div
+      v-for="activity in recentActivities"
+      :key="activity.id"
+      class="flex items-start justify-between gap-4 p-4 border border-[#E6EFE9] rounded-2xl"
+    >
+      <div>
+        <h4 class="font-bold text-[#1A2E20]">
+          {{ activity.user }}
+        </h4>
 
-          <div class="flex gap-4">
-            <div class="w-9 h-9 rounded-full bg-[#F3F4F6] flex items-center justify-center shrink-0 text-gray-500">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            </div>
-            <div>
-              <p class="text-[13px] font-bold text-[#1A2E20] leading-snug">System Update</p>
-              <p class="text-[12px] text-gray-500 mt-1">Auto-backup of student database completed successfully.</p>
-              <p class="text-[10px] text-gray-400 mt-2">3 hours ago</p>
-            </div>
-          </div>
-        </div>
-        
-        <button class="w-full mt-6 py-3 text-[11px] font-bold text-gray-400 hover:text-gray-600 transition-colors tracking-widest uppercase border-t border-[#E6EFE9]">LOAD MORE HISTORY</button>
+        <p class="text-sm text-gray-500 mt-1">
+          Completed module
+          <span class="font-semibold text-[#16A34A]">
+            {{ activity.module }}
+          </span>
+          in
+          <span class="font-semibold">
+            {{ activity.course }}
+          </span>
+        </p>
+
+        <p class="text-xs text-gray-400 mt-2">
+          {{ new Date(activity.updatedAt).toLocaleString() }}
+        </p>
+      </div>
+
+      <div class="text-right shrink-0">
+        <span
+          class="px-3 py-1 rounded-full text-xs font-bold"
+          :class="activity.status === 'COMPLETED'
+            ? 'bg-green-100 text-green-600'
+            : 'bg-blue-100 text-blue-600'"
+        >
+          {{ activity.status }}
+        </span>
+
+        <p class="text-sm font-bold text-[#16A34A] mt-2">
+          {{ activity.score }}%
+        </p>
       </div>
     </div>
   </div>
+</div>
+</div>
+</div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
-import api from '../../api/index.js'
+import { ref, onMounted } from 'vue'
+import { getDashboardAnalytics } from '../../services/dashboardService'
 
-const stats = reactive({
-  courses: 0,
-  users: 0,
-  categories: 0,
-  modules: 0
+const statistics = ref({
+  totalUsers: 0,
+  totalCourses: 0,
+  totalModules: 0,
+  averageProgress: 0
 })
 
-const fetchStats = async () => {
+const userEngagement = ref([])
+const recentActivities = ref([])
+const loading = ref(true)
+
+const loadDashboard = async () => {
+  try {
+    loading.value = true
+
+    const response = await getDashboardAnalytics()
+
+    statistics.value = response.data.data.statistics
+    userEngagement.value = response.data.data.engagement
+    recentActivities.value = response.data.data.recentActivities
+  } catch (error) {
+    console.error(error)
+  } finally {
+    loading.value = false
+  }
+}
+const fetchstatistics = async () => {
   try {
     const [coursesRes, usersRes, categoriesRes] = await Promise.all([
       api.get('/courses'),
@@ -209,7 +279,7 @@ const fetchStats = async () => {
     ])
 
     const coursesData = coursesRes.data.data || coursesRes.data
-    stats.courses = Array.isArray(coursesData) ? coursesData.length : 0
+    statistics.courses = Array.isArray(coursesData) ? coursesData.length : 0
     
     let modCount = 0
     if (Array.isArray(coursesData)) {
@@ -217,20 +287,19 @@ const fetchStats = async () => {
         if (c.modules) modCount += c.modules.length
       })
     }
-    stats.modules = modCount
+    statistics.modules = modCount
 
     const usersData = usersRes.data.users || usersRes.data.data || usersRes.data
-    stats.users = Array.isArray(usersData) ? usersData.length : 0
+    statistics.users = Array.isArray(usersData) ? usersData.length : 0
 
     const categoriesData = categoriesRes.data.data || categoriesRes.data
-    stats.categories = Array.isArray(categoriesData) ? categoriesData.length : 0
+    statistics.categories = Array.isArray(categoriesData) ? categoriesData.length : 0
 
   } catch (error) {
-    console.error('Failed to fetch dashboard stats:', error)
+    console.error('Failed to fetch dashboard statistics:', error)
   }
 }
-
 onMounted(() => {
-  fetchStats()
+  loadDashboard()
 })
 </script>

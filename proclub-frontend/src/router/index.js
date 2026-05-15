@@ -9,6 +9,7 @@ import QuizResultView from '../views/QuizResultView.vue'
 import ProjectSubmissionView from '../views/ProjectSubmissionView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import Register from '../views/Register.vue'
+import EditProfileView from '../views/EditProfileView.vue'
 
 import AdminLayout from '../layouts/AdminLayout.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
@@ -21,7 +22,7 @@ import AdminCategories from '../views/admin/categories/Index.vue'
 import AdminModules from '../views/admin/modules/Index.vue'
 import AdminSettings from '../views/admin/AdminSettings.vue'
 import AdminQuizResult from '../views/admin/AdminQuizResult.vue'
-
+import AdminUserProgress from '../views/admin/AdminUserProgress.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -58,7 +59,7 @@ const router = createRouter({
         {
           path: '/edit-profile',
           name: 'EditProfile',
-          component: () => import('../views/EditProfileView.vue')
+          component: EditProfileView
         },
       ]
     },
@@ -150,44 +151,50 @@ const router = createRouter({
           path: 'quiz-results',
           name: 'AdminQuizResult',
           component: AdminQuizResult
+        },
+        {
+          path: 'progress',
+          name: 'AdminUserProgress',
+          component: AdminUserProgress
         }
       ]
     }
   ]
 })
 
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token');
+router.beforeEach((to) => {
+  const token = localStorage.getItem('token')
 
-  const userRaw = localStorage.getItem('user');
-  let userData = {};
+  const userRaw = localStorage.getItem('user')
 
-  if (userRaw && userRaw !== "undefined") {
+  let userData = {}
+
+  if (userRaw && userRaw !== 'undefined') {
     try {
-      userData = JSON.parse(userRaw);
+      userData = JSON.parse(userRaw)
     } catch (e) {
-      console.error("Gagal parse JSON user:", e);
-      userData = {};
+      console.error('Gagal parse JSON user:', e)
+      userData = {}
     }
   }
 
   if (to.meta.requiresAuth && !token) {
-    return next('/login');
+    return '/login'
   }
 
   if (to.meta.requiresAdmin) {
-
-    const role = userData?.role?.toLowerCase();
+    const role = userData?.role?.toLowerCase()
 
     if (role !== 'admin') {
-      return next('/');
+      return '/'
     }
   }
 
   if (to.path === '/login' && token) {
-    return next('/');
+    return '/'
   }
 
-  next();
-});
-export default router
+  return true
+})
+
+export default router;

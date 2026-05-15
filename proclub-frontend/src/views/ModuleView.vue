@@ -306,14 +306,14 @@ function selectModule(m, i) {
   }
 }
 
-onBeforeRouteUpdate((to, from, next) => {
+onBeforeRouteUpdate((to, from) => {
   const nextModuleId = to.params.moduleId
   const nextIndex = allModules.value.findIndex(m => m.id == nextModuleId)
   if (nextIndex !== -1 && !canAccess(nextIndex)) { 
     toast.error('Modul ini masih terkunci!')
-    next(false)
+    return false
   } else {
-    next()
+    return true
   }
 })
 

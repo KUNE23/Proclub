@@ -122,4 +122,114 @@ export const getCourseModulesWithProgress = async (req, res) => {
   }
 }
 
+export const getDashboardAnalytics = async (req, res) => {
+  try {
+    const totalUsers = await prisma.user.count()
+
+    const totalCourses = await prisma.course.count({
+      where: {
+        isDeleted: false
+      }
+    })
+
+    const totalModules = await prisma.module.count({
+      where: {
+        isDeleted: false
+      }
+    })
+
+    const completedProgress = await prisma.userProgress.count({
+      where: {
+        status: 'COMPLETED'
+      }
+    })
+
+    const totalProgress = await prisma.userProgress.count()
+
+    const averageProgress =
+      totalProgress > 0
+        ? Math.round((completedProgress / totalProgress) * 100)
+        : 0
+
+    const latestActivities = await prisma.userProgress.findMany({
+      take: 8,
+      orderBy: {
+        updatedAt: 'desc'
+      },
+      include: {
+        user: true,
+        module: {
+          include: {
+            course: true
+          }
+        }
+      }
+    })
+
+    const recentActivities = latestActivities.map(item => ({
+      id: item.id,
+      user: item.user.name,
+      module: item.module.title,
+      course: item.module.course.title,
+      status: item.status,
+      score: item.score || 0,
+      updatedAt: item.updatedAt
+    }))
+
+    const engagement = await prisma.user.findMany({
+      include: {
+        progress: {
+          include: {
+            module: {
+              include: {
+                course: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const engagementData = engagement.map(user => {
+      const totalModulesUser = user.progress.length
+
+      const completedModules = user.progress.filter(
+        p => p.status === 'COMPLETED'
+      ).length
+
+      const percentage =
+        totalModulesUser > 0
+          ? Math.round((completedModules / totalModulesUser) * 100)
+          : 0
+
+      return {
+         id: user.id,
+        name: user.name,
+        email: user.email,
+        completedModules,
+        totalModules: totalModulesUser,
+        percentage
+      }
+    })
+
+    return res.status(200).json({
+      status: 'success',
+      data: {
+        statistics: {
+          totalUsers,
+          totalCourses,
+          totalModules,
+          averageProgress
+        },
+        engagement: engagementData,
+        recentActivities
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: error.message
+    })
+  }
+}
 

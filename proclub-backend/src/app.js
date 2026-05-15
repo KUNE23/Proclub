@@ -13,6 +13,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import memberDashboardRoutes from './routes/memberDashboardROutes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -31,7 +32,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use('/api/uploads', express.static(path.join(__dirname, '../uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', dashboardRoutes);
@@ -41,6 +42,7 @@ app.use('/api', courseRoutes);
 app.use('/api', moduleRoutes);
 app.use('/api', quizRoutes);
 app.use('/api', userRoutes);
+app.use('/api', memberDashboardRoutes);
 
 app.use((err, req, res, next) => {
   if (err.code === 'LIMIT_FILE_SIZE') {

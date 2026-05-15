@@ -32,7 +32,7 @@
         <router-link to="/admin/progress" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/progress') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/progress')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-          Progress
+          User Progress
         </router-link>
         <router-link to="/admin/quiz-results" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/quiz-results') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/quiz-results')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
@@ -42,7 +42,7 @@
         <router-link to="/admin/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/settings') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/settings')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          Settings
+          Account Settings
         </router-link>
       </nav>
       <div class="relative p-4 mx-4 mb-6 mt-auto" ref="profileRef">

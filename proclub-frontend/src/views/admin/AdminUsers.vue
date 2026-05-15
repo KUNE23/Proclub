@@ -40,7 +40,6 @@
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Name</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Email</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Role</th>
-            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Progress</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
@@ -67,20 +66,6 @@
                 }">
                 {{ user.role }}
               </span>
-            </td>
-            <td class="py-4 px-6">
-              <template v-if="user.role === 'Student' || user.role === 'member'">
-                <div class="flex flex-col gap-1.5 w-32">
-                  <span class="text-[12px] font-bold text-gray-600">{{ user.progress || 0 }}%</span>
-                  <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full bg-[#16A34A] rounded-full" :style="{ width: (user.progress || 0) + '%' }"></div>
-                  </div>
-                </div>
-                
-              </template>
-              <template v-else>
-                <span class="text-[12px] italic text-gray-400">Not Applicable</span>
-              </template>
             </td>
             <td class="py-4 px-6 text-right">
               <div class="flex items-center justify-end gap-2">

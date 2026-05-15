@@ -272,3 +272,193 @@ export const updateProfile = async (req, res) => {
   }
 };
 
+export const getAllUserProgress = async (req, res) => {
+  try {
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+    const skip = (page - 1) * limit
+
+    const users = await prisma.user.findMany({
+      skip,
+      take: limit,
+      where: {
+        role: 'member'
+      },
+      include: {
+        progress: {
+          include: {
+            module: {
+              include: {
+                course: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    })
+
+    const totalUsers = await prisma.user.count({
+      where: {
+        role: 'member'
+      }
+    })
+
+    const formatted = await Promise.all(
+      users.map(async (user) => {
+        const courses = await prisma.course.findMany({
+          where: {
+            isDeleted: false
+          },
+          include: {
+            modules: {
+              where: {
+                isDeleted: false
+              }
+            }
+          }
+        })
+
+        const progressByCourse = courses.map((course) => {
+          const totalModules = course.modules.length
+
+          const completedModules = course.modules.filter((module) =>
+            user.progress.some(
+              (p) =>
+                p.moduleId === module.id &&
+                p.status === 'COMPLETED'
+            )
+          ).length
+
+          const percentage =
+            totalModules > 0
+              ? Math.round(
+                  (completedModules / totalModules) * 100
+                )
+              : 0
+
+          return {
+            id: course.id,
+            title: course.title,
+            totalModules,
+            completedModules,
+            percentage,
+            isCompleted: percentage === 100
+          }
+        })
+
+        const totalModulesAll = progressByCourse.reduce(
+          (acc, item) => acc + item.totalModules,
+          0
+        )
+
+        const completedModulesAll = progressByCourse.reduce(
+          (acc, item) => acc + item.completedModules,
+          0
+        )
+
+        const totalCoursesCompleted = progressByCourse.filter(
+          (c) => c.isCompleted
+        ).length
+
+        const overallPercentage =
+          totalModulesAll > 0
+            ? Math.round(
+                (completedModulesAll / totalModulesAll) * 100
+              )
+            : 0
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          totalCoursesCompleted,
+          completedModulesAll,
+          totalModulesAll,
+          overallPercentage,
+          courses: progressByCourse
+        }
+      })
+    )
+
+    return res.status(200).json({
+      status: 'success',
+      data: formatted,
+      pagination: {
+        total: totalUsers,
+        page,
+        limit,
+        totalPages: Math.ceil(totalUsers / limit)
+      }
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Gagal mengambil progress user',
+      error: error.message
+    })
+  }
+}
+
+export const getMyProgress = async (req, res) => {
+  try {
+    const userId = req.user.id
+
+    const courses = await prisma.course.findMany({
+      where: {
+        isDeleted: false
+      },
+      include: {
+        modules: {
+          where: {
+            isDeleted: false
+          },
+          include: {
+            progress: {
+              where: {
+                userId: Number(userId)
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const formatted = courses
+      .map(course => {
+        const totalModules = course.modules.length
+
+        const completedModules = course.modules.filter(module =>
+          module.progress.some(
+            progress => progress.status === 'COMPLETED'
+          )
+        ).length
+
+        const percentage =
+          totalModules > 0
+            ? Math.round((completedModules / totalModules) * 100)
+            : 0
+
+        return {
+          id: course.id,
+          title: course.title,
+          image: course.image,
+          totalModules,
+          completedModules,
+          percentage
+        }
+      })
+      .filter(course => course.completedModules > 0 || course.percentage > 0)
+
+    return res.status(200).json({
+      status: 'success',
+      data: formatted
+    })
+  } catch (error) {
+    return res.status(500).json({
+      status: 'error',
+      message: error.message
+    })
+  }
+}
