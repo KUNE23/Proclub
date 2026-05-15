@@ -8,7 +8,8 @@ import {
   updateModule,
   deleteModule,
   getModuleDetail,
-  updateProgress
+  updateProgress,
+  getQuizResults
 } from '../controllers/moduleController.js';
 
 const router = express.Router();
@@ -23,5 +24,12 @@ router.get('/courses/:courseId/modules/:id', authMiddleware, checkModuleAccess, 
 
 router.get('/modules/:id', authMiddleware, checkModuleAccess, getModuleDetail);
 router.post('/modules/:id/progress', authMiddleware, updateProgress);
+
+router.get(
+  '/admin/quiz-results',
+  authMiddleware,
+  roleMiddleware(['admin']),
+  getQuizResults
+)
 
 export default router;

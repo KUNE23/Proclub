@@ -152,3 +152,50 @@ export const getModuleDetail = async (req, res) => {
     });
   }
 };
+
+export const getQuizResults = async (req, res) => {
+  try {
+    const results = await prisma.userProgress.findMany({
+      where: {
+        module: {
+          type: 'QUIZ'
+        }
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true
+          }
+        },
+        module: {
+          select: {
+            id: true,
+            title: true,
+            kkm: true,
+            course: {
+              select: {
+                id: true,
+                title: true
+              }
+            }
+          }
+        }
+      },
+      orderBy: {
+        updatedAt: 'desc'
+      }
+    })
+
+    return res.status(200).json({
+      status: 'success',
+      data: results
+    })
+  } catch (error) {
+    return res.status(500).json({
+      message: 'Gagal mengambil hasil quiz',
+      error: error.message
+    })
+  }
+}

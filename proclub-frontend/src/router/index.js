@@ -20,6 +20,7 @@ import AdminQuestions from '../views/admin/AdminQuestions.vue'
 import AdminCategories from '../views/admin/categories/Index.vue'
 import AdminModules from '../views/admin/modules/Index.vue'
 import AdminSettings from '../views/admin/AdminSettings.vue'
+import AdminQuizResult from '../views/admin/AdminQuizResult.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -144,6 +145,11 @@ const router = createRouter({
           path: 'settings',
           name: 'AdminSettings',
           component: AdminSettings
+        },
+        {
+          path: 'quiz-results',
+          name: 'AdminQuizResult',
+          component: AdminQuizResult
         }
       ]
     }
