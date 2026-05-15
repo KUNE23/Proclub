@@ -72,7 +72,6 @@ const fetchUserProfile = async () => {
     const response = await api.get('/profile'); 
     userName.value = response.data.name;
     userRole.value = response.data.role;
-    // Keep storage in sync
     const raw = localStorage.getItem('user')
     if (raw) {
       const u = JSON.parse(raw)

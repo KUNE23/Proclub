@@ -1,4 +1,4 @@
-const { z } = require("zod");
+import { z } from 'zod'
 
 const registerSchema = z.object({
     name: 
@@ -38,4 +38,4 @@ const loginSchema = z.object({
     .regex(/[0-9]/, "Password must contain at least one number")
 });
 
-module.exports = { registerSchema, loginSchema };
+export { registerSchema, loginSchema };

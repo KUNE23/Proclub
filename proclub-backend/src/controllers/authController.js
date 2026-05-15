@@ -1,8 +1,8 @@
-const prisma = require('../config/prisma')
-const bcrypt = require('bcrypt')
-const jwt = require('jsonwebtoken')
+import prisma from '../config/prisma.js'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 
-const register = async (req, res) => {
+export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body
 
@@ -30,7 +30,7 @@ const register = async (req, res) => {
   }
 }
 
-const login = async (req, res) => {
+export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -74,7 +74,7 @@ const login = async (req, res) => {
   }
 }
 
-const forgotpassword = async (req, res) => {
+export const forgotpassword = async (req, res) => {
   try {
     const { email } = req.body
 
@@ -92,7 +92,7 @@ d
   }d
 }
 
-const logout = async (req, res) => {
+export const logout = async (req, res) => {
   try {
     await prisma.user.update({
       where: { id: req.user.id },
@@ -107,4 +107,3 @@ const logout = async (req, res) => {
   }
 }
 
-module.exports = { register, login, forgotpassword, logout }

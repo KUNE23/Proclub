@@ -1,6 +1,6 @@
-const { z } = require("zod");
+import { z } from 'zod'
 
-const validate = (schema) => (req, res, next) => {
+export const validate = (schema) => (req, res, next) => {
   try {
     schema.parse(req.body);
     next();
@@ -19,4 +19,3 @@ const validate = (schema) => (req, res, next) => {
   }
 };
 
-module.exports = { validate };

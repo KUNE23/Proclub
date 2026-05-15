@@ -31,6 +31,7 @@ model Course {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   category    Category? @relation(fields: [categoryId], references: [id])
+  isDeleted   Boolean   @default(false)
   modules     Module[]
   projects    Project[]
 
@@ -41,12 +42,15 @@ model Course {
 model Module {
   id        Int            @id @default(autoincrement())
   title     String
-  content   String
+  kkm       Int            @default(70)
+  content   String?
+  type      ModuleType     @default(MATERIAL)
   order     Int
   courseId  Int
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  course    Course         @relation(fields: [courseId], references: [id])
+  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  isDeleted Boolean        @default(false)
   projects  Project[]
   quizzes   Quiz[]
   progress  UserProgress[]
@@ -62,20 +66,22 @@ model Quiz {
   moduleId      Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  module        Module   @relation(fields: [moduleId], references: [id])
+  module        Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  isDeleted   Boolean   @default(false)
 
   @@index([moduleId])
 }
 
 model UserProgress {
   id        Int            @id @default(autoincrement())
-  status    ProgressStatus @default(locked)
+  status    ProgressStatus @default(LOCKED)
   score     Float?
+  answers   Json?
   userId    Int
   moduleId  Int
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  module    Module         @relation(fields: [moduleId], references: [id])
+  module    Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   user      User           @relation(fields: [userId], references: [id])
 
   @@unique([userId, moduleId])
@@ -104,6 +110,7 @@ model Project {
 model Category {
   id        Int      @id @default(autoincrement())
   cat_name  String
+  isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   courses   Course[]
@@ -118,13 +125,19 @@ enum Role {
 }
 
 enum ProgressStatus {
-  locked
-  unlocked
-  completed
+  LOCKED
+  IN_PROGRESS
+  COMPLETED
+  FAILED    
 }
 
 enum ProjectStatus {
   pending
   approved
   rejected
+}
+
+enum ModuleType {
+  MATERIAL
+  QUIZ
 }

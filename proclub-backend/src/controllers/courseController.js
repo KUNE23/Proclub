@@ -1,11 +1,11 @@
-const prisma = require('../config/prisma')
+import prisma from '../config/prisma.js'
 
 const buildImagePath = (file) => {
   if (!file) return undefined
   return `uploads/courses/${file.filename}`
 }
 
-const createCourse = async (req, res) => {
+export const createCourse = async (req, res) => {
   try {
     const { title, description, categoryId } = req.body
 
@@ -21,7 +21,10 @@ const createCourse = async (req, res) => {
       }
 
       const category = await prisma.category.findUnique({
-        where: { id: parsedCategoryId }
+        where: { 
+          id: parsedCategoryId,
+          isDeleted: false
+         }
       })
 
       if (!category) {
@@ -63,7 +66,7 @@ const createCourse = async (req, res) => {
   }
 }
 
-const getCourses = async (req, res) => {
+export const getCourses = async (req, res) => {
   try {
     const page = Number(req.query.page) || 1
     const limit = Number(req.query.limit) || 10
@@ -71,6 +74,7 @@ const getCourses = async (req, res) => {
 
     const [courses, totalData] = await Promise.all([
       prisma.course.findMany({
+        where: { isDeleted: false },
         skip,
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -88,26 +92,31 @@ const getCourses = async (req, res) => {
           }
         }
       }),
-      prisma.course.count()
+      prisma.course.count({
+        where: { isDeleted: false } 
+      })
     ])
-
-    const totalPages = Math.ceil(totalData / limit)
 
     return res.status(200).json({
       status: 'success',
       data: courses,
       pagination: {
+        totalData,
+        totalPages: Math.ceil(totalData / limit),
         currentPage: page,
-        totalPages,
-        totalData
+        limit
       }
-    })
+    });
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    console.error(error);
+    return res.status(500).json({
+      status: 'error',
+      message: 'Internal Server Error'
+    });
   }
-}
+};
 
-const getCourseById = async (req, res) => {
+export const getCourseById = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
 
@@ -116,7 +125,10 @@ const getCourseById = async (req, res) => {
     }
 
     const course = await prisma.course.findUnique({
-      where: { id: courseId },
+      where: { 
+        id: courseId,
+        isDeleted: false
+       },
       include: {
         modules: {
           orderBy: { order: 'asc' }
@@ -146,7 +158,7 @@ const getCourseById = async (req, res) => {
   }
 }
 
-const updateCourse = async (req, res) => {
+export const updateCourse = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
     const { title, description, categoryId } = req.body
@@ -160,7 +172,10 @@ const updateCourse = async (req, res) => {
     }
 
     const existingCourse = await prisma.course.findUnique({
-      where: { id: courseId }
+      where: { 
+        id: courseId,
+        isDeleted: false
+       }
     })
 
     if (!existingCourse) {
@@ -190,7 +205,10 @@ const updateCourse = async (req, res) => {
         }
 
         const category = await prisma.category.findUnique({
-          where: { id: parsedCategoryId }
+          where: { 
+            id: parsedCategoryId,
+            isDeleted: false
+           }
         })
 
         if (!category) {
@@ -225,7 +243,7 @@ const updateCourse = async (req, res) => {
   }
 }
 
-const deleteCourse = async (req, res) => {
+export const deleteCourse = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
 
@@ -234,15 +252,19 @@ const deleteCourse = async (req, res) => {
     }
 
     const existingCourse = await prisma.course.findUnique({
-      where: { id: courseId }
+      where: { 
+        id: courseId,
+        isDeleted: false
+       }
     })
 
     if (!existingCourse) {
       return res.status(404).json({ message: 'Course not found' })
     }
 
-    await prisma.course.delete({
-      where: { id: courseId }
+    await prisma.course.update({
+      where: { id: courseId },
+      data: { isDeleted: true }
     })
 
     return res.status(200).json({ message: 'Course deleted' })
@@ -251,11 +273,5 @@ const deleteCourse = async (req, res) => {
   }
 }
 
-module.exports = {
-  createCourse,
-  getCourses,
-  getCourseById,
-  updateCourse,
-  deleteCourse
-}
+
 

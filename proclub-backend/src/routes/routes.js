@@ -1,12 +1,13 @@
-const express = require('express')
-const router = express.Router()
-const authMiddleware = require('../middleware/authMiddleware')
-const {
+import express from 'express'
+import authMiddleware from '../middleware/authMiddleware.js'
+import {
   getDashboard,
   getCourseModulesWithProgress
-} = require('../controllers/dashboardController')
+} from '../controllers/dashboardController.js'
+
+const router = express.Router()
 
 router.get('/', authMiddleware, getDashboard)
 router.get('/courses/:courseId/modules', authMiddleware, getCourseModulesWithProgress)
 
-module.exports = router
+export default router

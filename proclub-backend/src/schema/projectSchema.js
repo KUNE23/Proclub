@@ -1,4 +1,4 @@
-const { z } = require("zod");
+import { z } from 'zod'
 
 const submitProjectSchema = z.object({
     linkGithub: 
@@ -27,4 +27,4 @@ const submitProjectSchema = z.object({
 
   });
 
-module.exports = { submitProjectSchema };
+export { submitProjectSchema };

@@ -17,17 +17,12 @@
         <router-link to="/admin/courses" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/courses') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/courses')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          Courses
+          Courses / Quizzes
         </router-link>
         <router-link to="/admin/categories" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/categories') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/categories')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
           Categories
-        </router-link>
-        <router-link to="/admin/quizzes" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/quizzes') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/quizzes')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          Quizzes
         </router-link>
         <router-link to="/admin/users" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/users') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
           <div v-if="route.path.startsWith('/admin/users')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>

@@ -1,4 +1,4 @@
-const { z } = require('zod')
+import { z } from 'zod'
 
 const integerString = z.union([
   z.string().regex(/^[0-9]+$/, { message: 'categoryId must be a valid integer' }),
@@ -17,7 +17,7 @@ const updateCourseSchema = z.object({
   categoryId: integerString.optional()
 })
 
-module.exports = {
+export {
   createCourseSchema,
   updateCourseSchema
 }

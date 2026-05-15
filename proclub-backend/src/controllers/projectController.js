@@ -1,6 +1,6 @@
-const prisma = require('../config/prisma')
-const xss = require('xss');
-const submitProject = async (req, res) => {
+import prisma from '../config/prisma.js'
+import xss from 'xss'
+export const submitProject = async (req, res) => {
   try {
     const userId = req.user.id;
     let { linkGithub, note, courseId, moduleId } = req.body;
@@ -43,7 +43,7 @@ const submitProject = async (req, res) => {
   }
 };
 
-const getUserProjects = async (req, res) => {
+export const getUserProjects = async (req, res) => {
   try {
     const userId = req.user.id;
     const page = Number(req.query.page) || 1;
@@ -85,7 +85,7 @@ const getUserProjects = async (req, res) => {
   }
 };
 
-const reviewProject = async (req, res) => {
+export const reviewProject = async (req, res) => {
   try {
     const projectId = Number(req.params.id);
     const { status } = req.body;
@@ -108,8 +108,4 @@ const reviewProject = async (req, res) => {
   }
 };
 
-module.exports = {
-  submitProject,
-  getUserProjects,
-  reviewProject
-}
+

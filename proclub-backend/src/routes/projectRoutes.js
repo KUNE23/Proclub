@@ -1,17 +1,18 @@
-const express = require('express')
-const router = express.Router()
-const { validate } = require('../middleware/validate')
-const authMiddleware = require('../middleware/authMiddleware')
-const roleMiddleware = require('../middleware/roleMiddleware')
-const { submitProjectSchema } = require('../schema/projectSchema')
-const {
+import express from 'express'
+import { validate } from '../middleware/validate.js'
+import authMiddleware from '../middleware/authMiddleware.js'
+import roleMiddleware from '../middleware/roleMiddleware.js'
+import { submitProjectSchema } from '../schema/projectSchema.js'
+import {
   submitProject,
   getUserProjects,
   reviewProject
-} = require('../controllers/projectController')
+} from '../controllers/projectController.js'
+
+const router = express.Router()
 
 router.post('/projects', authMiddleware, validate(submitProjectSchema), submitProject)
 router.get('/projects', authMiddleware, getUserProjects)
 router.put('/projects/:id/review', authMiddleware, roleMiddleware(['admin', 'mentor']), reviewProject)
 
-module.exports = router
+export default router

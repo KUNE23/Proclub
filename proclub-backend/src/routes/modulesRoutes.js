@@ -1,22 +1,27 @@
-const express = require('express')
-const router = express.Router()
-const authMiddleware = require('../middleware/authMiddleware')
-const roleMiddleware = require('../middleware/roleMiddleware')
-const checkModuleAccess = require('../middleware/checkModuleAccess')
-const {
+import express from 'express';
+import authMiddleware from '../middleware/authMiddleware.js';
+import roleMiddleware from '../middleware/roleMiddleware.js';
+import checkModuleAccess from '../middleware/checkModuleAccess.js';
+import {
   createModule,
   getModulesByCourse,
   updateModule,
   deleteModule,
-  updateProgress,
-  getModuleDetail
-} = require('../controllers/moduleController')
+  getModuleDetail,
+  updateProgress
+} from '../controllers/moduleController.js';
 
-router.post('/courses/:courseId/modules', authMiddleware, roleMiddleware(['admin']), createModule)
-router.get('/courses/:courseId/modules', getModulesByCourse)
-router.get('/courses/:courseId/modules/:moduleId', authMiddleware, checkModuleAccess, getModuleDetail)
-router.post('/modules/:id/complete', authMiddleware, updateProgress)
-router.put('/modules/:id', authMiddleware, roleMiddleware(['admin']), updateModule)
-router.delete('/modules/:id', authMiddleware, roleMiddleware(['admin']), deleteModule)
+const router = express.Router();
 
-module.exports = router
+router.post('/courses/:courseId/modules', authMiddleware, roleMiddleware(['admin']), createModule);
+router.put('/modules/:id', authMiddleware, roleMiddleware(['admin']), updateModule);
+router.delete('/modules/:id', authMiddleware, roleMiddleware(['admin']), deleteModule);
+
+router.get('/courses/:courseId/modules', getModulesByCourse);
+
+router.get('/courses/:courseId/modules/:id', authMiddleware, checkModuleAccess, getModuleDetail);
+
+router.get('/modules/:id', authMiddleware, checkModuleAccess, getModuleDetail);
+router.post('/modules/:id/progress', authMiddleware, updateProgress);
+
+export default router;

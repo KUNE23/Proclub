@@ -1,7 +1,7 @@
-const prisma = require('../config/prisma')
-const bcrypt = require('bcrypt')
+import prisma from '../config/prisma.js'
+import bcrypt from 'bcrypt'
 
-const getProfile = async (req, res) => {
+export const getProfile = async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
@@ -24,7 +24,7 @@ const getProfile = async (req, res) => {
   }
 };
 
-const createUser = async (req, res) => {
+export const createUser = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
 
@@ -65,7 +65,7 @@ const createUser = async (req, res) => {
   }
 };
 
-const getUsers = async (req, res) => {
+export const getUsers = async (req, res) => {
   try {
     const { page = 1, limit = 10 } = req.query;
     const skip = (page - 1) * limit;
@@ -101,7 +101,7 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+export const getUserById = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = parseInt(id);
@@ -133,7 +133,7 @@ const getUserById = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
+export const updateUser = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = parseInt(id);
@@ -198,7 +198,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+export const deleteUser = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = parseInt(id);
@@ -226,7 +226,7 @@ const deleteUser = async (req, res) => {
   }
 };
 
-const updateProfile = async (req, res) => {
+export const updateProfile = async (req, res) => {
   try {
     const { name, email, currentPassword, newPassword } = req.body;
 
@@ -272,4 +272,3 @@ const updateProfile = async (req, res) => {
   }
 };
 
-module.exports = { getProfile, createUser, getUsers, getUserById, updateUser, deleteUser, updateProfile };

@@ -130,7 +130,6 @@ const loadUser = async () => {
       user.value = JSON.parse(raw)
     }
     
-    // Attempt to get fresh profile data
     const res = await api.get('/profile').catch(() => null)
     if (res?.data) {
       user.value = { ...user.value, ...res.data }

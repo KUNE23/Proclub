@@ -1,15 +1,21 @@
-const express = require('express')
-const router = express.Router()
-const authMiddleware = require('../middleware/authMiddleware')
-const roleMiddleware = require('../middleware/roleMiddleware')
-const {
+import express from 'express';
+import authMiddleware from '../middleware/authMiddleware.js';
+import roleMiddleware from '../middleware/roleMiddleware.js';
+import {
   createQuiz,
   updateQuiz,
-  deleteQuiz
-} = require('../controllers/quizController')
+  deleteQuiz,
+  submitQuiz,
+  getQuizByModule
+} from '../controllers/quizController.js';
 
-router.post('/quizzes', authMiddleware, roleMiddleware(['admin']), createQuiz)
-router.put('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), updateQuiz)
-router.delete('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), deleteQuiz)
+const router = express.Router();
 
-module.exports = router
+router.post('/quizzes', authMiddleware, roleMiddleware(['admin']), createQuiz);
+router.put('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), updateQuiz);
+router.delete('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), deleteQuiz);
+
+router.get('/modules/:moduleId/quizzes', authMiddleware, getQuizByModule);
+router.post('/modules/:id/submit', authMiddleware, submitQuiz);
+
+export default router;

@@ -1,17 +1,18 @@
-const express = require('express')
-const router = express.Router()
-const authMiddleware = require('../middleware/authMiddleware')
-const roleMiddleware = require('../middleware/roleMiddleware')
-const { upload } = require('../middleware/uploadMiddleware')
-const { validate } = require('../middleware/validate')
-const { createCourseSchema, updateCourseSchema } = require('../schema/courseSchema')
-const {
+import express from 'express'
+import authMiddleware from '../middleware/authMiddleware.js'
+import roleMiddleware from '../middleware/roleMiddleware.js'
+import { upload } from '../middleware/uploadMiddleware.js'
+import { validate } from '../middleware/validate.js'
+import { createCourseSchema, updateCourseSchema } from '../schema/courseSchema.js'
+import {
   createCourse,
   getCourses,
   getCourseById,
   updateCourse,
   deleteCourse
-} = require('../controllers/courseController')
+} from '../controllers/courseController.js'
+
+const router = express.Router()
 
 router.post(
   '/courses',
@@ -33,4 +34,4 @@ router.put(
 )
 router.delete('/courses/:id', authMiddleware, roleMiddleware(['admin']), deleteCourse)
 
-module.exports = router 
+export default router 

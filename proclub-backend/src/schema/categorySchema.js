@@ -1,4 +1,4 @@
-const { z } = require("zod");
+import { z } from 'zod'
 
 const createCategorySchema = z.object({
     cat_name:
@@ -16,4 +16,4 @@ const updateCategorySchema = z.object({
     .max(100, "Category name must be at most 100 characters")
 });
 
-module.exports = { createCategorySchema, updateCategorySchema };
+export { createCategorySchema, updateCategorySchema };

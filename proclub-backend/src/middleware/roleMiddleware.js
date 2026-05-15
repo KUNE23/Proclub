@@ -14,4 +14,6 @@ const roleMiddleware = (allowedRoles = []) => {
   }
 }
 
-module.exports = roleMiddleware
+export default roleMiddleware
+
+

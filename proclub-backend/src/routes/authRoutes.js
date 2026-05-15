@@ -1,14 +1,13 @@
-const express = require('express')
-const router = express.Router()
-const { validate } = require('../middleware/validate')
-const { register, login, logout } = require('../controllers/authController')
-const { registerSchema, loginSchema } = require('../schema/authSchema')
-const authMiddleware = require('../middleware/authMiddleware')
-const { loginLimiter } = require('../middleware/rateLimiter')
-const { registerLimiter } = require('../middleware/rateLimiter')
+import express from 'express'
+import { validate } from '../middleware/validate.js'
+import { register, login, logout } from '../controllers/authController.js'
+import { registerSchema, loginSchema } from '../schema/authSchema.js'
+import authMiddleware from '../middleware/authMiddleware.js'
+import { loginLimiter, registerLimiter } from '../middleware/rateLimiter.js'
 
-router.post('/register', registerLimiter, validate(registerSchema), register)
+const router = express.Router()
 router.post('/login', loginLimiter, validate(loginSchema), login)
 router.post('/logout', authMiddleware, logout)
+router.post('/register', registerLimiter, validate(registerSchema), register)
 
-module.exports = router
+export default router

@@ -5,7 +5,6 @@ import Login from '../views/Login.vue'
 import CourseDetailView from '../views/CourseDetailView.vue'
 import CoursesView from '../views/CoursesView.vue'
 import ModuleView from '../views/ModuleView.vue'
-import QuizView from '../views/QuizView.vue'
 import QuizResultView from '../views/QuizResultView.vue'
 import ProjectSubmissionView from '../views/ProjectSubmissionView.vue'
 import ProfileView from '../views/ProfileView.vue'
@@ -16,8 +15,8 @@ import AdminDashboard from '../views/admin/AdminDashboard.vue'
 import AdminUsers from '../views/admin/AdminUsers.vue'
 import AdminUserEdit from '../views/admin/AdminUserEdit.vue'
 import AdminCourses from '../views/admin/AdminCourses.vue'
-import AdminLessonEditor from '../views/admin/AdminLessonEditor.vue'
 import AdminQuizzes from '../views/admin/AdminQuizzes.vue'
+import AdminQuestions from '../views/admin/AdminQuestions.vue'
 import AdminCategories from '../views/admin/categories/Index.vue'
 import AdminModules from '../views/admin/modules/Index.vue'
 import AdminSettings from '../views/admin/AdminSettings.vue'
@@ -54,11 +53,6 @@ const router = createRouter({
           path: '/profile',
           name: 'Profile',
           component: ProfileView
-        },
-        {
-          path: '/quiz/:id?',
-          name: 'QuizView',
-          component: QuizView
         },
         {
           path: '/edit-profile',
@@ -127,14 +121,19 @@ const router = createRouter({
           component: AdminUserEdit
         },
         {
-          path: 'lessons/edit',
-          name: 'AdminLessonEditor',
-          component: AdminLessonEditor
+          path: 'quizzes/manage',
+          name: 'QuizManagement',
+          component: AdminQuestions
         },
         {
           path: 'quizzes',
           name: 'AdminQuizzes',
           component: AdminQuizzes
+        },
+        {
+          path: 'quizzes/:id/questions',
+          name: 'AdminQuestions',
+          component: AdminQuestions
         },
         {
           path: 'categories',

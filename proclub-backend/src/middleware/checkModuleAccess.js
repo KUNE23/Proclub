@@ -1,53 +1,65 @@
-const prisma = require('../config/prisma')
+import prisma from '../config/prisma.js';
 
-const checkModuleAccess = async (req, res, next) => {
+export default async function checkModuleAccess(req, res, next) {
   try {
-    const { courseId, moduleId } = req.params
-    const userId = req.user.id
+    const { id, moduleId } = req.params;
+    const userId = req.user.id;
 
-    const moduleData = await prisma.module.findUnique({
-      where: { id: Number(moduleId) }
-    })
+    const targetId = id || moduleId;
 
-    if (!moduleData) {
-      return res.status(404).json({ message: 'Module not found' })
+    if (!targetId || isNaN(Number(targetId))) {
+      return res.status(400).json({ message: 'ID Modul tidak valid atau hilang' });
     }
 
-    if (moduleData.order === 1) {
-      return next()
+    const moduleData = await prisma.module.findUnique({
+      where: { id: Number(targetId) },
+      include: { course: true }
+    });
+
+    if (!moduleData) {
+      return res.status(404).json({ message: 'Modul tidak ditemukan' });
+    }
+
+    if (req.user.role === 'admin') {
+      return next();
+    }
+
+    const currentOrder = moduleData.order;
+
+    if (currentOrder === 1) {
+      return next();
     }
 
     const previousModule = await prisma.module.findFirst({
       where: {
-        courseId: Number(courseId),
-        order: moduleData.order - 1
+        courseId: moduleData.courseId,
+        order: currentOrder - 1,
+        isDeleted: false
       }
-    })
+    });
 
     if (!previousModule) {
-      return res.status(404).json({ message: 'Previous module not found' })
+      return next();
     }
 
-    const userProgress = await prisma.userProgress.findUnique({
+    const progress = await prisma.userProgress.findUnique({
       where: {
         userId_moduleId: {
           userId: Number(userId),
           moduleId: previousModule.id
         }
       }
-    })
+    });
 
-    if (!userProgress || userProgress.status !== 'completed') {
-      return res.status(403).json({ 
-        message: 'Selesaikan modul sebelumnya terlebih dahulu!',
-        status: 'locked'
-      })
+    if (!progress || progress.status !== 'COMPLETED') {
+      return res.status(403).json({
+        message: 'Kamu harus menyelesaikan modul sebelumnya terlebih dahulu.'
+      });
     }
 
-    return next()
+    next();
   } catch (error) {
-    return res.status(500).json({ error: error.message })
+    console.error('Access Check Error:', error);
+    return res.status(500).json({ error: error.message });
   }
 }
-
-module.exports = checkModuleAccess

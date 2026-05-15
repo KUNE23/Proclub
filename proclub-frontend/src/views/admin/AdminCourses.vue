@@ -85,9 +85,6 @@
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
                     Modules
                   </router-link>
-                  <button @click="openViewModal(course)" class="p-1.5 text-gray-400 hover:text-[#0A733F] transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                  </button>
                   <button @click="openEditModal(course)" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                   </button>
@@ -141,26 +138,29 @@
               <input v-model="form.title" type="text" placeholder="e.g. Advanced React Patterns"
                 class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow"
                 :class="formErrors.title ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'">
-              <p v-if="formErrors.title" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.title }}</p>
+              <p v-if="formErrors.title" class="mt-1 text-[11px] text-red-500">{{ formErrors.title }}</p>
             </div>
 
             <div>
               <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Description <span class="text-red-500">*</span></label>
-              <textarea v-model="form.description" rows="3" placeholder="Describe what students will learn in this course..."
+              <textarea v-model="form.description" rows="3" placeholder="Describe what students will learn..."
                 class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow resize-none"
                 :class="formErrors.description ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'"></textarea>
               <div class="flex items-center justify-between mt-1">
-                <p v-if="formErrors.description" class="text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.description }}</p>
-                <span class="ml-auto text-[11px]" :class="form.description.length > 500 ? 'text-red-400' : 'text-gray-400'">{{ form.description.length }}/500</span>
+                <p v-if="formErrors.description" class="text-[11px] text-red-500">{{ formErrors.description }}</p>
+                <span class="ml-auto text-[11px] text-gray-400">{{ form.description.length }}/500</span>
               </div>
             </div>
 
             <div>
-              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Category ID <span class="text-red-500">*</span></label>
-              <input v-model.number="form.categoryId" type="number" min="1" placeholder="e.g. 1"
-                class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow"
+              <label class="block text-[12px] font-semibold text-gray-700 mb-1.5">Category <span class="text-red-500">*</span></label>
+              <select v-model.number="form.categoryId" 
+                class="w-full px-4 py-2.5 border rounded-xl text-[13px] focus:outline-none focus:ring-1 transition-shadow appearance-none bg-white"
                 :class="formErrors.categoryId ? 'border-red-400 focus:border-red-400 focus:ring-red-200' : 'border-[#E6EFE9] focus:border-[#0A733F] focus:ring-[#0A733F]/20'">
-              <p v-if="formErrors.categoryId" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.categoryId }}</p>
+                <option value="" disabled>Select Category</option>
+                <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.cat_name }}</option>
+              </select>
+              <p v-if="formErrors.categoryId" class="mt-1 text-[11px] text-red-500">{{ formErrors.categoryId }}</p>
             </div>
 
             <div>
@@ -168,25 +168,20 @@
               <div @dragover.prevent="dragOver = true" @dragleave.prevent="dragOver = false" @drop.prevent="handleDrop" @click="$refs.fileInput.click()"
                 class="relative border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all"
                 :class="[dragOver ? 'border-[#0A733F] bg-[#F0FDF4]' : 'border-[#E6EFE9] hover:border-[#0A733F] hover:bg-[#F0FDF4]/50', formErrors.image ? 'border-red-300 bg-red-50' : '']">
-                <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp,image/gif" class="hidden" @change="handleFileChange">
+                <input ref="fileInput" type="file" accept="image/*" class="hidden" @change="handleFileChange">
                 <div v-if="imagePreview" class="flex flex-col items-center gap-3">
                   <img :src="imagePreview" class="max-h-40 rounded-lg object-contain shadow-md">
-                  <button @click.stop="removeImage" class="px-3 py-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100 transition-colors">Remove Image</button>
+                  <button @click.stop="removeImage" class="px-3 py-1 text-[11px] font-semibold text-red-600 bg-red-50 rounded-lg hover:bg-red-100">Remove</button>
                 </div>
-                <div v-else class="flex flex-col items-center gap-2">
-                  <div class="w-12 h-12 rounded-xl bg-[#F0FDF4] flex items-center justify-center">
-                    <svg class="w-6 h-6 text-[#0A733F]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  </div>
-                  <p class="text-[13px] font-semibold text-gray-700">Click to upload or drag & drop</p>
-                  <p class="text-[11px] text-gray-400 mt-0.5">JPG, PNG, WEBP, GIF — max 2 MB</p>
+                <div v-else class="flex flex-col items-center gap-2 text-gray-400">
+                  <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  <p class="text-[13px] font-semibold">Click or drag & drop image</p>
                 </div>
               </div>
-              <p v-if="formErrors.image" class="mt-1 text-[11px] text-red-500 flex items-center gap-1">{{ formErrors.image }}</p>
+              <p v-if="formErrors.image" class="mt-1 text-[11px] text-red-500">{{ formErrors.image }}</p>
             </div>
 
-            <div v-if="submitError" class="p-3 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2">
-              <p class="text-[12px] text-red-700">{{ submitError }}</p>
-            </div>
+            <div v-if="submitError" class="p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">{{ submitError }}</div>
           </div>
 
           <div class="flex items-center justify-end gap-3 p-6 border-t border-[#E6EFE9]">
@@ -201,36 +196,19 @@
     </Teleport>
 
     <Teleport to="body">
-      <div v-if="showViewModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showViewModal = false"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg z-10 overflow-hidden">
-          <div v-if="selectedCourse?.image" class="h-44 overflow-hidden bg-gray-100">
-            <img :src="getImageUrl(selectedCourse.image)" :alt="selectedCourse.title" class="w-full h-full object-cover" @error="onImgError">
-          </div>
-          <div class="p-6">
-            <span class="inline-block px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#F0FDF4] text-[#16A34A] mb-2">{{ selectedCourse?.category?.cat_name || 'Uncategorized' }}</span>
-            <h3 class="text-xl font-bold text-[#1A2E20]">{{ selectedCourse?.title }}</h3>
-            <p class="mt-4 text-[13px] text-gray-600 leading-relaxed">{{ selectedCourse?.description }}</p>
-            <div class="mt-6 flex gap-3">
-              <button @click="openEditModal(selectedCourse); showViewModal = false" class="flex-1 py-2.5 text-[13px] font-semibold text-white bg-[#0A733F] rounded-xl hover:bg-[#085a31] transition-colors">Edit Course</button>
-              <button @click="showViewModal = false" class="px-5 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Close</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Teleport>
-
-    <Teleport to="body">
       <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showDeleteModal = false"></div>
-        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 p-6">
-          <h3 class="text-[16px] font-bold text-[#1A2E20]">Delete Course</h3>
-          <p class="text-[13px] text-gray-600 my-4">Are you sure you want to delete <span class="font-semibold text-[#1A2E20]">"{{ courseToDelete?.title }}"</span>?</p>
-          <div v-if="deleteError" class="mb-4 p-3 rounded-xl bg-red-50 border border-red-200 text-[12px] text-red-700">{{ deleteError }}</div>
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-md z-10 p-6 text-center">
+          <div class="w-16 h-16 bg-red-50 text-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </div>
+          <h3 class="text-[18px] font-bold text-[#1A2E20]">Delete Course?</h3>
+          <p class="text-[13px] text-gray-600 my-4">Are you sure you want to delete <span class="font-semibold text-red-600">"{{ courseToDelete?.title }}"</span>? This action cannot be undone.</p>
+          <div v-if="deleteError" class="mb-4 p-3 rounded-xl bg-red-50 text-[12px] text-red-700">{{ deleteError }}</div>
           <div class="flex gap-3">
-            <button @click="showDeleteModal = false" class="flex-1 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl hover:bg-gray-200 transition-colors">Cancel</button>
-            <button @click="deleteCourse" :disabled="deleting" class="flex-1 py-2.5 text-[13px] font-semibold text-white bg-red-600 rounded-xl hover:bg-red-700 transition-colors">
-              {{ deleting ? 'Deleting...' : 'Yes, Delete' }}
+            <button @click="showDeleteModal = false" class="flex-1 py-2.5 text-[13px] font-semibold text-gray-600 bg-gray-100 rounded-xl">Cancel</button>
+            <button @click="deleteCourse" :disabled="deleting" class="flex-1 py-2.5 text-[13px] font-semibold text-white bg-red-600 rounded-xl">
+              {{ deleting ? 'Deleting...' : 'Delete Course' }}
             </button>
           </div>
         </div>
@@ -251,7 +229,8 @@
 import { ref, computed, onMounted, reactive } from 'vue'
 
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api'
-const API = `${BASE_URL}/courses`
+const API_COURSES = `${BASE_URL}/courses`
+const API_CATEGORIES = `${BASE_URL}/categories`
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token')
@@ -264,6 +243,7 @@ const getImageUrl = (path) => {
 }
 
 const courses = ref([])
+const categories = ref([])
 const loading = ref(false)
 const fetchError = ref('')
 const search = ref('')
@@ -272,7 +252,6 @@ const currentPage = ref(1)
 const perPage = 10
 
 const showFormModal = ref(false)
-const showViewModal = ref(false)
 const showDeleteModal = ref(false)
 const isEditing = ref(false)
 const submitting = ref(false)
@@ -286,10 +265,8 @@ const courseToDelete = ref(null)
 const dragOver = ref(false)
 const imageFile = ref(null)
 const imagePreview = ref('')
-const fileInput = ref(null)
 
 const toast = reactive({ show: false, message: '', type: 'success' })
-
 const form = reactive({ title: '', description: '', categoryId: '' })
 const formErrors = reactive({ title: '', description: '', categoryId: '', image: '' })
 
@@ -317,7 +294,7 @@ async function fetchCourses() {
   loading.value = true
   fetchError.value = ''
   try {
-    const res = await fetch(API, { headers: getAuthHeaders() })
+    const res = await fetch(API_COURSES, { headers: getAuthHeaders() })
     if (!res.ok) throw new Error(`Server responded with ${res.status}`)
     const json = await res.json()
     courses.value = json.data ?? json
@@ -325,6 +302,17 @@ async function fetchCourses() {
     fetchError.value = err.message || 'Unable to connect to the server.'
   } finally {
     loading.value = false
+  }
+}
+
+async function fetchCategories() {
+  try {
+    const res = await fetch(API_CATEGORIES, { headers: getAuthHeaders() })
+    if (!res.ok) throw new Error('Failed to fetch categories')
+    const json = await res.json()
+    categories.value = json.data ?? json
+  } catch (err) {
+    console.error('Fetch categories error:', err)
   }
 }
 
@@ -340,7 +328,7 @@ async function submitForm() {
     formData.append('categoryId', form.categoryId)
     if (imageFile.value) formData.append('image', imageFile.value)
 
-    const url = isEditing.value ? `${API}/${selectedCourse.value.id}` : API
+    const url = isEditing.value ? `${API_COURSES}/${selectedCourse.value.id}` : API_COURSES
     const method = isEditing.value ? 'PUT' : 'POST'
 
     const res = await fetch(url, { 
@@ -356,7 +344,7 @@ async function submitForm() {
     closeFormModal()
     await fetchCourses()
   } catch (err) {
-    submitError.value = err.message || 'Something went wrong. Please try again.'
+    submitError.value = err.message || 'Something went wrong.'
   } finally {
     submitting.value = false
   }
@@ -366,35 +354,30 @@ async function deleteCourse() {
   deleting.value = true
   deleteError.value = ''
   try {
-    const res = await fetch(`${API}/${courseToDelete.value.id}`, { 
+    const res = await fetch(`${API_COURSES}/${courseToDelete.value.id}`, { 
       method: 'DELETE', 
       headers: getAuthHeaders() 
     })
-    if (!res.ok) {
-      const json = await res.json().catch(() => ({}))
-      throw new Error(json.message || `Error ${res.status}`)
-    }
+    if (!res.ok) throw new Error('Failed to delete course.')
     showToast('Course deleted successfully!', 'success')
     showDeleteModal.value = false
     await fetchCourses()
   } catch (err) {
-    deleteError.value = err.message || 'Failed to delete.'
+    deleteError.value = err.message
   } finally {
     deleting.value = false
   }
 }
 
 function validateForm() {
-  clearErrors()
+  Object.keys(formErrors).forEach(k => formErrors[k] = '')
   let valid = true
   if (!form.title.trim()) { formErrors.title = 'Title required.'; valid = false }
   if (!form.description.trim()) { formErrors.description = 'Description required.'; valid = false }
-  if (!form.categoryId) { formErrors.categoryId = 'Category ID required.'; valid = false }
+  if (!form.categoryId) { formErrors.categoryId = 'Category selection required.'; valid = false }
   if (!isEditing.value && !imageFile.value) { formErrors.image = 'Image required.'; valid = false }
   return valid
 }
-
-function clearErrors() { Object.keys(formErrors).forEach(k => formErrors[k] = '') }
 
 function handleFileChange(e) {
   const file = e.target.files?.[0]
@@ -420,9 +403,7 @@ function removeImage() {
   imagePreview.value = ''
 }
 
-function onImgError(e) {
-  e.target.style.display = 'none'
-}
+function onImgError(e) { e.target.style.display = 'none' }
 
 function openCreateModal() {
   isEditing.value = false
@@ -436,15 +417,9 @@ function openEditModal(course) {
   form.title = course.title
   form.description = course.description
   form.categoryId = course.category?.id || ''
-  imagePreview.value = ''
+  imagePreview.value = getImageUrl(course.image)
   imageFile.value = null
-  clearErrors()
   showFormModal.value = true
-}
-
-function openViewModal(course) {
-  selectedCourse.value = course
-  showViewModal.value = true
 }
 
 function confirmDelete(course) {
@@ -452,9 +427,7 @@ function confirmDelete(course) {
   showDeleteModal.value = true
 }
 
-function closeFormModal() {
-  showFormModal.value = false
-}
+function closeFormModal() { showFormModal.value = false }
 
 function resetForm() {
   form.title = ''
@@ -464,9 +437,7 @@ function resetForm() {
   imagePreview.value = ''
 }
 
-function formatDate(iso) {
-  return iso ? new Date(iso).toLocaleDateString('id-ID') : '-'
-}
+function formatDate(iso) { return iso ? new Date(iso).toLocaleDateString('id-ID') : '-' }
 
 function showToast(message, type = 'success') {
   toast.message = message
@@ -475,5 +446,8 @@ function showToast(message, type = 'success') {
   setTimeout(() => toast.show = false, 3000)
 }
 
-onMounted(fetchCourses)
+onMounted(() => {
+  fetchCourses()
+  fetchCategories()
+})
 </script>

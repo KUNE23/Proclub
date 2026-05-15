@@ -1,10 +1,11 @@
-const express = require('express');
+import express from 'express';
+import authMiddleware from '../middleware/authMiddleware.js';
+import roleMiddleware from '../middleware/roleMiddleware.js';
+import { validate } from '../middleware/validate.js';
+import { getCategories, createCategory, updateCategory, deleteCategory } from '../controllers/categoryController.js';
+import { createCategorySchema, updateCategorySchema } from '../schema/categorySchema.js';
+
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
-const roleMiddleware = require('../middleware/roleMiddleware');
-const { validate } = require('../middleware/validate');
-const { getCategories, createCategory, updateCategory } = require('../controllers/categoryController');
-const { createCategorySchema, updateCategorySchema } = require('../schema/categorySchema');
 
 router.get('/categories', authMiddleware, getCategories);
 
@@ -13,4 +14,4 @@ router.put('/categories/:id', authMiddleware, roleMiddleware(['admin']), validat
 router.post('/categories', authMiddleware, roleMiddleware(['admin']), validate(createCategorySchema), createCategory);
 
 
-module.exports = router;
+export default router;

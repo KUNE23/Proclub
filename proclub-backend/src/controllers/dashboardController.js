@@ -1,6 +1,6 @@
-const prisma = require('../config/prisma')
+import prisma from '../config/prisma.js'
 
-const getDashboard = async (req, res) => {
+export const getDashboard = async (req, res) => {
   try {
     const userId = req.user.id
 
@@ -63,7 +63,7 @@ const getDashboard = async (req, res) => {
   }
 }
 
-const getCourseModulesWithProgress = async (req, res) => {
+export const getCourseModulesWithProgress = async (req, res) => {
   try {
     const userId = req.user.id
     const courseId = Number(req.params.courseId)
@@ -122,7 +122,4 @@ const getCourseModulesWithProgress = async (req, res) => {
   }
 }
 
-module.exports = {
-  getDashboard,
-  getCourseModulesWithProgress
-}
+
