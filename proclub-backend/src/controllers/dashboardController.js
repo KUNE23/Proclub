@@ -13,38 +13,54 @@ export const getDashboard = async (req, res) => {
     }
 
     const courses = await prisma.course.findMany({
+      where: {
+        isDeleted: false
+      },
       include: {
-        modules: true
+        modules: {
+          where: {
+            isDeleted: false
+          },
+          include: {
+            lessons: {
+              where: {
+                isDeleted: false
+              }
+            }
+          }
+        }
       }
     })
 
     const coursesWithProgress = await Promise.all(
       courses.map(async (course) => {
-        const totalModules = course.modules.length
+        const lessons = course.modules.flatMap((module) => module.lessons)
+        const totalLessons = lessons.length
 
         const userProgress = await prisma.userProgress.findMany({
           where: {
             userId,
-            moduleId: {
-              in: course.modules.map((m) => m.id)
+            lessonId: {
+              in: lessons.map((lesson) => lesson.id)
             }
           }
         })
 
-        const completedModules = userProgress.filter(
-          (p) => p.status === 'completed'
+        const completedLessons = userProgress.filter(
+          (p) => p.status === 'COMPLETED'
         ).length
 
         const progressPercentage =
-          totalModules > 0 ? (completedModules / totalModules) * 100 : 0
+          totalLessons > 0 ? (completedLessons / totalLessons) * 100 : 0
 
         return {
           id: course.id,
           title: course.title,
           description: course.description,
           progressPercentage: Math.round(progressPercentage),
-          completedModules,
-          totalModules
+          completedLessons,
+          totalLessons,
+          totalModules: course.modules.length
         }
       })
     )
@@ -76,6 +92,19 @@ export const getCourseModulesWithProgress = async (req, res) => {
       where: { id: courseId },
       include: {
         modules: {
+          where: {
+            isDeleted: false
+          },
+          include: {
+            lessons: {
+              where: {
+                isDeleted: false
+              },
+              orderBy: {
+                order: 'asc'
+              }
+            }
+          },
           orderBy: { order: 'asc' }
         }
       }
@@ -87,24 +116,35 @@ export const getCourseModulesWithProgress = async (req, res) => {
 
     const modulesWithProgress = await Promise.all(
       course.modules.map(async (module) => {
-        const userProgress = await prisma.userProgress.findUnique({
-          where: {
-            userId_moduleId: {
-              userId,
-              moduleId: module.id
+        const lessons = await Promise.all(module.lessons.map(async (lesson) => {
+          const userProgress = await prisma.userProgress.findUnique({
+            where: {
+              userId_lessonId: {
+                userId,
+                lessonId: lesson.id
+              }
+            }
+          })
+
+          return {
+            id: lesson.id,
+            title: lesson.title,
+            content: lesson.content,
+            order: lesson.order,
+            type: lesson.type,
+            progress: {
+              status: userProgress?.status || 'LOCKED',
+              score: userProgress?.score || null
             }
           }
-        })
+        }))
 
         return {
           id: module.id,
           title: module.title,
-          content: module.content,
+          description: module.description,
           order: module.order,
-          progress: {
-            status: userProgress?.status || 'locked',
-            score: userProgress?.score || null
-          }
+          lessons
         }
       })
     )
@@ -138,6 +178,12 @@ export const getDashboardAnalytics = async (req, res) => {
       }
     })
 
+    const totalLessons = await prisma.lesson.count({
+      where: {
+        isDeleted: false
+      }
+    })
+
     const completedProgress = await prisma.userProgress.count({
       where: {
         status: 'COMPLETED'
@@ -158,27 +204,7 @@ export const getDashboardAnalytics = async (req, res) => {
       },
       include: {
         user: true,
-        module: {
-          include: {
-            course: true
-          }
-        }
-      }
-    })
-
-    const recentActivities = latestActivities.map(item => ({
-      id: item.id,
-      user: item.user.name,
-      module: item.module.title,
-      course: item.module.course.title,
-      status: item.status,
-      score: item.score || 0,
-      updatedAt: item.updatedAt
-    }))
-
-    const engagement = await prisma.user.findMany({
-      include: {
-        progress: {
+        lesson: {
           include: {
             module: {
               include: {
@@ -190,24 +216,53 @@ export const getDashboardAnalytics = async (req, res) => {
       }
     })
 
-    const engagementData = engagement.map(user => {
-      const totalModulesUser = user.progress.length
+    const recentActivities = latestActivities.map(item => ({
+      id: item.id,
+      user: item.user.name,
+      lesson: item.lesson.title,
+      module: item.lesson.module.title,
+      course: item.lesson.module.course.title,
+      status: item.status,
+      score: item.score || 0,
+      updatedAt: item.updatedAt
+    }))
 
-      const completedModules = user.progress.filter(
+    const engagement = await prisma.user.findMany({
+      include: {
+        progress: {
+          include: {
+            lesson: {
+              include: {
+                module: {
+                  include: {
+                    course: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    const engagementData = engagement.map(user => {
+      const totalLessonsUser = user.progress.length
+
+      const completedLessons = user.progress.filter(
         p => p.status === 'COMPLETED'
       ).length
 
       const percentage =
-        totalModulesUser > 0
-          ? Math.round((completedModules / totalModulesUser) * 100)
+        totalLessonsUser > 0
+          ? Math.round((completedLessons / totalLessonsUser) * 100)
           : 0
 
       return {
          id: user.id,
         name: user.name,
         email: user.email,
-        completedModules,
-        totalModules: totalModulesUser,
+        completedLessons,
+        totalLessons: totalLessonsUser,
         percentage
       }
     })
@@ -219,6 +274,7 @@ export const getDashboardAnalytics = async (req, res) => {
           totalUsers,
           totalCourses,
           totalModules,
+          totalLessons,
           averageProgress
         },
         engagement: engagementData,

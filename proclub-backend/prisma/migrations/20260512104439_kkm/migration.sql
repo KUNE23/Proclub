@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE "Module" ADD COLUMN     "kkm" INTEGER NOT NULL DEFAULT 70;

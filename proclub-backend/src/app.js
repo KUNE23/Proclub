@@ -1,8 +1,6 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import 'dotenv/config';
 
 import authRoutes from './routes/authRoutes.js';
@@ -12,11 +10,7 @@ import moduleRoutes from './routes/modulesRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import categoryRoutes from './routes/categoryRoutes.js';
 import memberDashboardRoutes from './routes/memberDashboardROutes.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 const app = express();
 
@@ -32,30 +26,15 @@ app.use(cors({
 }));
 
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', dashboardRoutes);
-app.use('/api', categoryRoutes);
 app.use('/api', projectRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', moduleRoutes);
 app.use('/api', quizRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
-
-app.use((err, req, res, next) => {
-  if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({ status: 'fail', message: 'Image size must be 2MB or less' });
-  }
-
-  if (err.message && err.message.includes('Only jpeg, jpg, png, and webp image files are allowed')) {
-    return res.status(400).json({ status: 'fail', message: err.message });
-  }
-
-  console.error(err);
-  return res.status(500).json({ status: 'error', message: err.message || 'Server Error' });
-});
 
 app.listen(3000, () => {
   console.log('Server running on port 3000');

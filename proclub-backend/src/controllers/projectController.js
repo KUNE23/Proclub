@@ -3,11 +3,12 @@ import xss from 'xss'
 export const submitProject = async (req, res) => {
   try {
     const userId = req.user.id;
-    let { linkGithub, note, courseId, moduleId } = req.body;
+    let { linkGithub, note, courseId, moduleId, lessonId } = req.body;
     const cleanNote = xss(note);
 
     courseId = Number(courseId);
     moduleId = moduleId ? Number(moduleId) : null;
+    lessonId = lessonId ? Number(lessonId) : null;
 
     if (!linkGithub || !courseId) {
       return res.status(400).json({ message: 'linkGithub and courseId are required' });
@@ -23,13 +24,27 @@ export const submitProject = async (req, res) => {
       }
     }
 
+    if (lessonId) {
+      const lesson = await prisma.lesson.findUnique({
+        where: { id: lessonId },
+        include: { module: true }
+      });
+
+      if (!lesson || lesson.module.courseId !== courseId) {
+        return res.status(404).json({ message: 'Lesson not found in this course' });
+      }
+
+      moduleId = lesson.moduleId;
+    }
+
     const project = await prisma.project.create({
       data: {
         linkGithub,
         note: cleanNote,
         userId,
         courseId,
-        moduleId 
+        moduleId,
+        lessonId
       }
     });
 
@@ -61,7 +76,8 @@ export const getUserProjects = async (req, res) => {
           status: true,
           createdAt: true,
           course: { select: { id: true, title: true } },
-          module: { select: { id: true, title: true } }
+          module: { select: { id: true, title: true } },
+          lesson: { select: { id: true, title: true } }
         }
       }),
       prisma.project.count({ where: { userId } })

@@ -6,7 +6,7 @@ import {
   updateQuiz,
   deleteQuiz,
   submitQuiz,
-  getQuizByModule
+  getQuizByLesson
 } from '../controllers/quizController.js';
 
 const router = express.Router();
@@ -15,7 +15,7 @@ router.post('/quizzes', authMiddleware, roleMiddleware(['admin']), createQuiz);
 router.put('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), updateQuiz);
 router.delete('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), deleteQuiz);
 
-router.get('/modules/:moduleId/quizzes', authMiddleware, getQuizByModule);
-router.post('/modules/:id/submit', authMiddleware, submitQuiz);
+router.get('/lessons/:lessonId/quizzes', authMiddleware, getQuizByLesson);
+router.post('/lessons/:id/submit', authMiddleware, submitQuiz);
 
 export default router;

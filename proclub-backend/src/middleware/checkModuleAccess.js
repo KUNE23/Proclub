@@ -2,58 +2,64 @@ import prisma from '../config/prisma.js';
 
 export default async function checkModuleAccess(req, res, next) {
   try {
-    const { id, moduleId } = req.params;
+    const { id, lessonId } = req.params;
     const userId = req.user.id;
 
-    const targetId = id || moduleId;
+    const targetId = id || lessonId;
 
     if (!targetId || isNaN(Number(targetId))) {
-      return res.status(400).json({ message: 'ID Modul tidak valid atau hilang' });
+      return res.status(400).json({ message: 'ID Lesson tidak valid atau hilang' });
     }
 
-    const moduleData = await prisma.module.findUnique({
+    const lessonData = await prisma.lesson.findUnique({
       where: { id: Number(targetId) },
-      include: { course: true }
+      include: {
+        module: {
+          include: {
+            course: true
+          }
+        }
+      }
     });
 
-    if (!moduleData) {
-      return res.status(404).json({ message: 'Modul tidak ditemukan' });
+    if (!lessonData) {
+      return res.status(404).json({ message: 'Lesson tidak ditemukan' });
     }
 
     if (req.user.role === 'admin') {
       return next();
     }
 
-    const currentOrder = moduleData.order;
+    const currentOrder = lessonData.order;
 
     if (currentOrder === 1) {
       return next();
     }
 
-    const previousModule = await prisma.module.findFirst({
+    const previousLesson = await prisma.lesson.findFirst({
       where: {
-        courseId: moduleData.courseId,
+        moduleId: lessonData.moduleId,
         order: currentOrder - 1,
         isDeleted: false
       }
     });
 
-    if (!previousModule) {
+    if (!previousLesson) {
       return next();
     }
 
     const progress = await prisma.userProgress.findUnique({
       where: {
-        userId_moduleId: {
+        userId_lessonId: {
           userId: Number(userId),
-          moduleId: previousModule.id
+          lessonId: previousLesson.id
         }
       }
     });
 
     if (!progress || progress.status !== 'COMPLETED') {
       return res.status(403).json({
-        message: 'Kamu harus menyelesaikan modul sebelumnya terlebih dahulu.'
+        message: 'Kamu harus menyelesaikan lesson sebelumnya terlebih dahulu.'
       });
     }
 

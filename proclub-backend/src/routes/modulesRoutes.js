@@ -7,7 +7,11 @@ import {
   getModulesByCourse,
   updateModule,
   deleteModule,
-  getModuleDetail,
+  createLesson,
+  getLessonsByModule,
+  getLessonDetail,
+  updateLesson,
+  deleteLesson,
   updateProgress,
   getQuizResults
 } from '../controllers/moduleController.js';
@@ -20,10 +24,13 @@ router.delete('/modules/:id', authMiddleware, roleMiddleware(['admin']), deleteM
 
 router.get('/courses/:courseId/modules', getModulesByCourse);
 
-router.get('/courses/:courseId/modules/:id', authMiddleware, checkModuleAccess, getModuleDetail);
+router.post('/modules/:moduleId/lessons', authMiddleware, roleMiddleware(['admin']), createLesson);
+router.get('/modules/:moduleId/lessons', authMiddleware, getLessonsByModule);
+router.put('/lessons/:id', authMiddleware, roleMiddleware(['admin']), updateLesson);
+router.delete('/lessons/:id', authMiddleware, roleMiddleware(['admin']), deleteLesson);
 
-router.get('/modules/:id', authMiddleware, checkModuleAccess, getModuleDetail);
-router.post('/modules/:id/progress', authMiddleware, updateProgress);
+router.get('/lessons/:id', authMiddleware, checkModuleAccess, getLessonDetail);
+router.post('/lessons/:id/progress', authMiddleware, updateProgress);
 
 router.get(
   '/admin/quiz-results',

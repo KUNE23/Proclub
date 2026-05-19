@@ -26,36 +26,65 @@ model Course {
   id          Int       @id @default(autoincrement())
   title       String
   description String?
-  image       String?
-  categoryId  Int?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
-  category    Category? @relation(fields: [categoryId], references: [id])
   isDeleted   Boolean   @default(false)
   modules     Module[]
   projects    Project[]
 
   @@index([title])
-  @@index([categoryId])
 }
 
 model Module {
-  id        Int            @id @default(autoincrement())
-  title     String
-  kkm       Int            @default(70)
-  content   String?
-  type      ModuleType     @default(MATERIAL)
-  order     Int
-  courseId  Int
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
-  course    Course         @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  isDeleted Boolean        @default(false)
-  projects  Project[]
-  quizzes   Quiz[]
-  progress  UserProgress[]
+  id          Int       @id @default(autoincrement())
+  title       String
+  description String?
+  order       Int
+  courseId    Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  isDeleted   Boolean   @default(false)
+  lessons     Lesson[]
+  projects    Project[]
 
   @@index([courseId])
+}
+
+model Lesson {
+  id            Int            @id @default(autoincrement())
+  title         String
+  description   String?
+  content       String?
+  type          LessonType     @default(MATERIAL)
+  order         Int
+  kkm           Int            @default(70)
+  moduleId      Int
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  isDeleted     Boolean        @default(false)
+  module        Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  contentBlocks ContentBlock[]
+  quizzes       Quiz[]
+  progress      UserProgress[]
+  projects      Project[]
+
+  @@index([moduleId])
+}
+
+model ContentBlock {
+  id        Int              @id @default(autoincrement())
+  type      ContentBlockType @default(TEXT)
+  order     Int
+  title     String?
+  content   Json
+  lessonId  Int
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  lesson    Lesson           @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  isDeleted Boolean          @default(false)
+
+  @@index([lessonId])
 }
 
 model Quiz {
@@ -63,13 +92,13 @@ model Quiz {
   question      String
   options       Json
   correctAnswer String
-  moduleId      Int
+  lessonId      Int
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  module        Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-  isDeleted   Boolean   @default(false)
+  lesson        Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  isDeleted     Boolean  @default(false)
 
-  @@index([moduleId])
+  @@index([lessonId])
 }
 
 model UserProgress {
@@ -78,13 +107,13 @@ model UserProgress {
   score     Float?
   answers   Json?
   userId    Int
-  moduleId  Int
+  lessonId  Int
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
-  module    Module         @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lesson    Lesson         @relation(fields: [lessonId], references: [id], onDelete: Cascade)
   user      User           @relation(fields: [userId], references: [id])
 
-  @@unique([userId, moduleId])
+  @@unique([userId, lessonId])
   @@index([userId])
 }
 
@@ -96,26 +125,17 @@ model Project {
   userId     Int
   courseId   Int
   moduleId   Int?
+  lessonId   Int?
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
   course     Course        @relation(fields: [courseId], references: [id])
   module     Module?       @relation(fields: [moduleId], references: [id])
+  lesson     Lesson?       @relation(fields: [lessonId], references: [id])
   user       User          @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([courseId])
   @@index([status])
-}
-
-model Category {
-  id        Int      @id @default(autoincrement())
-  cat_name  String
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  courses   Course[]
-
-  @@index([cat_name])
 }
 
 enum Role {
@@ -137,7 +157,16 @@ enum ProjectStatus {
   rejected
 }
 
-enum ModuleType {
+enum LessonType {
   MATERIAL
   QUIZ
+}
+
+enum ContentBlockType {
+  TEXT
+  VIDEO
+  IMAGE
+  CODE
+  CALLOUT
+  RESOURCE
 }

@@ -77,9 +77,9 @@ export const getUsers = async (req, res) => {
         id: true,
         name: true,
         email: true,
-        role: true,
+        role: true,   
         createdAt: true,
-        updatedAt: true
+        updatedAt: true     
       },
       orderBy: { createdAt: 'desc' }
     });
@@ -287,9 +287,13 @@ export const getAllUserProgress = async (req, res) => {
       include: {
         progress: {
           include: {
-            module: {
+            lesson: {
               include: {
-                course: true
+                module: {
+                  include: {
+                    course: true
+                  }
+                }
               }
             }
           }
@@ -316,46 +320,55 @@ export const getAllUserProgress = async (req, res) => {
             modules: {
               where: {
                 isDeleted: false
+              },
+              include: {
+                lessons: {
+                  where: {
+                    isDeleted: false
+                  }
+                }
               }
             }
           }
         })
 
         const progressByCourse = courses.map((course) => {
-          const totalModules = course.modules.length
+          const lessons = course.modules.flatMap((module) => module.lessons)
+          const totalLessons = lessons.length
 
-          const completedModules = course.modules.filter((module) =>
+          const completedLessons = lessons.filter((lesson) =>
             user.progress.some(
               (p) =>
-                p.moduleId === module.id &&
+                p.lessonId === lesson.id &&
                 p.status === 'COMPLETED'
             )
           ).length
 
           const percentage =
-            totalModules > 0
+            totalLessons > 0
               ? Math.round(
-                  (completedModules / totalModules) * 100
+                  (completedLessons / totalLessons) * 100
                 )
               : 0
 
           return {
             id: course.id,
             title: course.title,
-            totalModules,
-            completedModules,
+            totalModules: course.modules.length,
+            totalLessons,
+            completedLessons,
             percentage,
             isCompleted: percentage === 100
           }
         })
 
-        const totalModulesAll = progressByCourse.reduce(
-          (acc, item) => acc + item.totalModules,
+        const totalLessonsAll = progressByCourse.reduce(
+          (acc, item) => acc + item.totalLessons,
           0
         )
 
-        const completedModulesAll = progressByCourse.reduce(
-          (acc, item) => acc + item.completedModules,
+        const completedLessonsAll = progressByCourse.reduce(
+          (acc, item) => acc + item.completedLessons,
           0
         )
 
@@ -364,9 +377,9 @@ export const getAllUserProgress = async (req, res) => {
         ).length
 
         const overallPercentage =
-          totalModulesAll > 0
+          totalLessonsAll > 0
             ? Math.round(
-                (completedModulesAll / totalModulesAll) * 100
+                (completedLessonsAll / totalLessonsAll) * 100
               )
             : 0
 
@@ -375,8 +388,8 @@ export const getAllUserProgress = async (req, res) => {
           name: user.name,
           email: user.email,
           totalCoursesCompleted,
-          completedModulesAll,
-          totalModulesAll,
+          completedLessonsAll,
+          totalLessonsAll,
           overallPercentage,
           courses: progressByCourse
         }
@@ -405,19 +418,16 @@ export const getMyProgress = async (req, res) => {
   try {
     const userId = req.user.id
 
-    const courses = await prisma.course.findMany({
+    const progress = await prisma.userProgress.findMany({
       where: {
-        isDeleted: false
+        userId
       },
       include: {
-        modules: {
-          where: {
-            isDeleted: false
-          },
+        lesson: {
           include: {
-            progress: {
-              where: {
-                userId: Number(userId)
+            module: {
+              include: {
+                course: true
               }
             }
           }
@@ -425,40 +435,68 @@ export const getMyProgress = async (req, res) => {
       }
     })
 
-    const formatted = courses
-      .map(course => {
-        const totalModules = course.modules.length
-
-        const completedModules = course.modules.filter(module =>
-          module.progress.some(
-            progress => progress.status === 'COMPLETED'
-          )
-        ).length
-
-        const percentage =
-          totalModules > 0
-            ? Math.round((completedModules / totalModules) * 100)
-            : 0
-
-        return {
-          id: course.id,
-          title: course.title,
-          image: course.image,
-          totalModules,
-          completedModules,
-          percentage
-        }
-      })
-      .filter(course => course.completedModules > 0 || course.percentage > 0)
-
-    return res.status(200).json({
+    return res.json({
       status: 'success',
-      data: formatted
+      data: progress
     })
+
   } catch (error) {
     return res.status(500).json({
-      status: 'error',
-      message: error.message
+      error: error.message
+    })
+  }
+}
+
+export const completeLesson = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const lessonId = Number(req.params.lessonId)
+
+    const progress = await prisma.userProgress.findUnique({
+      where: {
+        userId_lessonId: {
+          userId,
+          lessonId
+        }
+      },
+      include: {
+        lesson: true
+      }
+    })
+
+    if (!progress) {
+      return res.status(404).json({
+        message: 'Progress tidak ditemukan'
+      })
+    }
+
+    await prisma.userProgress.update({
+      where: {
+        id: progress.id
+      },
+      data: {
+        status: 'COMPLETED',
+        score: 100
+      }
+    })
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId
+      }
+    })
+
+   
+    return res.json({
+      status: 'success',
+    
+    })
+
+  } catch (error) {
+    console.error(error)
+
+    return res.status(500).json({
+      error: error.message
     })
   }
 }

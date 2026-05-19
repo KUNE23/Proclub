@@ -2,20 +2,20 @@ import prisma from '../config/prisma.js';
 
 export const createQuiz = async (req, res) => {
   try {
-    const { question, options, correctAnswer, moduleId } = req.body
+    const { question, options, correctAnswer, lessonId } = req.body
 
-    if (!question || !options || !correctAnswer || !moduleId) {
+    if (!question || !options || !correctAnswer || !lessonId) {
       return res.status(400).json({ 
-        message: 'Semua field (question, options, correctAnswer, moduleId) wajib diisi!' 
+        message: 'Semua field (question, options, correctAnswer, lessonId) wajib diisi!' 
       })
     }
 
-    const moduleExist = await prisma.module.findUnique({
-      where: { id: Number(moduleId) }
+    const lessonExist = await prisma.lesson.findUnique({
+      where: { id: Number(lessonId) }
     })
 
-    if (!moduleExist) {
-      return res.status(404).json({ message: 'Modul tidak ditemukan, tidak bisa membuat kuis.' })
+    if (!lessonExist) {
+      return res.status(404).json({ message: 'Lesson tidak ditemukan, tidak bisa membuat kuis.' })
     }
 
     const quiz = await prisma.quiz.create({
@@ -23,7 +23,7 @@ export const createQuiz = async (req, res) => {
         question,
         options,
         correctAnswer,
-        moduleId: Number(moduleId)
+        lessonId: Number(lessonId)
       }
     })
 
@@ -92,7 +92,7 @@ export const submitQuiz = async (req, res) => {
       return res.status(400).json({ message: 'Format jawaban tidak valid (harus array)' });
     }
 
-    const moduleData = await prisma.module.findUnique({
+    const lessonData = await prisma.lesson.findUnique({
       where: {
         id: parseInt(id)
       },
@@ -101,14 +101,14 @@ export const submitQuiz = async (req, res) => {
       }
     });
 
-    if (!moduleData) {
-      return res.status(404).json({ message: 'Modul tidak ditemukan' });
+    if (!lessonData) {
+      return res.status(404).json({ message: 'Lesson tidak ditemukan' });
     }
 
     let correctAnswersCount = 0;
-    const totalQuestions = moduleData.quizzes.length;
+    const totalQuestions = lessonData.quizzes.length;
 
-    moduleData.quizzes.forEach((quiz) => {
+    lessonData.quizzes.forEach((quiz) => {
       const userAnswer = answers.find((a) => a.quizId === quiz.id);
       if (userAnswer && String(userAnswer.answer).trim() === String(quiz.correctAnswer).trim()) {
         correctAnswersCount++;
@@ -116,13 +116,13 @@ export const submitQuiz = async (req, res) => {
     });
 
     const score = Math.round((correctAnswersCount / (totalQuestions || 1)) * 100);
-    const isPassed = score >= 70;
+    const isPassed = score >= lessonData.kkm;
 
     await prisma.userProgress.upsert({
       where: {
-        userId_moduleId: {
+        userId_lessonId: {
           userId: parseInt(userId),
-          moduleId: parseInt(id),
+          lessonId: parseInt(id),
         },
       },
       update: {
@@ -132,7 +132,7 @@ export const submitQuiz = async (req, res) => {
       },
       create: {
         userId: parseInt(userId),
-        moduleId: parseInt(id),
+        lessonId: parseInt(id),
         status: isPassed ? 'COMPLETED' : 'IN_PROGRESS',
         score: score,
         answers: answers,
@@ -155,11 +155,11 @@ export const submitQuiz = async (req, res) => {
   }
 };
 
-export const getQuizByModule = async (req, res) => {
+export const getQuizByLesson = async (req, res) => {
   try {
-    const { moduleId } = req.params
+    const { lessonId } = req.params
     const quizzes = await prisma.quiz.findMany({
-      where: { moduleId: parseInt(moduleId), isDeleted: false }
+      where: { lessonId: parseInt(lessonId), isDeleted: false }
     });
     return res.status(200).json({ status: 'success', data: quizzes || [] })
   } catch (error) {

@@ -25,6 +25,10 @@ const submitProjectSchema = z.object({
     z.number()
     .optional(),
 
+    lessonId:
+    z.number()
+    .optional(),
+
   });
 
 export { submitProjectSchema };

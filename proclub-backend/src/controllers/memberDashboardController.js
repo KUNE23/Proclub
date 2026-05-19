@@ -15,25 +15,33 @@ export const getMemberDashboard = async (req, res) => {
         isDeleted: false
       },
       include: {
-        modules: true
+        modules: {
+          where: {
+            isDeleted: false
+          },
+          include: {
+            lessons: {
+              where: {
+                isDeleted: false
+              }
+            }
+          }
+        }
       }
     })
-
-    const formattedCourses = courses.map(course => ({
-      ...course,
-      image: course.image
-        ? `${BASE_URL}/${course.image}`
-        : null
-    }))
 
     const progress = await prisma.userProgress.findMany({
       where: {
         userId
       },
       include: {
-        module: {
+        lesson: {
           include: {
-            course: true
+            module: {
+              include: {
+                course: true
+              }
+            }
           }
         }
       }
@@ -41,7 +49,7 @@ export const getMemberDashboard = async (req, res) => {
     const courseProgressMap = {}
 
     progress.forEach(item => {
-      const course = item.module.course
+      const course = item.lesson.module.course
 
       if (!courseProgressMap[course.id]) {
         courseProgressMap[course.id] = {
@@ -49,21 +57,17 @@ export const getMemberDashboard = async (req, res) => {
           title: course.title,
           description: course.description,
 
-          image: course.image
-            ? `${BASE_URL}/${course.image}`
-            : null,
-
-          totalModules: 0,
-          completedModules: 0,
+          totalLessons: 0,
+          completedLessons: 0,
           totalScore: 0,
           scoreCount: 0
         }
       }
 
-      courseProgressMap[course.id].totalModules++
+      courseProgressMap[course.id].totalLessons++
 
       if (item.status === 'COMPLETED') {
-        courseProgressMap[course.id].completedModules++
+        courseProgressMap[course.id].completedLessons++
       }
 
       if (item.score) {
@@ -74,9 +78,9 @@ export const getMemberDashboard = async (req, res) => {
 
     const coursesProgress = Object.values(courseProgressMap).map(course => {
       const percentage =
-        course.totalModules > 0
+        course.totalLessons > 0
           ? Math.round(
-              (course.completedModules / course.totalModules) * 100
+              (course.completedLessons / course.totalLessons) * 100
             )
           : 0
 
@@ -97,7 +101,7 @@ export const getMemberDashboard = async (req, res) => {
 
     const totalCoursesInProgress = coursesProgress.length
 
-    const totalCompletedModules = progress.filter(
+    const totalCompletedLessons = progress.filter(
       p => p.status === 'COMPLETED'
     ).length
 
@@ -109,7 +113,7 @@ export const getMemberDashboard = async (req, res) => {
           )
         : 0
         
-    const recommendedCourses = formattedCourses.slice(0, 3)
+
 
     return res.status(200).json({
       status: 'success',
@@ -120,11 +124,10 @@ export const getMemberDashboard = async (req, res) => {
 
         statistics: {
           totalCoursesInProgress,
-          totalCompletedModules,
+          totalCompletedLessons,
           avgQuizScore
         },
 
-        recommendedCourses
       }
     })
   } catch (error) {

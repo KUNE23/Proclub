@@ -22,8 +22,8 @@ router.post(
   validate(createCourseSchema),
   createCourse
 )
-router.get('/courses', getCourses)
-router.get('/courses/:id', getCourseById)
+router.get('/courses', authMiddleware, getCourses)
+router.get('/courses/:id', authMiddleware, getCourseById)
 router.put(
   '/courses/:id',
   authMiddleware,

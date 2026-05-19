@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password} = req.body
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -107,3 +107,22 @@ export const logout = async (req, res) => {
   }
 }
 
+export const getMe = async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: req.user.id
+      },
+      select: {
+        id: true,
+        name: true
+      }
+    })
+
+    return res.json(user)
+  } catch (error) {
+    return res.status(500).json({
+      error: error.message
+    })
+  }
+}
