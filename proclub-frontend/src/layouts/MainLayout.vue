@@ -3,6 +3,11 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import api from '../api/index.js'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
+import {
+  getNotifications,
+  markAllNotificationsAsRead,
+  markNotificationAsRead
+} from '../services/notificationService.js'
 import { 
   LayoutDashboard, 
   BookOpen, 
@@ -11,7 +16,11 @@ import {
   LogOut, 
   Menu, 
   X, 
-  Bell 
+  Bell,
+  CheckCircle2,
+  Circle,
+  Inbox,
+  Loader2
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -22,15 +31,34 @@ const isLoggingOut = ref(false)
 const userName = ref('');
 const userRole = ref('');
 const showProfileMenu = ref(false)
+const showNotificationMenu = ref(false)
+const notifications = ref([])
+const unreadCount = ref(0)
+const isLoadingNotifications = ref(false)
 const profileRef = ref(null)
+const notificationRef = ref(null)
 
 const toggleProfileMenu = () => {
   showProfileMenu.value = !showProfileMenu.value
+  showNotificationMenu.value = false
+}
+
+const toggleNotificationMenu = async () => {
+  showNotificationMenu.value = !showNotificationMenu.value
+  showProfileMenu.value = false
+
+  if (showNotificationMenu.value) {
+    await fetchNotifications()
+  }
 }
 
 const handleClickOutside = (e) => {
   if (profileRef.value && !profileRef.value.contains(e.target)) {
     showProfileMenu.value = false
+  }
+
+  if (notificationRef.value && !notificationRef.value.contains(e.target)) {
+    showNotificationMenu.value = false
   }
 }
 
@@ -54,6 +82,69 @@ const handleLogout = async () => {
   isLoggingOut.value = false
     router.push('/login')
   }
+}
+
+const fetchNotifications = async () => {
+  isLoadingNotifications.value = true
+
+  try {
+    const response = await getNotifications({ limit: 10 })
+    notifications.value = Array.isArray(response.data?.data) ? response.data.data : []
+    unreadCount.value = response.data?.unreadCount || 0
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memuat notifikasi')
+  } finally {
+    isLoadingNotifications.value = false
+  }
+}
+
+const readNotification = async (notification) => {
+  try {
+    if (!notification.isRead) {
+      await markNotificationAsRead(notification.id)
+      notification.isRead = true
+      unreadCount.value = Math.max(unreadCount.value - 1, 0)
+    }
+
+    showNotificationMenu.value = false
+
+    if (notification.link) {
+      router.push(notification.link)
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal membuka notifikasi')
+  }
+}
+
+const readAllNotifications = async () => {
+  if (!unreadCount.value) return
+
+  try {
+    await markAllNotificationsAsRead()
+    notifications.value = notifications.value.map((item) => ({
+      ...item,
+      isRead: true
+    }))
+    unreadCount.value = 0
+    toast.success('Semua notifikasi ditandai sudah dibaca')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memperbarui notifikasi')
+  }
+}
+
+const notificationIcon = (type) => {
+  return type === 'MODULE_COMPLETED' ? CheckCircle2 : Bell
+}
+
+const formatNotificationDate = (date) => {
+  if (!date) return ''
+
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(date))
 }
 
 const loadFromStorage = () => {
@@ -96,11 +187,14 @@ const toggleSidebar = () => {
 onMounted(() => {
   loadFromStorage();
   fetchUserProfile();
+  fetchNotifications();
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('notification:refresh', fetchNotifications)
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('notification:refresh', fetchNotifications)
 })
 </script>
 
@@ -197,10 +291,88 @@ onUnmounted(() => {
         </div>
 
         <div class="flex items-center gap-4">
-          <button class="p-2 text-gray-400 hover:text-[#2C7047] relative">
-            <Bell class="w-5 h-5" />
-            <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-          </button>
+          <div class="relative" ref="notificationRef">
+            <button
+              @click="toggleNotificationMenu"
+              aria-label="Buka notifikasi"
+              class="relative rounded-xl p-2 text-gray-400 transition-colors hover:bg-gray-50 hover:text-[#2C7047]"
+              type="button"
+            >
+              <Bell class="w-5 h-5" />
+              <span
+                v-if="unreadCount > 0"
+                class="absolute -right-0.5 -top-0.5 flex min-h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white ring-2 ring-white"
+              >
+                {{ unreadCount > 9 ? '9+' : unreadCount }}
+              </span>
+            </button>
+
+            <Transition
+              enter-active-class="transition-all duration-200 ease-out"
+              enter-from-class="opacity-0 translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition-all duration-150 ease-in"
+              leave-from-class="opacity-100 translate-y-0"
+              leave-to-class="opacity-0 translate-y-2"
+            >
+              <div
+                v-if="showNotificationMenu"
+                class="absolute right-0 mt-3 w-[340px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl z-50"
+              >
+                <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                  <div>
+                    <p class="text-sm font-bold text-[#1A2E20]">Notifikasi</p>
+                    <p class="text-[11px] text-gray-400">{{ unreadCount }} belum dibaca</p>
+                  </div>
+                  <button
+                    @click="readAllNotifications"
+                    :disabled="!unreadCount"
+                    class="text-[11px] font-bold text-[#2C7047] transition-colors hover:text-[#235838] disabled:text-gray-300"
+                    type="button"
+                  >
+                    Tandai semua
+                  </button>
+                </div>
+
+                <div v-if="isLoadingNotifications" class="flex items-center justify-center py-10 text-gray-400">
+                  <Loader2 class="h-5 w-5 animate-spin" />
+                </div>
+
+                <div v-else-if="notifications.length === 0" class="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+                  <Inbox class="h-8 w-8 text-gray-300" />
+                  <p class="text-sm font-semibold text-gray-500">Belum ada notifikasi</p>
+                  <p class="text-xs leading-relaxed text-gray-400">Kabar module baru dan pencapaian belajar akan muncul di sini.</p>
+                </div>
+
+                <div v-else class="max-h-[420px] overflow-y-auto p-2">
+                  <button
+                    v-for="notification in notifications"
+                    :key="notification.id"
+                    @click="readNotification(notification)"
+                    class="flex w-full gap-3 rounded-xl p-3 text-left transition-colors hover:bg-gray-50"
+                    type="button"
+                  >
+                    <div
+                      class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                      :class="notification.type === 'MODULE_COMPLETED' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'"
+                    >
+                      <component :is="notificationIcon(notification.type)" class="h-4 w-4" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex items-start justify-between gap-2">
+                        <p class="line-clamp-1 text-[13px] font-bold text-[#1A2E20]">{{ notification.title }}</p>
+                        <Circle v-if="!notification.isRead" class="mt-1 h-2.5 w-2.5 shrink-0 fill-red-500 text-red-500" />
+                      </div>
+                      <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{{ notification.message }}</p>
+                      <p class="mt-2 text-[10px] font-semibold uppercase tracking-wider text-gray-300">
+                        {{ formatNotificationDate(notification.createdAt) }}
+                      </p>
+                    </div>
+                  </button>
+                </div>
+              </div>
+            </Transition>
+          </div>
           <div class="h-8 w-[1px] bg-gray-200 mx-1"></div>
           <div class="relative pl-2" ref="profileRef">
             <button 

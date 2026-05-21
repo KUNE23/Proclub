@@ -11,6 +11,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import memberDashboardRoutes from './routes/memberDashboardROutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 
 const app = express();
 
@@ -21,7 +22,7 @@ app.use(helmet({
 app.use(cors({
   origin: 'http://localhost:5173',
   allowedHeaders: ['Content-Type', 'Authorization'], 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true
 }));
 
@@ -33,6 +34,7 @@ app.use('/api', projectRoutes);
 app.use('/api', courseRoutes);
 app.use('/api', moduleRoutes);
 app.use('/api', quizRoutes);
+app.use('/api', notificationRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 

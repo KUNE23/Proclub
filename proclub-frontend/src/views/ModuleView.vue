@@ -426,7 +426,8 @@ const handleComplete = async () => {
   try {
     const response = await api.post(`/lessons/${activeLesson.value.id}/progress`)
     lessonProgress.value[activeLesson.value.id] = response.data.progress
-    toast.success('Lesson berhasil diselesaikan')
+    toast.success(response.data.moduleCompleted ? 'Selamat, module berhasil diselesaikan' : 'Lesson berhasil diselesaikan')
+    window.dispatchEvent(new CustomEvent('notification:refresh'))
     goToNextLesson()
   } catch (error) {
     toast.error(error.response?.data?.message || 'Gagal menyimpan progress lesson')
@@ -448,7 +449,8 @@ const handleQuizCompleted = async (data) => {
       status: 'COMPLETED',
       score: data.score
     }
-    toast.success('Quiz berhasil diselesaikan')
+    toast.success(data.moduleCompleted ? 'Selamat, module berhasil diselesaikan' : 'Quiz berhasil diselesaikan')
+    window.dispatchEvent(new CustomEvent('notification:refresh'))
   } else {
     toast.warning('Skor kamu belum mencapai KKM')
   }

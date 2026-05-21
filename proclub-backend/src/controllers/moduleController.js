@@ -60,6 +60,23 @@ export const createModule = async (req, res) => {
       }
     });
 
+    const members = await prisma.user.findMany({
+      where: { role: 'member' },
+      select: { id: true }
+    });
+
+    if (members.length > 0) {
+      await prisma.notification.createMany({
+        data: members.map((member) => ({
+          userId: member.id,
+          title: 'Module baru tersedia',
+          message: `Module "${moduleItem.title}" sudah ditambahkan di learning path "${course.title}".`,
+          type: 'MODULE_CREATED',
+          link: `/courses/${courseId}`
+        }))
+      });
+    }
+
     return res.status(201).json({ message: 'Module created', module: moduleItem });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -411,6 +428,15 @@ export const updateProgress = async (req, res) => {
       return res.status(400).json({ message: 'Invalid lesson ID' });
     }
 
+    const existingProgress = await prisma.userProgress.findUnique({
+      where: {
+        userId_lessonId: {
+          userId: Number(userId),
+          lessonId
+        }
+      }
+    });
+
     const progress = await prisma.userProgress.upsert({
       where: {
         userId_lessonId: {
@@ -435,15 +461,51 @@ export const updateProgress = async (req, res) => {
         id: lessonId
       },
       include: {
-        module: true
+        module: {
+          include: {
+            course: true,
+            lessons: {
+              where: { isDeleted: false },
+              select: { id: true }
+            }
+          }
+        }
       }
     });
+
+    let moduleCompleted = false;
+
+    if (currentLesson?.module && existingProgress?.status !== 'COMPLETED') {
+      const lessonIds = currentLesson.module.lessons.map((lesson) => lesson.id);
+      const completedLessons = await prisma.userProgress.count({
+        where: {
+          userId: Number(userId),
+          lessonId: { in: lessonIds },
+          status: 'COMPLETED'
+        }
+      });
+
+      moduleCompleted = lessonIds.length > 0 && completedLessons === lessonIds.length;
+
+      if (moduleCompleted) {
+        await prisma.notification.create({
+          data: {
+            userId: Number(userId),
+            title: 'Selamat, module selesai',
+            message: `Kamu berhasil menyelesaikan module "${currentLesson.module.title}" di learning path "${currentLesson.module.course.title}".`,
+            type: 'MODULE_COMPLETED',
+            link: `/courses/${currentLesson.module.courseId}`
+          }
+        });
+      }
+    }
 
     return res.status(200).json({
       status: 'success',
       progress,
       completedCourseId: currentLesson?.module.courseId,
-      completedModuleId: currentLesson?.moduleId
+      completedModuleId: currentLesson?.moduleId,
+      moduleCompleted
     });
   } catch (error) {
     console.error(error);
@@ -528,4 +590,3 @@ export const getQuizResults = async (req, res) => {
     });
   }
 };
-
