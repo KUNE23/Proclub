@@ -5,8 +5,8 @@
         <h1 class="text-[32px] font-black text-slate-900 tracking-tight">Quiz Management</h1>
         <p class="text-slate-500 mt-1 text-[15px] font-medium">Create, manage, and track quiz performance across all courses.</p>
       </div>
-      <button 
-        @click="showDrawer = true"
+      <button
+        @click="showCreateNotice"
         class="bg-[#10B981] hover:bg-[#059669] text-white px-6 py-2.5 rounded-xl font-bold text-[14px] transition-all flex items-center gap-2 shadow-lg shadow-[#10B981]/20 active:scale-95"
       >
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
@@ -277,9 +277,13 @@
 </template>
 
 <script setup>
-import { reactive, ref } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
+import { Award, CheckCircle, FileText, Users } from 'lucide-vue-next'
+import { useToast } from 'vue-toastification'
+import api from '../../api/index.js'
 
 const showDrawer = ref(false)
+const toast = useToast()
 const form = reactive({
   title: '',
   description: '',
@@ -290,61 +294,93 @@ const form = reactive({
   maxAttempts: 1
 })
 
-const stats = reactive([
+const stats = computed(() => [
   { 
     label: 'Total Quizzes', 
-    value: '24', 
-    icon: 'FileText', 
+    value: quizzes.value.length,
+    icon: FileText,
     iconColor: 'text-emerald-500', 
     bgColor: 'bg-emerald-50',
     sparkline: 'M0 25 L10 22 L20 28 L30 18 L40 22 L50 12 L60 15 L70 5 L80 12 L90 8 L100 15'
   },
   { 
     label: 'Active Participants', 
-    value: '1,842', 
-    icon: 'Users', 
+    value: quizResults.value.length,
+    icon: Users,
     iconColor: 'text-blue-500', 
     bgColor: 'bg-blue-50',
     sparkline: 'M0 28 L10 25 L20 20 L30 22 L40 18 L50 22 L60 25 L70 20 L80 15 L90 10 L100 5'
   },
   { 
     label: 'Avg Completion Rate', 
-    value: '84.2%', 
-    icon: 'CheckCircle', 
+    value: completionRate.value + '%',
+    icon: CheckCircle,
     iconColor: 'text-amber-500', 
     bgColor: 'bg-amber-50',
     sparkline: 'M0 15 L10 18 L20 12 L30 15 L40 10 L50 8 L60 12 L70 15 L80 20 L90 25 L100 28'
   },
   { 
     label: 'Average Score', 
-    value: '78.5', 
-    icon: 'Award', 
+    value: averageScore.value,
+    icon: Award,
     iconColor: 'text-purple-500', 
     bgColor: 'bg-purple-50',
     sparkline: 'M0 20 L10 15 L20 18 L30 12 L40 15 L50 10 L60 8 L70 5 L80 10 L90 12 L100 8'
   }
 ])
 
-const quizzes = ref([
-  { id: 1, title: 'Introduction to Plant Biology', module: 'Botany Fundamentals', questions: 15, passGrade: 70, duration: '20m', status: 'Active' },
-  { id: 2, title: 'Cellular Respiration & ATP', module: 'Cell Biology', questions: 12, passGrade: 75, duration: '15m', status: 'Active' },
-  { id: 3, title: 'Genetic Inheritance Patterns', module: 'Genetics', questions: 20, passGrade: 65, duration: '30m', status: 'Draft' },
-  { id: 4, title: 'Photosynthesis Deep Dive', module: 'Plant Physiology', questions: 10, passGrade: 80, duration: '15m', status: 'Active' },
-  { id: 5, title: 'Ecosystem Dynamics', module: 'Ecology', questions: 18, passGrade: 70, duration: '25m', status: 'Active' },
-])
+const quizzes = ref([])
+const quizResults = ref([])
 
-const FileText = {
-  template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`
+const averageScore = computed(() => {
+  if (!quizResults.value.length) return 0
+
+  return Math.round(
+    quizResults.value.reduce((acc, item) => acc + (item.score || 0), 0) / quizResults.value.length
+  )
+})
+
+const completionRate = computed(() => {
+  if (!quizzes.value.length) return 0
+
+  const completedQuizIds = new Set(quizResults.value.map(item => item.lesson?.id).filter(Boolean))
+  return Math.round((completedQuizIds.size / quizzes.value.length) * 100)
+})
+
+const fetchQuizzes = async () => {
+  try {
+    const [coursesRes, resultsRes] = await Promise.all([
+      api.get('/courses'),
+      api.get('/admin/quiz-results')
+    ])
+
+    quizResults.value = resultsRes.data?.data || []
+
+    quizzes.value = (coursesRes.data?.data || []).flatMap(course =>
+      (course.modules || []).flatMap(module =>
+        (module.lessons || [])
+          .filter(lesson => lesson.type === 'QUIZ')
+          .map(lesson => ({
+            id: lesson.id,
+            title: lesson.title,
+            module: module.title,
+            questions: lesson.quizzes?.length || 0,
+            passGrade: lesson.kkm || 70,
+            duration: '-',
+            status: 'Active'
+          }))
+      )
+    )
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memuat data quiz')
+  }
 }
-const Users = {
-  template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>`
+
+const showCreateNotice = () => {
+  toast.info('Pembuatan quiz akan tersedia setelah form lesson selesai dibuat')
 }
-const CheckCircle = {
-  template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>`
-}
-const Award = {
-  template: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>`
-}
+
+onMounted(fetchQuizzes)
 </script>
 
 <style scoped>
@@ -362,4 +398,3 @@ const Award = {
   background: #CBD5E1;
 }
 </style>
-

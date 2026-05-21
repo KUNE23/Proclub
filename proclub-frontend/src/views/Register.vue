@@ -27,7 +27,7 @@
       
       <form @submit.prevent="handleRegister" class="space-y-6">
         <div>
-          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Name</label>
+          <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2 ml-1">Nama Lengkap</label>
           <input 
             v-model="name"
             type="text" 
@@ -43,7 +43,7 @@
             v-model="email"
             type="email" 
             class="block w-full border border-gray-200 rounded-2xl shadow-sm p-4 focus:ring-2 focus:ring-[#2C7047]/20 focus:border-[#2C7047] transition-all bg-gray-50/50 focus:bg-white text-gray-900 outline-none" 
-            placeholder="name@example.com" 
+            placeholder="name@student.sttcipasung.ac.id" 
             required 
           />
         </div>

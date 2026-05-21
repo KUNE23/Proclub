@@ -1,258 +1,439 @@
 <template>
-  <div class="flex bg-[#FAFCFB] font-sans antialiased text-gray-800">
+  <div class="min-h-screen bg-[#FAFCFB] p-4 md:p-6 font-sans text-slate-900">
+    <div class="mx-auto max-w-full lg:max-w-[1400px]">
+      <header class="mb-10 flex flex-wrap items-start justify-between gap-6 px-2">
+        <div class="space-y-3">
+          <div class="flex items-center gap-2 text-[11px] font-bold tracking-widest">
+            <span class="h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)]"></span>
+            <span class="text-emerald-600 uppercase">Ruang Belajar</span>
+          </div>
 
-    <div class="flex-1 flex flex-col">
+          <div>
+            <h1 class="text-2xl font-black tracking-tight text-slate-900">
+              Alur Belajar Kamu
+            </h1>
 
-      <div class="flex-1">
-
-        <div v-if="isLoading" class="animate-pulse p-8 lg:p-12 max-w-7xl mx-auto space-y-8">
-          <div class="h-72 bg-gray-200 rounded-3xl"></div>
-          <div class="flex gap-8">
-            <div class="flex-1 space-y-4">
-              <div class="h-8 bg-gray-200 rounded w-1/3"></div>
-              <div class="h-32 bg-gray-200 rounded-2xl"></div>
-              <div class="h-32 bg-gray-200 rounded-2xl"></div>
-              <div class="h-32 bg-gray-200 rounded-2xl"></div>
-            </div>
-            <div class="w-72 space-y-4">
-              <div class="h-64 bg-gray-200 rounded-2xl"></div>
-              <div class="h-48 bg-gray-200 rounded-2xl"></div>
-            </div>
+            <p class="mt-1 text-sm text-slate-500">
+              Profil Mahasiswa:
+              <span class="font-bold text-emerald-700">
+                {{ profile.name }}
+              </span>
+            </p>
           </div>
         </div>
+      </header>
 
-        <div v-if="fetchError && !isLoading" class="mx-auto px-5 md:px-0 py-5">
-          <div class="flex items-center gap-3 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm mb-4">
-            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>Gagal memuat detail kursus. <button @click="fetchCourseDetail" class="underline font-medium">Coba lagi</button></span>
-          </div>
-        </div>
+      <div
+        v-if="loading"
+        class="flex min-h-[400px] flex-col items-center justify-center"
+      >
+        <div class="h-10 w-10 animate-spin rounded-full border-4 border-slate-100 border-t-emerald-600"></div>
+      </div>
 
-        <div v-else-if="!isLoading" class="mx-auto px-5 md:px-0 py-5">
+      <div v-else class="relative px-2">
+        <div class="absolute left-1/2 top-0 hidden h-full w-px -translate-x-1/2 bg-gradient-to-b from-slate-200 via-slate-200 to-transparent md:block"></div>
 
-          <div class="mb-6 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <h2 class="text-3xl lg:text-4xl font-black text-[#1A2E20] leading-tight">Materi & Modul Pembelajaran</h2>
-              <p class="text-gray-500 text-sm mt-3 max-w-xl leading-relaxed">
-                Pelajari setiap modul yang telah disusun secara terstruktur untuk membantu kamu menguasai materi dari dasar hingga lanjutan.
-              </p>
+        <div class="absolute left-6 top-0 block h-full w-px bg-slate-200 md:hidden"></div>
+
+        <div class="space-y-10 relative">
+          <div
+            v-for="(module, index) in sortedModules"
+            :key="module.id"
+            class="relative flex w-full items-center justify-center md:justify-between"
+            :class="index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'"
+          >
+            <div class="absolute left-6 top-1/2 z-10 flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded-full bg-white ring-2 ring-slate-200 md:left-1/2 md:-translate-x-1/2">
+              <div
+                class="h-2 w-2 rounded-full transition-all duration-500"
+                :class="[
+                  isLocked(module, index)
+                    ? 'bg-slate-200'
+                    : isCompleted(module)
+                      ? 'bg-emerald-500'
+                      : 'bg-emerald-600 scale-150 shadow-[0_0_12px_rgba(5,150,105,0.4)]'
+                ]"
+              ></div>
             </div>
-          </div>
 
-          <div class="mx-auto p-4 lg:px-12 lg:py-10 py-5">
-            <div class="flex flex-col lg:flex-row gap-8">
+            <div class="w-full pl-14 md:w-[47%] md:pl-0">
+              <div
+                class="group relative rounded-[1.5rem] border bg-white p-6 transition-all duration-500"
+                :class="[
+                  isLocked(module, index)
+                    ? 'border-slate-100 opacity-60 grayscale-[0.5]'
+                    : 'hover:-translate-y-1 hover:shadow-xl',
 
-              <div class="flex-1 min-w-0">
-                <h2 class="text-2xl font-bold text-[#1A2E20] mb-6">Silabus Materi</h2>
+                  isCurrentActive(module, index)
+                    ? 'border-emerald-500 ring-4 ring-emerald-50/50'
+                    : 'border-slate-100'
+                ]"
+              >
+                <div class="mb-4 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <div
+                      v-if="isLocked(module, index)"
+                      class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 border border-slate-100"
+                    >
+                      <Lock class="w-4 h-4" />
+                    </div>
 
-                <div class="space-y-5">
+                    <div
+                      v-else-if="isCompleted(module)"
+                      class="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-100"
+                    >
+                      <CheckCircle2 class="w-4 h-4" />
+                    </div>
+
+                    <div
+                      v-else
+                      class="flex items-center gap-2 px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest"
+                    >
+                      <Layout class="w-3 h-3" />
+                      {{ module.lessons.length }} Lesson
+                    </div>
+
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                      {{
+                        isLocked(module, index)
+                          ? 'Belum Terbuka'
+                          : isCompleted(module)
+                            ? 'Selesai'
+                            : 'Sedang Dipelajari'
+                      }}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-900 leading-tight transition-colors group-hover:text-emerald-700">
+                  {{ module.title }}
+                </h3>
+
+                <p class="mt-2 text-xs leading-relaxed text-slate-500 line-clamp-2">
+                  {{ module.description || nextLesson(module)?.title || 'Belum ada lesson di module ini.' }}
+                </p>
+
+                <div v-if="module.lessons.length" class="mt-4 space-y-2">
                   <div
-                    v-for="(mod, modIndex) in modules"
-                    :key="mod.id"
-                    class="rounded-2xl border transition-all duration-300"
-                    :class="mod.status === 'current'
-                      ? 'border-[#2C7047] bg-white shadow-md shadow-[#2C7047]/5'
-                      : mod.status === 'completed'
-                        ? 'border-[#E6EFE9] bg-white'
-                        : 'border-[#E6EFE9] bg-[#FAFCFB] opacity-70'"
+                    v-for="lesson in module.lessons"
+                    :key="lesson.id"
+                    class="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-600"
                   >
-
-                    <div class="px-6 py-5 flex items-start gap-4 cursor-pointer" @click="!mod.is_locked && toggleModule(mod.id)">
-                      
-                      <div class="mt-0.5 shrink-0">
-                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-check-icon lucide-book-check"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/></svg>
-                      </div>
-
-                      <div class="flex-1 min-w-0">
-                        <div class="flex items-center gap-2 mb-1">
-                          <span class="text-[10px] font-bold uppercase tracking-wider"
-                            :class="mod.status === 'current' ? 'text-[#2C7047]' : 'text-gray-400'">
-                            Module {{ String(modIndex + 1).padStart(2, '0') }}
-                            <span v-if="mod.status === 'current'" class="text-[#2C7047]"> · In Progress</span>
-                          </span>
-                        </div>
-                        <h3 class="font-bold text-[#1A2E20] text-[15px] leading-snug">{{ mod.title }}</h3>
-                      </div>
-
-                      <div class="shrink-0 pt-3">
-                        <span v-if="mod.status === 'completed'" class="text-xs text-gray-400 font-medium">Completed</span>
-                        <router-link v-else-if="mod.status === 'current'" :to="`/courses/${course.id}/modules/${mod.id}`" class="text-xs text-[#2C7047] font-bold hover:underline flex items-center gap-1">
-                          Resume <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
-                        </router-link>  
-                        <svg v-else class="w-4 h-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
-                      </div>
-                    </div>
-
-                  </div>
-                </div>
-              </div>
-
-              <div class="w-full lg:w-72 shrink-0 space-y-6">
-
-                <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
-                  <h3 class="font-bold text-[#1A2E20] text-base mb-5">Course Insights</h3>
-                  <div class="space-y-4">
-                    <div v-for="insight in courseInsights" :key="insight.label" class="flex items-center justify-between">
-                      <div class="flex items-center gap-3">
-                        <div v-html="insight.icon" class="w-5 h-5 text-[#2C7047]"></div>
-                        <span class="text-sm text-gray-500">{{ insight.label }}</span>
-                      </div>
-                      <span class="text-sm font-bold text-[#1A2E20]">{{ insight.value }}</span>
-                    </div>
+                    <CheckCircle2
+                      v-if="isLessonCompleted(lesson)"
+                      class="h-3.5 w-3.5 text-emerald-600"
+                    />
+                    <Lock
+                      v-else-if="isLessonLocked(lesson)"
+                      class="h-3.5 w-3.5 text-slate-400"
+                    />
+                    <FileText
+                      v-else
+                      class="h-3.5 w-3.5 text-emerald-600"
+                    />
+                    <span class="truncate font-semibold">{{ lesson.title }}</span>
                   </div>
                 </div>
 
+                <div
+                  v-if="!isLocked(module, index)"
+                  class="mt-6"
+                >
+                  <div class="flex flex-col items-center md:items-end lg:flex-row lg:justify-between gap-6">
+                    <div class="relative h-16 w-16 shrink-0">
+                      <svg
+                        class="h-full w-full -rotate-90"
+                        viewBox="0 0 100 100"
+                      >
+                        <circle
+                          class="fill-none stroke-slate-50"
+                          stroke-width="12"
+                          cx="50"
+                          cy="50"
+                          r="40"
+                        />
+
+                        <circle
+                          class="fill-none stroke-emerald-600 transition-all duration-1000 ease-out"
+                          stroke-width="12"
+                          stroke-linecap="round"
+                          cx="50"
+                          cy="50"
+                          r="40"
+                          :stroke-dasharray="251.2"
+                          :stroke-dashoffset="251.2 * (1 - getProgress(module) / 100)"
+                        />
+                      </svg>
+
+                      <div class="absolute inset-0 flex items-center justify-center text-[10px] font-black">
+                        {{ getProgress(module) }}%
+                      </div>
+                    </div>
+
+                    <button
+                      v-if="!isCompleted(module)"
+                      @click="continueLearning(module)"
+                      class="w-full lg:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-950 px-6 py-3 text-[11px] font-black text-white hover:bg-emerald-900 transition-all shadow-lg shadow-emerald-950/20"
+                    >
+                      Lanjut Belajar
+                      <ArrowRight class="w-3.5 h-3.5" />
+                    </button>
+
+                    <button
+                      v-else
+                      @click="reviewArchive(module)"
+                      class="flex items-center gap-2 rounded-lg bg-slate-50 px-5 py-2.5 text-[10px] font-black tracking-widest text-slate-500 hover:bg-slate-100 hover:text-slate-900 transition-all uppercase border border-slate-200/50"
+                    >
+                      <FileText class="w-3.5 h-3.5" />
+                      Arsip Materi
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  v-else
+                  class="mt-6 flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase"
+                >
+                  <Lock class="w-3 h-3" />
+                  Terbuka setelah modul sebelumnya selesai
+                </div>
               </div>
             </div>
+
+            <div class="hidden md:block w-[47%]"></div>
           </div>
         </div>
       </div>
+
+      <footer class="mt-16 grid grid-cols-1 gap-4 md:grid-cols-3 px-2">
+        <div
+          v-for="(info, key) in footerItems"
+          :key="key"
+          class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-emerald-100"
+        >
+          <div
+            :class="[
+              'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110',
+              info.bg,
+              info.color
+            ]"
+          >
+            <component :is="info.icon" class="w-5 h-5" />
+          </div>
+
+          <div class="min-w-0">
+            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">
+              {{ info.label }}
+            </span>
+
+            <p class="truncate text-[13px] font-bold text-slate-900 mt-0.5">
+              {{ info.data.title }}
+            </p>
+
+            <span class="text-[10px] font-medium text-slate-500">
+              {{ info.data.sub }}
+            </span>
+          </div>
+        </div>
+      </footer>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { ref, onMounted, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useToast } from 'vue-toastification'
 import api from '../api/index.js'
 
+import {
+  CheckCircle2,
+  Layout,
+  ArrowRight,
+  Calendar,
+  FileText,
+  Trophy,
+  Lock
+} from 'lucide-vue-next'
+
+const router = useRouter()
 const route = useRoute()
-const isLoading = ref(true)
-const fetchError = ref(false)
-const expandedModules = ref([])
+const toast = useToast()
 
-const toggleModule = (id) => {
-  const idx = expandedModules.value.indexOf(id)
-  if (idx > -1) expandedModules.value.splice(idx, 1)
-  else expandedModules.value.push(id)
-}
+const loading = ref(true)
 
-const course = ref({
-  id: '',
-  title: '',
-  badge: '',
-  description: '',
-  progress: 0,
-  coverImage: '',
-})
+const courseId = computed(() => route.params.id)
 
 const modules = ref([])
+const progressMap = ref({})
 
-const mentor = ref({
-  name: '-',
-  role: '-',
-  avatar: '',
+const profile = ref({
+  name: ''
 })
 
-const courseInsights = computed(() => [
-  {
-    label: 'Estimate Duration',
-    value: course.value.duration || '-',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-  },
-  {
-    label: 'Modules',
-    value: course.value.total_lessons ? `${course.value.total_lessons} Modules` : `${modules.value.length} Modules`,
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
-  },
-  {
-    label: 'Difficulty',
-    value: course.value.level || course.value.difficulty || '-',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>'
-  },
-  {
-    label: 'Certificate',
-    value: course.value.has_certificate ? 'Included' : '-',
-    icon: '<svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>'
-  },
-])
+const sortedModules = computed(() => {
+  return [...modules.value]
+    .map(module => ({
+      ...module,
+      lessons: [...(module.lessons || [])].sort((a, b) => a.order - b.order)
+    }))
+    .sort((a, b) => a.order - b.order)
+})
 
-const mapModuleStatus = (mod) => {
-  if (mod.is_locked ?? mod.locked) return 'locked'
-  if (mod.status) return mod.status
-  return 'current'
+const flattenedLessons = computed(() => {
+  return sortedModules.value.flatMap(module =>
+    module.lessons.map(lesson => ({
+      ...lesson,
+      moduleId: module.id
+    }))
+  )
+})
+
+const getProgress = (module) => {
+  if (!module.lessons.length) return 0
+
+  const completed = module.lessons.filter(isLessonCompleted).length
+  return Math.round((completed / module.lessons.length) * 100)
 }
 
-const fetchCourseDetail = async () => {
-  isLoading.value = true
-  fetchError.value = false
-  try {
-    const id = route.params.id
-    const response = await api.get(`/courses/${id}`)
-    const data = response.data.data ?? response.data
+const isCompleted = (module) => {
+  return module.lessons.length > 0 && module.lessons.every(isLessonCompleted)
+}
 
-    course.value = {
-      id: data.id ?? data._id ?? id,
-      title: data.title ?? '',
-      badge: data.badge ?? data.category?.cat_name ?? data.category ?? 'Course',
-      description: data.description ?? '',
-      progress: data.progress ?? data.user_progress ?? 0,
-      coverImage: data.image ? `http://localhost:3000/${data.image}` : data.coverImage ?? '',
-      duration: data.duration ?? '',
-      total_lessons: data.total_lessons ?? null,
-      level: data.level ?? data.difficulty ?? '',
-      has_certificate: data.has_certificate ?? true,
-    }
+const isCurrentActive = (module, index) => {
+  if (isCompleted(module)) return false
 
-    if (data.mentor || data.instructor) {
-      const m = data.mentor ?? data.instructor
-      mentor.value = {
-        name: m.name ?? m.username ?? '-',
-        role: m.role ?? m.title ?? 'Mentor, Proclub',
-        avatar: m.avatar ? `http://localhost:3000/${m.avatar}` : (m.profile_picture ? `http://localhost:3000/${m.profile_picture}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(m.name ?? 'M')}&background=2C7047&color=fff`),
-      }
-    }
+  const previousModules = sortedModules.value.slice(0, index)
 
-    let rawModules = data.modules ?? data.syllabus ?? []
+  return previousModules.every(
+    (item) => isCompleted(item)
+  )
+}
 
-    if (!Array.isArray(rawModules)) {
-      rawModules = rawModules ? [rawModules] : []
-    }
+const isLocked = (module, index) => {
+  if (index === 0) return false
 
-    if (!rawModules.length) {
-      try {
-        const modRes = await api.get(`/courses/${id}/modules`)
-        const modData = modRes.data
+  const previousModule = sortedModules.value[index - 1]
 
-        if (Array.isArray(modData)) {
-          rawModules = modData
-        } else if (Array.isArray(modData?.data)) {
-          rawModules = modData.data
-        } else if (Array.isArray(modData?.modules)) {
-          rawModules = modData.modules
-        } else {
-          rawModules = []
-        }
-      } catch (e) {
-        console.warn('Endpoint /modules tidak tersedia atau kosong:', e.message)
-        rawModules = []
-      }
-    }
+  return previousModule && !isCompleted(previousModule)
+}
 
-    modules.value = [...rawModules]
-      .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
-      .map((mod, idx) => ({
-        id: mod.id ?? mod._id ?? `mod-${idx}`,
-        title: mod.title ?? mod.name ?? `Module ${idx + 1}`,
-        content: mod.content ?? '',
-        order: mod.order ?? idx + 1,
-        courseId: mod.courseId ?? mod.course_id ?? id,
-        status: mapModuleStatus(mod),
-        is_locked: mod.is_locked ?? mod.locked ?? false,
-      }))
-      
-    expandedModules.value = modules.value.map(m => m.id)
-  } catch (error) {
-    console.error('Gagal mengambil detail kursus:', error)
-    fetchError.value = true
-  } finally {
-    isLoading.value = false
+const isLessonCompleted = (lesson) => {
+  return progressMap.value[lesson.id]?.status === 'COMPLETED'
+}
+
+const isLessonLocked = (lesson) => {
+  const index = flattenedLessons.value.findIndex(item => item.id === lesson.id)
+  if (index <= 0) return false
+
+  return !isLessonCompleted(flattenedLessons.value[index - 1])
+}
+
+const nextLesson = (module) => {
+  return module.lessons.find(lesson => !isLessonCompleted(lesson)) || module.lessons[0] || null
+}
+
+const fetchProgress = async () => {
+  const response = await api.get('/progress')
+  const progress = Array.isArray(response.data?.data) ? response.data.data : []
+
+  progressMap.value = progress.reduce((acc, item) => {
+    acc[item.lessonId] = item
+    return acc
+  }, {})
+}
+
+const fetchUserData = async () => {
+  const res = await api.get('/auth/me')
+
+  profile.value = {
+    name: res.data.name || ''
   }
 }
 
+const fetchModules = async () => {
+  loading.value = true
+
+  try {
+    await Promise.all([
+      fetchUserData(),
+      fetchProgress()
+    ])
+
+    const response = await api.get(`/courses/${courseId.value}/modules`)
+
+    if (response.data?.status === 'success') {
+      modules.value = response.data.modules || []
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memuat alur belajar')
+  } finally {
+    loading.value = false
+  }
+}
+
+const continueLearning = (module) => {
+  const lesson = nextLesson(module)
+
+  if (!lesson) {
+    toast.warning('Module ini belum memiliki lesson')
+    return
+  }
+
+  if (isLessonLocked(lesson)) {
+    toast.warning('Selesaikan lesson sebelumnya terlebih dahulu')
+    return
+  }
+
+  router.push(`/courses/${courseId.value}/lessons/${lesson.id}`)
+}
+
+const reviewArchive = (module) => {
+  const lesson = module.lessons[0]
+
+  if (!lesson) {
+    toast.warning('Module ini belum memiliki lesson')
+    return
+  }
+
+  router.push(`/courses/${courseId.value}/lessons/${lesson.id}`)
+}
+
+const footerItems = computed(() => ({
+  deadline: {
+    label: 'Tenggat Terdekat',
+    icon: Calendar,
+    bg: 'bg-rose-50',
+    color: 'text-rose-500',
+    data: {
+      title: 'Quiz Dasar Pemrograman',
+      sub: '1 Hari lagi'
+    }
+  },
+
+  resource: {
+    label: 'Materi Terbaru',
+    icon: FileText,
+    bg: 'bg-emerald-50',
+    color: 'text-emerald-600',
+    data: {
+      title: 'Module Array & Looping',
+      sub: 'PDF • 3 MB'
+    }
+  },
+
+  rank: {
+    label: 'Peringkat Kamu',
+    icon: Trophy,
+    bg: 'bg-blue-50',
+    color: 'text-blue-600',
+    data: {
+      title: 'Top 5 Student',
+      sub: 'Peringkat #5'
+    }
+  }
+}))
+
 onMounted(() => {
-  fetchCourseDetail()
+  fetchModules()
 })
 </script>

@@ -45,13 +45,6 @@
           />
         </div>
 
-        <!-- <button
-          @click="exportReport"
-          class="flex items-center gap-2 px-5 py-2 bg-[#0D7A42] text-white rounded-lg text-[13px] font-bold hover:bg-[#0A6034]"
-        >
-          <Download class="w-4 h-4" />
-          Export Report
-        </button> -->
       </div>
     </div>
 
@@ -423,7 +416,6 @@ import {
   TrendingUp,
   FileCheck,
   ChevronDown,
-  Download,
   Search,
   ChevronLeft,
   ChevronRight,
@@ -431,8 +423,10 @@ import {
 } from 'lucide-vue-next'
 
 import { getUserProgress } from '../../services/userProgressService'
+import { useToast } from 'vue-toastification'
 
 const loading = ref(true)
+const toast = useToast()
 const userProgressList = ref([])
 const searchQuery = ref('')
 const currentPage = ref(1)
@@ -575,41 +569,47 @@ const fetchProgress = async () => {
   try {
     const response = await getUserProgress()
     userProgressList.value = (response.data.data || []).map(user => {
-  const firstCourse = user.courses?.[0]
+      const firstCourse = user.courses?.[0]
+      const progress = user.overallPercentage || 0
 
-  return {
-    id: user.id,
-    name: user.name,
-    email: user.email,
-
-    course: firstCourse?.title || '-',
-    current_module: '-',
-
-    completed_modules: user.completedModulesAll || 0,
-    total_modules: user.totalModulesAll || 0,
-
-    avg_quiz_score: user.overallPercentage || 0,
-    progress_percentage: user.overallPercentage || 0,
-
-    status:
-      user.overallPercentage >= 100
-        ? 'Completed'
-        : user.overallPercentage > 0
-        ? 'In Progress'
-        : 'Not Started',
-
-    modules: [],
-
-    courses: (user.courses || []).map(course => ({
-      name: course.title,
-      progress: course.percentage,
-      lessons_completed: course.completedModules,
-      total_lessons: course.totalModules
-    }))
-  }
-})
+      return {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        course: firstCourse?.title || '-',
+        current_module: firstCourse?.title || '-',
+        completed_modules: user.completedLessonsAll || 0,
+        total_modules: user.totalLessonsAll || 0,
+        avg_quiz_score: progress,
+        progress_percentage: progress,
+        status:
+          progress >= 100
+            ? 'Completed'
+            : progress > 0
+            ? 'In Progress'
+            : 'Not Started',
+        modules: (user.courses || []).map(course => ({
+          id: course.id,
+          title: course.title,
+          type: 'Learning Path',
+          status:
+            course.percentage >= 100
+              ? 'Completed'
+              : course.percentage > 0
+              ? 'In Progress'
+              : 'Not Started',
+          score: course.percentage || 0
+        })),
+        courses: (user.courses || []).map(course => ({
+          name: course.title,
+          progress: course.percentage,
+          lessons_completed: course.completedLessons,
+          total_lessons: course.totalLessons
+        }))
+      }
+    })
   } catch (error) {
-    console.error(error)
+    toast.error(error.response?.data?.message || 'Gagal memuat progress user')
   } finally {
     loading.value = false
   }
@@ -635,10 +635,6 @@ const prevPage = () => {
 
 const nextPage = () => {
   if (currentPage.value < totalPages.value) currentPage.value++
-}
-
-const exportReport = () => {
-  console.log('Export report')
 }
 
 watch([searchQuery, filters], () => {

@@ -126,7 +126,7 @@ import api from '../api/index.js'
 
 const props = defineProps({
   questions: Array,
-  moduleId: Number,
+  lessonId: Number,
   savedAnswers: {
     type: Array,
     default: () => []
@@ -177,7 +177,7 @@ async function submitQuiz() {
     }
 
     const res = await api.post(
-      `/modules/${props.moduleId}/submit`,
+      `/lessons/${props.lessonId}/submit`,
       payload
     )
 

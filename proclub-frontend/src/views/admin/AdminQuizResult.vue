@@ -40,11 +40,11 @@
               </td>
 
               <td class="px-6 py-4 text-gray-600">
-                {{ item.module.course.title }}
+                {{ item.lesson?.module?.course?.title || '-' }}
               </td>
 
               <td class="px-6 py-4 text-gray-600">
-                {{ item.module.title }}
+                {{ item.lesson?.title || '-' }}
               </td>
 
               <td class="px-6 py-4">
@@ -57,12 +57,12 @@
                 <span
                   class="px-3 py-1 rounded-full text-xs font-bold"
                   :class="
-                    item.score >= item.module.kkm
+                    item.score >= item.lesson?.kkm
                       ? 'bg-green-100 text-green-700'
                       : 'bg-red-100 text-red-700'
                   "
                 >
-                  {{ item.score >= item.module.kkm ? 'LULUS' : 'TIDAK LULUS' }}
+                  {{ item.score >= item.lesson?.kkm ? 'LULUS' : 'TIDAK LULUS' }}
                 </span>
               </td>
 
@@ -144,7 +144,7 @@ async function fetchResults(page = 1) {
     currentPage.value = res.data.pagination.page
     totalPages.value = res.data.pagination.totalPages
   } catch (error) {
-    toast.error('Gagal memuat hasil quiz')
+    toast.error(error.response?.data?.message || 'Gagal memuat hasil quiz')
   }
 }
 

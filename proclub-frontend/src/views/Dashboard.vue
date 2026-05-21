@@ -46,11 +46,7 @@
             <div
               class="relative w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl ring-1 ring-gray-900/5"
             >
-             <img
-            :src="featuredCourse.image"
-            :alt="featuredCourse.title"
-            class="w-full aspect-[4/3] object-cover"
-          />
+
 
               <div
                 class="absolute inset-0 bg-black/40 flex items-center justify-center flex-col text-white"
@@ -210,13 +206,6 @@
               :key="course.id"
               class="bg-white rounded-[1.5rem] border border-[#E6EFE9] overflow-hidden group hover:shadow-lg transition-shadow duration-300 flex flex-col"
             >
-              <div class="aspect-video w-full overflow-hidden shrink-0">
-               <img
-            :src="course.image"
-            :alt="course.title"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-              </div>
 
               <div class="p-6 flex-1 flex flex-col justify-between">
                 <div>
@@ -249,6 +238,7 @@
 import { ref, onMounted } from 'vue'
 import { useToast } from 'vue-toastification'
 import { getMemberDashboard } from '../services/dashboardService'
+import api from '../api/index.js'
 
 const toast = useToast()
 
@@ -264,27 +254,20 @@ const recommendedCourses = ref([])
 
 const stats = ref([])
 
-const getImage = (path) => {
-  if (!path) {
-    return 'https://via.placeholder.com/600x400?text=No+Image'
-  }
-
-  return `http://localhost:3000/${path}`
-}
-
 const loadDashboard = async () => {
   try {
     isLoading.value = true
 
     const response = await getMemberDashboard()
+    const coursesResponse = await api.get('/courses')
 
-    const data = response.data
+    const data = response.data?.data || response.data
 
     user.value = data.user
 
     featuredCourse.value = data.featuredCourse
 
-    recommendedCourses.value = data.recommendedCourses
+    recommendedCourses.value = coursesResponse.data?.data || []
 
     stats.value = [
       {
@@ -300,8 +283,8 @@ const loadDashboard = async () => {
       },
 
       {
-        label: 'COMPLETED MODULES',
-        value: data.statistics.totalCompletedModules,
+        label: 'COMPLETED LESSONS',
+        value: data.statistics.totalCompletedLessons || 0,
         icon: `
           <svg class="text-[#2C7047] w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -324,9 +307,7 @@ const loadDashboard = async () => {
       }
     ]
   } catch (error) {
-    console.error(error)
-
-    toast.error('Failed to load dashboard')
+    toast.error(error.response?.data?.message || 'Gagal memuat dashboard')
   } finally {
     isLoading.value = false
   }

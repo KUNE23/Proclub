@@ -6,17 +6,6 @@
         <h1 class="text-3xl font-bold text-[#1A2E20]">Welcome back, Admin</h1>
         <p class="text-gray-500 mt-1.5 text-[15px]">Here's what happened in the Proclub Learning Hub since your last login.</p>
       </div>
-      <!-- Button export belum dibutuhkan, tetapi mungkin nanti dibutuhkan -->
-      <!-- <div class="flex items-center gap-3">
-        <button class="px-4 py-2.5 bg-white border border-[#E6EFE9] rounded-lg text-sm font-semibold text-gray-700 hover:bg-gray-50 flex items-center gap-2 transition-colors">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Export Reports
-        </button>
-        <button class="px-4 py-2.5 bg-[#0D7A42] text-white rounded-lg text-sm font-semibold hover:bg-[#0A6034] flex items-center gap-2 transition-colors shadow-sm">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-          New Course
-        </button>
-      </div> -->
     </div>
 
     <div class="grid grid-cols-4 gap-6">
@@ -56,13 +45,12 @@
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
           </div>
         </div>
-        <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Modules</p>
-        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.totalModules }}</h3>
+        <p class="text-[13px] text-gray-500 font-semibold mb-1">Total Lessons</p>
+        <h3 class="text-3xl font-bold text-[#1A2E20]">{{ statistics.totalLessons }}</h3>
       </div>
     </div>
 
     <div class="grid grid-cols-3 gap-6">
-      <!-- Chart -->
       <div class="col-span-2 bg-white p-6 rounded-2xl border border-[#E6EFE9] shadow-sm flex flex-col">
         <div class="bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm">
   <div class="flex items-center justify-between mb-6">
@@ -108,11 +96,11 @@
 
       <div class="flex items-center justify-between mt-3 text-xs text-gray-500">
         <span>
-          Completed {{ user.completedModules }} Modules
+          Completed {{ user.completedLessons }} Lessons
         </span>
 
         <span>
-          Total {{ user.totalModules }} Modules
+          Total {{ user.totalLessons }} Lessons
         </span>
       </div>
     </div>
@@ -243,11 +231,15 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getDashboardAnalytics } from '../../services/dashboardService'
+import { useToast } from 'vue-toastification'
+
+const toast = useToast()
 
 const statistics = ref({
   totalUsers: 0,
   totalCourses: 0,
   totalModules: 0,
+  totalLessons: 0,
   averageProgress: 0
 })
 
@@ -265,40 +257,12 @@ const loadDashboard = async () => {
     userEngagement.value = response.data.data.engagement
     recentActivities.value = response.data.data.recentActivities
   } catch (error) {
-    console.error(error)
+    toast.error(error.response?.data?.message || 'Gagal memuat dashboard admin')
   } finally {
     loading.value = false
   }
 }
-const fetchstatistics = async () => {
-  try {
-    const [coursesRes, usersRes, categoriesRes] = await Promise.all([
-      api.get('/courses'),
-      api.get('/'),
-      api.get('/categories')
-    ])
 
-    const coursesData = coursesRes.data.data || coursesRes.data
-    statistics.courses = Array.isArray(coursesData) ? coursesData.length : 0
-    
-    let modCount = 0
-    if (Array.isArray(coursesData)) {
-      coursesData.forEach(c => {
-        if (c.modules) modCount += c.modules.length
-      })
-    }
-    statistics.modules = modCount
-
-    const usersData = usersRes.data.users || usersRes.data.data || usersRes.data
-    statistics.users = Array.isArray(usersData) ? usersData.length : 0
-
-    const categoriesData = categoriesRes.data.data || categoriesRes.data
-    statistics.categories = Array.isArray(categoriesData) ? categoriesData.length : 0
-
-  } catch (error) {
-    console.error('Failed to fetch dashboard statistics:', error)
-  }
-}
 onMounted(() => {
   loadDashboard()
 })

@@ -84,11 +84,11 @@
 
             <div>
               <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                Completed Modules
+                Completed Lessons
               </p>
 
               <h3 class="text-2xl font-bold text-[#1A2E20]">
-                {{ completedModules }}/{{ totalModules }}
+                {{ completedLessons }}/{{ totalLessons }}
               </h3>
             </div>
           </div>
@@ -158,7 +158,7 @@
                       </h4>
 
                       <p class="text-[12px] text-gray-500 mt-1">
-                        {{ course.completedModules }}/{{ course.totalModules }} modules completed
+                        {{ course.completedLessons }}/{{ course.totalLessons }} lessons completed
                       </p>
                     </div>
 
@@ -211,8 +211,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '../api/index.js'
+import { useToast } from 'vue-toastification'
 
 const isLoading = ref(true)
+const toast = useToast()
 
 const user = ref({
   name: '',
@@ -238,25 +240,25 @@ const initials = computed(() => {
 
 const totalCourses = computed(() => activeCourses.value.length)
 
-const completedModules = computed(() => {
+const completedLessons = computed(() => {
   return activeCourses.value.reduce(
-    (acc, course) => acc + course.completedModules,
+    (acc, course) => acc + course.completedLessons,
     0
   )
 })
 
-const totalModules = computed(() => {
+const totalLessons = computed(() => {
   return activeCourses.value.reduce(
-    (acc, course) => acc + course.totalModules,
+    (acc, course) => acc + course.totalLessons,
     0
   )
 })
 
 const overallProgress = computed(() => {
-  if (totalModules.value === 0) return 0
+  if (totalLessons.value === 0) return 0
 
   return Math.round(
-    (completedModules.value / totalModules.value) * 100
+    (completedLessons.value / totalLessons.value) * 100
   )
 })
 
@@ -277,20 +279,33 @@ const loadUser = async () => {
       }
     }
 
-    const progressRes = await api.get('/user/progress').catch(() => null)
+    const [coursesRes, progressRes] = await Promise.all([
+      api.get('/courses'),
+      api.get('/progress')
+    ])
 
-    if (progressRes?.data?.data) {
-      activeCourses.value = progressRes.data.data.map(course => ({
+    const progressItems = Array.isArray(progressRes.data?.data) ? progressRes.data.data : []
+    const completedLessonIds = new Set(
+      progressItems
+        .filter(item => item.status === 'COMPLETED')
+        .map(item => item.lessonId)
+    )
+
+    activeCourses.value = (coursesRes.data?.data || []).map(course => {
+      const lessons = (course.modules || []).flatMap(module => module.lessons || [])
+      const completed = lessons.filter(lesson => completedLessonIds.has(lesson.id)).length
+
+      return {
         id: course.id,
         title: course.title,
         image: course.image,
-        totalModules: course.totalModules || 0,
-        completedModules: course.completedModules || 0,
-        progress: course.percentage || 0
-      }))
-    }
+        totalLessons: lessons.length,
+        completedLessons: completed,
+        progress: lessons.length > 0 ? Math.round((completed / lessons.length) * 100) : 0
+      }
+    })
   } catch (err) {
-    console.error('Failed to load user data:', err)
+    toast.error(err.response?.data?.message || 'Gagal memuat profil')
   } finally {
     isLoading.value = false
   }
