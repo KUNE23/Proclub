@@ -27,6 +27,12 @@
           <span class="text-xs font-semibold text-slate-600">
             Progress <span class="font-bold text-emerald-600">{{ progressPercent }}%</span>
           </span>
+          <div class="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
+            <div
+              class="h-full rounded-full bg-emerald-600 transition-all duration-700 ease-out"
+              :style="{ width: progressPercent + '%' }"
+            ></div>
+          </div>
         </div>
       </div>
     </header>
@@ -195,12 +201,15 @@
             :class="[
               isLessonCompleted(activeLesson.id)
                 ? 'cursor-default bg-emerald-100 text-emerald-700'
-                : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md'
+                : isCompleting
+                  ? 'cursor-wait bg-emerald-500 text-white'
+                  : 'bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-md'
             ]"
             type="button"
           >
-            <CheckCircle2 class="h-5 w-5 shrink-0" />
-            <span class="truncate">{{ isLessonCompleted(activeLesson.id) ? 'Selesai' : 'Tandai Selesai' }}</span>
+            <Loader2 v-if="isCompleting" class="h-5 w-5 shrink-0 animate-spin" />
+            <CheckCircle2 v-else class="h-5 w-5 shrink-0" />
+            <span class="truncate">{{ isCompleting ? 'Menyimpan...' : isLessonCompleted(activeLesson.id) ? 'Selesai' : 'Tandai Selesai' }}</span>
           </button>
         </div>
 
@@ -269,6 +278,7 @@ import {
   Image,
   Info,
   Link,
+  Loader2,
   Video
 } from 'lucide-vue-next'
 import api from '../api/index.js'

@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js'
+import { assertCourseAccess } from '../services/learningAccessService.js'
 
 export const createCourse = async (req, res) => {
   try {
@@ -234,6 +235,12 @@ export const getCourseById = async (req, res) => {
       })
     }
 
+    await assertCourseAccess({
+      userId: req.user.id,
+      courseId,
+      role: req.user.role
+    })
+
     return res.status(200).json({
       status: 'success',
       course
@@ -241,6 +248,13 @@ export const getCourseById = async (req, res) => {
 
   } catch (error) {
   console.error('GET COURSE DETAIL ERROR:', error)
+
+  if (error.statusCode) {
+    return res.status(error.statusCode).json({
+      status: 'fail',
+      message: error.message
+    })
+  }
 
   return res.status(500).json({
     error: error.message

@@ -12,6 +12,8 @@ import quizRoutes from './routes/quizRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import memberDashboardRoutes from './routes/memberDashboardROutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
+import certificateRoutes from './routes/certificateRoutes.js';
+import path from 'path';
 
 const app = express();
 
@@ -27,6 +29,7 @@ app.use(cors({
 }));
 
 app.use(express.json());
+app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api', dashboardRoutes);
@@ -35,6 +38,7 @@ app.use('/api', courseRoutes);
 app.use('/api', moduleRoutes);
 app.use('/api', quizRoutes);
 app.use('/api', notificationRoutes);
+app.use('/api', certificateRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 

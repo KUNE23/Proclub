@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { assertCourseAccess } from '../services/learningAccessService.js';
 
 export default async function checkModuleAccess(req, res, next) {
   try {
@@ -29,6 +30,12 @@ export default async function checkModuleAccess(req, res, next) {
     if (req.user.role === 'admin') {
       return next();
     }
+
+    await assertCourseAccess({
+      userId,
+      courseId: lessonData.module.courseId,
+      role: req.user.role
+    });
 
     const currentOrder = lessonData.order;
 
@@ -65,6 +72,13 @@ export default async function checkModuleAccess(req, res, next) {
 
     next();
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({
+        status: 'fail',
+        message: error.message
+      });
+    }
+
     console.error('Access Check Error:', error);
     return res.status(500).json({ error: error.message });
   }

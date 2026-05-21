@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
+import { sendPasswordResetOtp } from '../services/emailService.js'
 
 export const register = async (req, res) => {
   try {
@@ -42,6 +43,10 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
+    if (user.role === 'member' && !user.email.endsWith('@student.sttcipasung.ac.id')) {
+      return res.status(403).json({ message: 'Akun member wajib menggunakan email kampus.' });
+    }
+
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
@@ -74,22 +79,113 @@ export const login = async (req, res) => {
   }
 }
 
-export const forgotpassword = async (req, res) => {
+export const requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body
 
     const user = await prisma.user.findUnique({
       where: { email }
     })
-d
+
     if (!user) {
-      return res.status(400).json({ message: 'User not found' })
+      return res.json({ status: 'success', message: 'Jika email terdaftar, kode OTP akan dikirim.' })
     }
 
-    res.json({ message: 'Password reset link sent to your email' })
+    const code = String(Math.floor(100000 + Math.random() * 900000))
+    const codeHash = await bcrypt.hash(code, 10)
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000)
+
+    await prisma.passwordResetOtp.updateMany({
+      where: {
+        userId: user.id,
+        consumedAt: null,
+        expiresAt: { gt: new Date() }
+      },
+      data: { consumedAt: new Date() }
+    })
+
+    await prisma.passwordResetOtp.create({
+      data: {
+        email: user.email,
+        codeHash,
+        expiresAt,
+        userId: user.id
+      }
+    })
+
+    const mail = await sendPasswordResetOtp({
+      email: user.email,
+      name: user.name,
+      code
+    })
+
+    return res.json({
+      status: 'success',
+      message: mail.sent ? 'Kode OTP sudah dikirim ke email kamu.' : 'Kode OTP dibuat. Konfigurasi SMTP belum tersedia di server.'
+    })
   } catch (error) {
-    res.status(500).json({ error: error.message })
-  }d
+    return res.status(500).json({ message: 'Gagal memproses reset password', error: error.message })
+  }
+}
+
+export const resetPasswordWithOtp = async (req, res) => {
+  try {
+    const { email, otp, password } = req.body
+
+    const resetOtp = await prisma.passwordResetOtp.findFirst({
+      where: {
+        email,
+        consumedAt: null,
+        expiresAt: { gt: new Date() }
+      },
+      include: { user: true },
+      orderBy: { createdAt: 'desc' }
+    })
+
+    if (!resetOtp) {
+      return res.status(400).json({ message: 'Kode OTP tidak valid atau sudah kedaluwarsa.' })
+    }
+
+    if (resetOtp.attempts >= 5) {
+      await prisma.passwordResetOtp.update({
+        where: { id: resetOtp.id },
+        data: { consumedAt: new Date() }
+      })
+
+      return res.status(400).json({ message: 'Kode OTP terlalu sering dicoba. Minta kode baru.' })
+    }
+
+    const isValid = await bcrypt.compare(otp, resetOtp.codeHash)
+
+    if (!isValid) {
+      await prisma.passwordResetOtp.update({
+        where: { id: resetOtp.id },
+        data: { attempts: { increment: 1 } }
+      })
+
+      return res.status(400).json({ message: 'Kode OTP salah.' })
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: resetOtp.userId },
+        data: {
+          password: hashedPassword,
+          token: null
+        }
+      }),
+      prisma.passwordResetOtp.update({
+        where: { id: resetOtp.id },
+        data: { consumedAt: new Date() }
+      })
+    ])
+
+    return res.json({ status: 'success', message: 'Password berhasil direset. Silakan login kembali.' })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal reset password', error: error.message })
+  }
 }
 
 export const logout = async (req, res) => {

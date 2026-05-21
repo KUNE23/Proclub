@@ -84,11 +84,11 @@
 
             <div>
               <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-1">
-                Completed Lessons
+                Completed Modules
               </p>
 
               <h3 class="text-2xl font-bold text-[#1A2E20]">
-                {{ completedLessons }}/{{ totalLessons }}
+                {{ completedModules }}/{{ totalModules }}
               </h3>
             </div>
           </div>
@@ -120,7 +120,7 @@
             </h2>
 
             <router-link
-              to="/courses-catalog"
+              to="/learning-path"
               class="text-sm font-bold text-[#0A733F] hover:underline"
             >
               Explore More
@@ -144,12 +144,6 @@
               class="group bg-white rounded-2xl border border-[#E6EFE9] p-6 shadow-sm hover:shadow-md hover:border-[#0A733F]/30 transition-all"
             >
               <div class="flex flex-col md:flex-row gap-5">
-                <img
-                  :src="course.image || 'https://placehold.co/200x200?text=Course'"
-                  :alt="course.title"
-                  class="w-full md:w-24 h-24 rounded-2xl object-cover border border-[#E6EFE9] shrink-0"
-                >
-
                 <div class="flex-1 min-w-0">
                   <div class="flex items-start justify-between gap-4">
                     <div>
@@ -158,7 +152,7 @@
                       </h4>
 
                       <p class="text-[12px] text-gray-500 mt-1">
-                        {{ course.completedLessons }}/{{ course.totalLessons }} lessons completed
+                        {{ course.completedModules }}/{{ course.totalModules }} modules completed
                       </p>
                     </div>
 
@@ -203,6 +197,46 @@
             </router-link>
           </div>
         </div>
+
+        <div class="space-y-6">
+          <div class="flex items-center justify-between border-b border-[#E6EFE9] pb-4">
+            <h2 class="text-xl font-bold text-[#1A2E20]">My Certificates</h2>
+          </div>
+
+          <div
+            v-if="certificates.length === 0"
+            class="rounded-2xl border border-dashed border-gray-300 bg-white py-14 text-center"
+          >
+            <p class="text-sm font-semibold text-gray-400">Sertifikat akan muncul setelah learning path selesai dan project approved.</p>
+          </div>
+
+          <div v-else class="grid gap-4 md:grid-cols-2">
+            <div
+              v-for="certificate in certificates"
+              :key="certificate.id"
+              class="rounded-2xl border border-[#E6EFE9] bg-white p-6 shadow-sm"
+            >
+              <p class="text-[11px] font-bold uppercase tracking-widest text-[#0A733F]">{{ certificate.code }}</p>
+              <h3 class="mt-2 text-lg font-bold text-[#1A2E20]">{{ certificate.learningPath }}</h3>
+              <p class="mt-1 text-xs text-gray-400">Terbit {{ formatDate(certificate.issuedAt) }}</p>
+              <div class="mt-5 flex gap-3">
+                <a
+                  :href="`http://localhost:3000${certificate.pdfUrl}`"
+                  target="_blank"
+                  class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0A733F] px-4 py-2.5 text-[13px] font-bold text-white"
+                >
+                  Download PDF
+                </a>
+                <router-link
+                  :to="`/certificate/${certificate.code}`"
+                  class="inline-flex flex-1 items-center justify-center rounded-xl border border-[#E6EFE9] px-4 py-2.5 text-[13px] font-bold text-[#1A2E20]"
+                >
+                  Verifikasi
+                </router-link>
+              </div>
+            </div>
+          </div>
+        </div>
       </template>
     </div>
   </div>
@@ -212,6 +246,7 @@
 import { ref, computed, onMounted } from 'vue'
 import api from '../api/index.js'
 import { useToast } from 'vue-toastification'
+import { getMyCertificates } from '../services/certificateService.js'
 
 const isLoading = ref(true)
 const toast = useToast()
@@ -223,6 +258,7 @@ const user = ref({
 })
 
 const activeCourses = ref([])
+const certificates = ref([])
 
 const initials = computed(() => {
   if (!user.value.name) return 'U'
@@ -240,25 +276,25 @@ const initials = computed(() => {
 
 const totalCourses = computed(() => activeCourses.value.length)
 
-const completedLessons = computed(() => {
+const completedModules = computed(() => {
   return activeCourses.value.reduce(
-    (acc, course) => acc + course.completedLessons,
+    (acc, course) => acc + course.completedModules,
     0
   )
 })
 
-const totalLessons = computed(() => {
+const totalModules = computed(() => {
   return activeCourses.value.reduce(
-    (acc, course) => acc + course.totalLessons,
+    (acc, course) => acc + course.totalModules,
     0
   )
 })
 
 const overallProgress = computed(() => {
-  if (totalLessons.value === 0) return 0
+  if (totalModules.value === 0) return 0
 
   return Math.round(
-    (completedLessons.value / totalLessons.value) * 100
+    (completedModules.value / totalModules.value) * 100
   )
 })
 
@@ -279,9 +315,10 @@ const loadUser = async () => {
       }
     }
 
-    const [coursesRes, progressRes] = await Promise.all([
+    const [coursesRes, progressRes, certificatesRes] = await Promise.all([
       api.get('/courses'),
-      api.get('/progress')
+      api.get('/progress'),
+      getMyCertificates()
     ])
 
     const progressItems = Array.isArray(progressRes.data?.data) ? progressRes.data.data : []
@@ -292,23 +329,37 @@ const loadUser = async () => {
     )
 
     activeCourses.value = (coursesRes.data?.data || []).map(course => {
-      const lessons = (course.modules || []).flatMap(module => module.lessons || [])
-      const completed = lessons.filter(lesson => completedLessonIds.has(lesson.id)).length
+      const modules = course.modules || []
+      const lessons = modules.flatMap(module => module.lessons || [])
+      const completedLessons = lessons.filter(lesson => completedLessonIds.has(lesson.id)).length
+      const completedModules = modules.filter(module => {
+        const moduleLessons = module.lessons || []
+        return moduleLessons.length > 0 && moduleLessons.every(lesson => completedLessonIds.has(lesson.id))
+      }).length
 
       return {
         id: course.id,
         title: course.title,
-        image: course.image,
-        totalLessons: lessons.length,
-        completedLessons: completed,
-        progress: lessons.length > 0 ? Math.round((completed / lessons.length) * 100) : 0
+        totalModules: modules.length,
+        completedModules,
+        progress: lessons.length > 0 ? Math.round((completedLessons / lessons.length) * 100) : 0
       }
     })
+
+    certificates.value = certificatesRes.data?.data || []
   } catch (err) {
     toast.error(err.response?.data?.message || 'Gagal memuat profil')
   } finally {
     isLoading.value = false
   }
+}
+
+const formatDate = (date) => {
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date(date))
 }
 
 onMounted(() => {

@@ -96,8 +96,14 @@ const router = useRouter();
 const email = ref('');  
 const password = ref('');
 const name = ref('');
+const campusEmailPattern = /^[a-zA-Z0-9._%+-]+@student\.sttcipasung\.ac\.id$/;
 
 const handleRegister = async () => {
+  if (!campusEmailPattern.test(email.value.trim())) {
+    toast.warning('Gunakan email kampus dengan domain @student.sttcipasung.ac.id');
+    return;
+  }
+
   isLoading.value = true;
   try {
     const response = await api.post('auth/register', {

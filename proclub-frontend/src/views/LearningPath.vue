@@ -49,8 +49,8 @@
               {{ index === 0 ? 'direkomendasikan' : 'kelas terbaru' }}
             </span>
             <div class="flex flex-col items-center bg-slate-900 text-white rounded-xl px-5 py-3 text-center min-w-[72px]">
-              <span class="text-2xl font-bold leading-none">{{ course.totalLessons || 0 }}</span>
-              <span class="text-[10px] font-medium opacity-70 mt-1">Lesson</span>
+              <span class="text-2xl font-bold leading-none">{{ course.totalModules || course.modules?.length || 0 }}</span>
+              <span class="text-[10px] font-medium opacity-70 mt-1">Module</span>
             </div>
           </div>
 
@@ -85,16 +85,19 @@
           <button 
             :class="[
               'w-full font-semibold py-3.5 rounded-xl text-sm transition-colors duration-200 flex items-center justify-center gap-2 text-white',
-              index === 0 ? 'bg-[#1B8745] hover:bg-green-800' : 'bg-slate-900 hover:bg-slate-700'
+              isLocked(index) ? 'bg-slate-300 cursor-not-allowed' : index === 0 ? 'bg-[#1B8745] hover:bg-green-800' : 'bg-slate-900 hover:bg-slate-700'
             ]"
-  @click="handleClick(course.id)"
+            @click="handleClick(course, index)"
           >
-            {{ course.percentage > 0 ? 'Lanjutkan Belajar' : 'Mulai Belajar' }}
-            <svg v-if="course.percentage > 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            {{ isLocked(index) ? 'Terkunci' : course.percentage > 0 ? 'Lanjutkan Belajar' : 'Mulai Belajar' }}
+            <svg v-if="!isLocked(index) && course.percentage > 0" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/>
             </svg>
-            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg v-else-if="!isLocked(index)" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2h-1V7a5 5 0 00-10 0v4H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
             </svg>
           </button>
         </div>
@@ -126,7 +129,17 @@ onMounted(async () => {
   }
 })
 
-const handleClick = (courseId) => {
-  router.push(`/courses/${courseId}`)
+const isLocked = (index) => {
+  if (index === 0) return false
+  return !courses.value[index - 1]?.completed
+}
+
+const handleClick = (course, index) => {
+  if (isLocked(index)) {
+    toast.warning('Selesaikan kelas sebelumnya terlebih dahulu')
+    return
+  }
+
+  router.push(`/courses/${course.id}`)
 }
 </script>

@@ -22,7 +22,7 @@ router.post('/courses/:courseId/modules', authMiddleware, roleMiddleware(['admin
 router.put('/modules/:id', authMiddleware, roleMiddleware(['admin']), updateModule);
 router.delete('/modules/:id', authMiddleware, roleMiddleware(['admin']), deleteModule);
 
-router.get('/courses/:courseId/modules', getModulesByCourse);
+router.get('/courses/:courseId/modules', authMiddleware, getModulesByCourse);
 
 router.post('/modules/:moduleId/lessons', authMiddleware, roleMiddleware(['admin']), createLesson);
 router.get('/modules/:moduleId/lessons', authMiddleware, getLessonsByModule);
@@ -30,7 +30,7 @@ router.put('/lessons/:id', authMiddleware, roleMiddleware(['admin']), updateLess
 router.delete('/lessons/:id', authMiddleware, roleMiddleware(['admin']), deleteLesson);
 
 router.get('/lessons/:id', authMiddleware, checkModuleAccess, getLessonDetail);
-router.post('/lessons/:id/progress', authMiddleware, updateProgress);
+router.post('/lessons/:id/progress', authMiddleware, checkModuleAccess, updateProgress);
 
 router.get(
   '/admin/quiz-results',

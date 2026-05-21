@@ -19,6 +19,8 @@ model User {
   projects  Project[]
   progress  UserProgress[]
   notifications Notification[]
+  certificates Certificate[]
+  passwordResetOtps PasswordResetOtp[]
 
   @@index([role])
 }
@@ -32,6 +34,8 @@ model Course {
   isDeleted   Boolean   @default(false)
   modules     Module[]
   projects    Project[]
+  certificates Certificate[]
+  projectRequirements ProjectRequirement[]
 
   @@index([title])
 }
@@ -139,6 +143,38 @@ model Project {
   @@index([status])
 }
 
+model ProjectRequirement {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  order       Int      @default(1)
+  courseId    Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  isDeleted   Boolean  @default(false)
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([isDeleted])
+}
+
+model PasswordResetOtp {
+  id         Int       @id @default(autoincrement())
+  email      String
+  codeHash   String
+  expiresAt  DateTime
+  consumedAt DateTime?
+  attempts   Int       @default(0)
+  userId     Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId])
+  @@index([expiresAt])
+}
+
 model Notification {
   id        Int              @id @default(autoincrement())
   title     String
@@ -153,6 +189,54 @@ model Notification {
 
   @@index([userId, isRead])
   @@index([createdAt])
+}
+
+model CertificateTemplate {
+  id           Int           @id @default(autoincrement())
+  name         String
+  backgroundPath String
+  backgroundUrl  String
+  imageWidth   Int
+  imageHeight  Int
+  nameX        Int           @default(420)
+  nameY        Int           @default(320)
+  dateX        Int           @default(420)
+  dateY        Int           @default(470)
+  qrX          Int           @default(940)
+  qrY          Int           @default(470)
+  qrSize       Int           @default(120)
+  fontFamily   String        @default("Helvetica")
+  nameFontSize Int           @default(42)
+  dateFontSize Int           @default(18)
+  textColor    String        @default("#1A2E20")
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  certificates Certificate[]
+}
+
+model Certificate {
+  id              Int                 @id @default(autoincrement())
+  code            String              @unique
+  userName        String
+  learningPath    String
+  issuedAt        DateTime            @default(now())
+  pdfPath         String
+  pdfUrl          String
+  verificationUrl String
+  userId          Int
+  courseId        Int
+  templateId      Int
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course          Course              @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  template        CertificateTemplate @relation(fields: [templateId], references: [id])
+
+  @@unique([userId, courseId])
+  @@index([code])
+  @@index([userId])
+  @@index([courseId])
 }
 
 enum Role {

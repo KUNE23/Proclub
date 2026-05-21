@@ -1,4 +1,6 @@
 import prisma from '../config/prisma.js';
+import { generateCertificateForCourse } from '../services/certificateService.js';
+import { assertCourseAccess } from '../services/learningAccessService.js';
 
 const toNumber = (value) => Number(value);
 
@@ -91,6 +93,12 @@ export const getModulesByCourse = async (req, res) => {
       return res.status(400).json({ message: 'Invalid course ID' });
     }
 
+    await assertCourseAccess({
+      userId: req.user.id,
+      courseId,
+      role: req.user.role
+    });
+
     const modules = await prisma.module.findMany({
       where: { courseId, isDeleted: false },
       include: {
@@ -113,6 +121,10 @@ export const getModulesByCourse = async (req, res) => {
 
     return res.status(200).json({ status: 'success', modules });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ status: 'fail', message: error.message });
+    }
+
     return res.status(500).json({ error: error.message });
   }
 };
@@ -505,7 +517,10 @@ export const updateProgress = async (req, res) => {
       progress,
       completedCourseId: currentLesson?.module.courseId,
       completedModuleId: currentLesson?.moduleId,
-      moduleCompleted
+      moduleCompleted,
+      certificate: currentLesson?.module?.courseId
+        ? await generateCertificateForCourse(Number(userId), currentLesson.module.courseId)
+        : null
     });
   } catch (error) {
     console.error(error);

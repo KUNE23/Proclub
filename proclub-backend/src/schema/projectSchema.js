@@ -4,19 +4,20 @@ const submitProjectSchema = z.object({
     linkGithub: 
     z.string()
     .trim()
-    .min(2, "GitHub link must be at least 2 characters")
+    .min(12, "GitHub link must be at least 12 characters")
     .max(255, "GitHub link must be at most 255 characters")
     .url({ message: "Format link tidak valid" })
-    .refine((val) => val.includes('github.com'), {
+    .refine((val) => /^https:\/\/github\.com\/[^/\s]+\/[^/\s]+\/?$/.test(val), {
       message: "Hanya link GitHub yang diperbolehkan",
     }),
 
     note: 
     z.string()
-    .min(2, "Note must be at least 2 characters")
     .trim()
     .max(255, "Note must be at most 255 characters")
-    .transform((val) => val.replace(/<[^>]*>?/gm, '')),
+    .transform((val) => val.replace(/<[^>]*>?/gm, ''))
+    .optional()
+    .default(''),
 
     courseId:
     z.number(),
@@ -31,4 +32,10 @@ const submitProjectSchema = z.object({
 
   });
 
-export { submitProjectSchema };
+const projectRequirementSchema = z.object({
+  title: z.string().trim().min(3, 'Judul requirement minimal 3 karakter').max(120, 'Judul requirement maksimal 120 karakter'),
+  description: z.string().trim().min(8, 'Deskripsi requirement minimal 8 karakter').max(500, 'Deskripsi requirement maksimal 500 karakter'),
+  order: z.number().int().min(1, 'Urutan minimal 1').max(100, 'Urutan maksimal 100').optional()
+});
+
+export { submitProjectSchema, projectRequirementSchema };

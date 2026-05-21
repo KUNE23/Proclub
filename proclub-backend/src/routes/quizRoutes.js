@@ -1,6 +1,7 @@
 import express from 'express';
 import authMiddleware from '../middleware/authMiddleware.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
+import checkModuleAccess from '../middleware/checkModuleAccess.js';
 import {
   createQuiz,
   updateQuiz,
@@ -15,7 +16,7 @@ router.post('/quizzes', authMiddleware, roleMiddleware(['admin']), createQuiz);
 router.put('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), updateQuiz);
 router.delete('/quizzes/:id', authMiddleware, roleMiddleware(['admin']), deleteQuiz);
 
-router.get('/lessons/:lessonId/quizzes', authMiddleware, getQuizByLesson);
-router.post('/lessons/:id/submit', authMiddleware, submitQuiz);
+router.get('/lessons/:lessonId/quizzes', authMiddleware, checkModuleAccess, getQuizByLesson);
+router.post('/lessons/:id/submit', authMiddleware, checkModuleAccess, submitQuiz);
 
 export default router;

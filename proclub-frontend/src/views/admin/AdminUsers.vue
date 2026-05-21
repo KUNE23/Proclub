@@ -1,5 +1,5 @@
 <template>
-  <div class="p-8 max-w-7xl mx-auto space-y-6">
+  <div class="p-5 max-w-7xl mx-auto space-y-5">
 
     <div class="flex items-center justify-between">
       <div>
@@ -72,7 +72,7 @@
                 <router-link :to="`/admin/users/edit/${user.id}`" class="p-1.5 text-gray-400 hover:text-gray-700 transition-colors" title="Edit">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                 </router-link>
-                <button @click="deleteUser(user.id)" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete User">
+                <button @click="confirmDeleteUser(user)" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors" title="Delete User">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>
               </div>
@@ -125,28 +125,72 @@
   </div>
 </div>
     </div>
+    <Teleport to="body">
+      <div v-if="userToDelete" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-slate-950/50 backdrop-blur-sm" @click="userToDelete = null"></div>
+        <div class="relative z-10 w-full max-w-md rounded-2xl bg-white p-6 text-center shadow-2xl">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-red-50 text-red-600">
+            <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          </div>
+          <h3 class="text-lg font-bold text-[#1A2E20]">Hapus User?</h3>
+          <p class="my-4 text-[13px] leading-relaxed text-gray-500">
+            User "{{ userToDelete.name }}" akan dihapus dari sistem.
+          </p>
+          <div class="flex gap-3">
+            <button
+              type="button"
+              class="flex-1 rounded-xl bg-gray-100 py-2.5 text-[13px] font-semibold text-gray-600"
+              @click="userToDelete = null"
+            >
+              Batal
+            </button>
+            <button
+              type="button"
+              class="flex-1 rounded-xl bg-red-600 py-2.5 text-[13px] font-semibold text-white disabled:opacity-60"
+              :disabled="deleting"
+              @click="deleteSelectedUser"
+            >
+              {{ deleting ? 'Menghapus...' : 'Hapus' }}
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import api from '../../api/index.js'
+import { useToast } from 'vue-toastification'
 
 const users = ref([])
 const selectedRole = ref('All Roles');
+const toast = useToast()
+const userToDelete = ref(null)
+const deleting = ref(false)
 
 const currentPage = ref(1);
 const itemsPerPage = ref(5);
 
-const deleteUser = async (id) => {
-  if (confirm('Are you sure you want to delete this user?')) {
-    try {
-      await api.delete(`/${id}`)
-      users.value = users.value.filter(u => u.id !== id)
-    } catch (error) {
-      console.error('Failed to delete user:', error)
-      alert('Failed to delete user. Please try again.')
-    }
+const confirmDeleteUser = (user) => {
+  userToDelete.value = user
+}
+
+const deleteSelectedUser = async () => {
+  if (!userToDelete.value) return
+
+  deleting.value = true
+
+  try {
+    await api.delete(`/${userToDelete.value.id}`)
+    users.value = users.value.filter(u => u.id !== userToDelete.value.id)
+    toast.warning('User berhasil dihapus')
+    userToDelete.value = null
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal menghapus user')
+  } finally {
+    deleting.value = false
   }
 }
 

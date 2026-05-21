@@ -41,7 +41,7 @@
         <div>
           <div class="flex justify-between items-center mb-2 ml-1">
             <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider">Password</label>
-            <a href="#" class="text-xs font-bold text-[#2C7047] hover:text-[#235838] transition-colors">Forgot password?</a>
+            <router-link to="/forgot-password" class="text-xs font-bold text-[#2C7047] hover:text-[#235838] transition-colors">Forgot password?</router-link>
           </div>
           <input
             v-model="password" 

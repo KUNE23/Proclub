@@ -10,6 +10,8 @@ import ProfileView from '../views/ProfileView.vue'
 import Register from '../views/Register.vue'
 import EditProfileView from '../views/EditProfileView.vue'
 import LearningPath from '../views/LearningPath.vue'
+import CertificateVerifyView from '../views/CertificateVerifyView.vue'
+import ForgotPassword from '../views/ForgotPassword.vue'
 
 import AdminLayout from '../layouts/AdminLayout.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
@@ -22,6 +24,8 @@ import AdminModules from '../views/admin/modules/Index.vue'
 import AdminSettings from '../views/admin/AdminSettings.vue'
 import AdminQuizResult from '../views/admin/AdminQuizResult.vue'
 import AdminUserProgress from '../views/admin/AdminUserProgress.vue'
+import AdminCertificateTemplate from '../views/admin/AdminCertificateTemplate.vue'
+import AdminProjectReview from '../views/admin/AdminProjectReview.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -74,6 +78,17 @@ const router = createRouter({
       name: 'Login',
       component: Login,
       meta: { guestOnly: true }
+    },
+    {
+      path: '/forgot-password',
+      name: 'ForgotPassword',
+      component: ForgotPassword,
+      meta: { guestOnly: true }
+    },
+    {
+      path: '/certificate/:code',
+      name: 'CertificateVerify',
+      component: CertificateVerifyView
     },
     {
       path: '/courses/:courseId/lessons/:lessonId',
@@ -155,6 +170,16 @@ const router = createRouter({
           path: 'progress',
           name: 'AdminUserProgress',
           component: AdminUserProgress
+        },
+        {
+          path: 'project-review',
+          name: 'AdminProjectReview',
+          component: AdminProjectReview
+        },
+        {
+          path: 'certificates',
+          name: 'AdminCertificateTemplate',
+          component: AdminCertificateTemplate
         }
       ]
     }

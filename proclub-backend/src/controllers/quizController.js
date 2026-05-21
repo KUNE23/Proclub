@@ -1,4 +1,5 @@
 import prisma from '../config/prisma.js';
+import { generateCertificateForCourse } from '../services/certificateService.js';
 
 export const createQuiz = async (req, res) => {
   try {
@@ -189,6 +190,7 @@ export const submitQuiz = async (req, res) => {
       score,
       isPassed,
       moduleCompleted,
+      certificate: isPassed ? await generateCertificateForCourse(parseInt(userId), lessonData.module.courseId) : null,
       message: isPassed ? 'Selamat! Kamu lulus kuis.' : 'Skor kamu belum mencukupi.'
     });
 

@@ -19,8 +19,11 @@ import {
   Bell,
   CheckCircle2,
   Circle,
+  Instagram,
   Inbox,
-  Loader2
+  Loader2,
+  Music2,
+  Settings
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -180,6 +183,11 @@ const navigation = [
   { name: 'Projects', href: '/project-submission', icon: CheckSquare },
 ]
 
+const accountNavigation = [
+  { name: 'Profile', href: '/profile', icon: User },
+  { name: 'Settings', href: '/edit-profile', icon: Settings }
+]
+
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
 }
@@ -211,7 +219,7 @@ onUnmounted(() => {
       isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
     ]">
       <div class="h-full flex flex-col">
-       <div class="p-8 flex flex-col items-center gap-4">
+       <div class="px-6 py-7 flex flex-col items-center gap-3">
 
   <div class="w-16 h-16 flex items-center justify-center">
     <img 
@@ -231,41 +239,54 @@ onUnmounted(() => {
   </div>
 </div>
 
-        <nav class="flex-1 px-4 space-y-2 mt-4">
-          <RouterLink 
-            v-for="item in navigation" 
-            :key="item.name" 
-            :to="item.href"
-            :class="[
-              route.path === item.href 
-                ? 'bg-[#2C7047]/10 text-[#2C7047]' 
-                : 'text-gray-600 hover:bg-gray-100',
-              'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all'
-            ]"
-            @click="isSidebarOpen = false"
-          >
-            <component :is="item.icon" class="w-5 h-5" />
-            {{ item.name }}
-          </RouterLink>
+        <nav class="flex-1 px-4 space-y-6 mt-3 overflow-y-auto">
+          <div>
+            <p class="px-4 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Belajar</p>
+            <div class="space-y-1.5">
+              <RouterLink 
+                v-for="item in navigation" 
+                :key="item.name" 
+                :to="item.href"
+                :class="[
+                  route.path === item.href || (item.href !== '/' && route.path.startsWith(item.href))
+                    ? 'bg-[#2C7047]/10 text-[#2C7047]' 
+                    : 'text-gray-600 hover:bg-gray-100',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all'
+                ]"
+                @click="isSidebarOpen = false"
+              >
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.name }}
+              </RouterLink>
+            </div>
+          </div>
+
+          <div>
+            <p class="px-4 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Akun</p>
+            <div class="space-y-1.5">
+              <RouterLink 
+                v-for="item in accountNavigation"
+                :key="item.name"
+                :to="item.href"
+                :class="[
+                  route.path === item.href 
+                    ? 'bg-[#2C7047]/10 text-[#2C7047]' 
+                    : 'text-gray-600 hover:bg-gray-100',
+                  'flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium transition-all'
+                ]"
+                @click="isSidebarOpen = false"
+              >
+                <component :is="item.icon" class="w-5 h-5" />
+                {{ item.name }}
+              </RouterLink>
+            </div>
+          </div>
         </nav>
 
         <div class="px-4 pb-8 space-y-2 mt-auto">
-          <RouterLink 
-            to="/edit-profile"
-            :class="[
-              route.path === '/edit-profile' 
-                ? 'bg-[#2C7047]/10 text-[#2C7047]' 
-                : 'text-gray-600 hover:bg-gray-100',
-              'flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all'
-            ]"
-            @click="isSidebarOpen = false"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-            Account Settings
-          </RouterLink>
           <button 
             @click="handleLogout"
-            class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"
+            class="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl font-medium text-gray-600 hover:bg-red-50 hover:text-red-600 transition-all"
           >
             <LogOut class="w-5 h-5" />
             Logout
@@ -425,7 +446,7 @@ onUnmounted(() => {
         </div>
       </header>
 
-      <main class="flex-1 overflow-y-auto lg:p-20">
+      <main class="flex-1 overflow-y-auto px-4 py-5 lg:px-8 lg:py-7">
         <div class="mx-auto">
           <RouterView />
         </div>
@@ -436,10 +457,13 @@ onUnmounted(() => {
           <p class="text-sm text-gray-500 text-center">
             © 2026 Proclub STT Cipasung. Built with 💚 for the community.
           </p>
-          <div class="flex gap-6 text-sm font-medium text-gray-400">
-            <a href="#" class="hover:text-[#2C7047]">Instagram</a>
-            <a href="#" class="hover:text-[#2C7047]">Support</a>
-            <a href="#" class="hover:text-[#2C7047]">Privacy Policy</a>
+          <div class="flex gap-3 text-gray-400">
+            <a href="#" aria-label="Instagram Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
+              <Instagram class="h-5 w-5" />
+            </a>
+            <a href="#" aria-label="TikTok Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
+              <Music2 class="h-5 w-5" />
+            </a>
           </div>
         </div>
       </footer>

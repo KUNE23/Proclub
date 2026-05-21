@@ -204,37 +204,6 @@
         </div>
       </div>
 
-      <footer class="mt-16 grid grid-cols-1 gap-4 md:grid-cols-3 px-2">
-        <div
-          v-for="(info, key) in footerItems"
-          :key="key"
-          class="group flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-all hover:shadow-md hover:border-emerald-100"
-        >
-          <div
-            :class="[
-              'flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-transform group-hover:scale-110',
-              info.bg,
-              info.color
-            ]"
-          >
-            <component :is="info.icon" class="w-5 h-5" />
-          </div>
-
-          <div class="min-w-0">
-            <span class="text-[8px] font-black uppercase tracking-widest text-slate-400">
-              {{ info.label }}
-            </span>
-
-            <p class="truncate text-[13px] font-bold text-slate-900 mt-0.5">
-              {{ info.data.title }}
-            </p>
-
-            <span class="text-[10px] font-medium text-slate-500">
-              {{ info.data.sub }}
-            </span>
-          </div>
-        </div>
-      </footer>
     </div>
   </div>
 </template>
@@ -249,9 +218,7 @@ import {
   CheckCircle2,
   Layout,
   ArrowRight,
-  Calendar,
   FileText,
-  Trophy,
   Lock
 } from 'lucide-vue-next'
 
@@ -397,41 +364,6 @@ const reviewArchive = (module) => {
 
   router.push(`/courses/${courseId.value}/lessons/${lesson.id}`)
 }
-
-const footerItems = computed(() => ({
-  deadline: {
-    label: 'Tenggat Terdekat',
-    icon: Calendar,
-    bg: 'bg-rose-50',
-    color: 'text-rose-500',
-    data: {
-      title: 'Quiz Dasar Pemrograman',
-      sub: '1 Hari lagi'
-    }
-  },
-
-  resource: {
-    label: 'Materi Terbaru',
-    icon: FileText,
-    bg: 'bg-emerald-50',
-    color: 'text-emerald-600',
-    data: {
-      title: 'Module Array & Looping',
-      sub: 'PDF • 3 MB'
-    }
-  },
-
-  rank: {
-    label: 'Peringkat Kamu',
-    icon: Trophy,
-    bg: 'bg-blue-50',
-    color: 'text-blue-600',
-    data: {
-      title: 'Top 5 Student',
-      sub: 'Peringkat #5'
-    }
-  }
-}))
 
 onMounted(() => {
   fetchModules()
