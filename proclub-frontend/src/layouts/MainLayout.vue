@@ -338,7 +338,7 @@ onUnmounted(() => {
             >
               <div
                 v-if="showNotificationMenu"
-                class="absolute right-0 mt-3 w-[340px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl z-50"
+                class="fixed sm:absolute top-16 sm:top-auto left-4 right-4 sm:left-auto sm:right-0 mt-2 sm:mt-3 w-auto sm:w-[340px] overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-2xl z-50"
               >
                 <div class="flex items-center justify-between border-b border-gray-100 px-4 py-3">
                   <div>

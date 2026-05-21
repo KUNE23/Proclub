@@ -4,7 +4,6 @@ import Dashboard from '../views/Dashboard.vue'
 import Login from '../views/Login.vue'
 import CourseDetailView from '../views/CourseDetailView.vue'
 import ModuleView from '../views/ModuleView.vue'
-import QuizResultView from '../views/QuizResultView.vue'
 import ProjectSubmissionView from '../views/ProjectSubmissionView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import Register from '../views/Register.vue'
@@ -99,12 +98,6 @@ const router = createRouter({
     {
       path: '/courses/:courseId/modules/:moduleId',
       redirect: to => `/courses/${to.params.courseId}`
-    },
-    {
-      path: '/quiz-result/:id?',
-      name: 'QuizResult',
-      component: QuizResultView,
-      meta: { requiresAuth: true }
     },
     {
       path: '/admin',

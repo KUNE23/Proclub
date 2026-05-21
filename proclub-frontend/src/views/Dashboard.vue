@@ -129,12 +129,6 @@
                 </svg>
               </router-link>
 
-              <router-link
-                :to="`/courses/${featuredCourse.id}`"
-                class="text-[#2C7047] hover:bg-[#F2F7F4] transition-colors px-6 py-3 rounded-lg text-sm font-medium"
-              >
-                View Curriculum
-              </router-link>
             </div>
           </div>
         </div>
@@ -179,7 +173,7 @@
             </div>
 
             <router-link
-              to="/courses-catalog"
+              :to="`/courses/${featuredCourse.id}`"
               class="text-sm font-bold text-[#2C7047] hover:underline flex items-center gap-1"
             >
               See all courses

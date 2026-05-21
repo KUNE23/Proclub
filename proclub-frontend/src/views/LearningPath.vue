@@ -39,7 +39,7 @@
         </div>
 
         <div class="relative p-8 flex flex-col flex-1">
-          <div class="flex items-start justify-between mb-6">
+          <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
             <span 
               :class="[
                 'text-xs font-bold tracking-widest uppercase px-3 py-1.5 rounded-full',

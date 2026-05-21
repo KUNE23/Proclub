@@ -48,7 +48,7 @@
           <div class="flex items-center gap-3 w-full md:w-auto">
             <router-link
               to="/edit-profile"
-              class="flex-1 md:flex-none px-6 py-2.5 bg-white border border-[#E6EFE9] text-[#1A2E20] rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors"
+              class="flex-1 md:flex-none px-6 py-2.5 bg-white border border-[#E6EFE9] text-[#1A2E20] rounded-xl text-sm font-bold hover:bg-gray-50 transition-colors text-center"
             >
               Edit Profile
             </router-link>
@@ -157,7 +157,7 @@
                     </div>
 
                     <div
-                      class="px-3 py-1 rounded-full text-[11px] font-bold border"
+                      class="px-3 py-1 rounded-full text-[11px] font-bold border text-center shrink-0 whitespace-nowrap"
                       :class="course.progress >= 100
                         ? 'bg-green-50 text-green-600 border-green-200'
                         : course.progress > 0

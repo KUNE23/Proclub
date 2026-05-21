@@ -61,11 +61,11 @@
         </div>
       </div>
 
-      <div class="px-8 py-6 bg-gray-50/50 border-t border-[#E6EFE9] flex items-center justify-between">
+      <div class="px-8 py-6 bg-gray-50/50 border-t border-[#E6EFE9] flex flex-col sm:flex-row items-center justify-between gap-4">
         <button
           @click="prev"
           :disabled="currentIndex === 0"
-          class="px-6 py-2.5 text-[13px] font-bold text-gray-500 hover:text-[#1A2E20] disabled:opacity-30 transition-colors flex items-center gap-2"
+          class="w-full sm:w-auto px-6 py-2.5 text-[13px] font-bold text-gray-500 hover:text-[#1A2E20] disabled:opacity-30 transition-colors flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -77,7 +77,7 @@
         <button
           v-if="currentIndex < questions.length - 1"
           @click="next"
-          class="bg-[#2C7047] text-white px-8 py-2.5 rounded-xl text-[13px] font-bold shadow-lg shadow-[#2C7047]/20 hover:bg-[#235838] transition-all flex items-center gap-2"
+          class="w-full sm:w-auto bg-[#2C7047] text-white px-8 py-2.5 rounded-xl text-[13px] font-bold shadow-lg shadow-[#2C7047]/20 hover:bg-[#235838] transition-all flex items-center justify-center gap-2"
         >
           Selanjutnya
 
@@ -90,7 +90,7 @@
           v-else
           @click="submitQuiz"
           :disabled="isSubmitting || props.isCompleted"
-          class="bg-[#0A733F] text-white px-10 py-2.5 rounded-xl text-[13px] font-bold shadow-lg shadow-[#0A733F]/20 hover:bg-[#085a31] transition-all flex items-center gap-2 disabled:opacity-50"
+          class="w-full sm:w-auto bg-[#0A733F] text-white px-10 py-2.5 rounded-xl text-[13px] font-bold shadow-lg shadow-[#0A733F]/20 hover:bg-[#085a31] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           <svg
             v-if="isSubmitting"

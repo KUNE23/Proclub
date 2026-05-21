@@ -13,12 +13,6 @@
               Alur Belajar Kamu
             </h1>
 
-            <p class="mt-1 text-sm text-slate-500">
-              Profil Mahasiswa:
-              <span class="font-bold text-emerald-700">
-                {{ profile.name }}
-              </span>
-            </p>
           </div>
         </div>
       </header>
@@ -69,7 +63,7 @@
                 ]"
               >
                 <div class="mb-4 flex items-center justify-between">
-                  <div class="flex items-center gap-2">
+                  <div class="flex flex-wrap items-center gap-2">
                     <div
                       v-if="isLocked(module, index)"
                       class="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-50 text-slate-400 border border-slate-100"
@@ -86,13 +80,13 @@
 
                     <div
                       v-else
-                      class="flex items-center gap-2 px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest"
+                      class="flex items-center justify-center text-center gap-2 px-2.5 py-1 bg-emerald-600 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shrink-0 whitespace-nowrap"
                     >
-                      <Layout class="w-3 h-3" />
-                      {{ module.lessons.length }} Lesson
+                      <Layout class="w-3 h-3 shrink-0" />
+                      <span>{{ module.lessons.length }} Lesson</span>
                     </div>
 
-                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400">
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
                       {{
                         isLocked(module, index)
                           ? 'Belum Terbuka'
