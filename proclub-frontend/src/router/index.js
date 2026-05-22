@@ -25,6 +25,8 @@ import AdminQuizResult from '../views/admin/AdminQuizResult.vue'
 import AdminUserProgress from '../views/admin/AdminUserProgress.vue'
 import AdminCertificateTemplate from '../views/admin/AdminCertificateTemplate.vue'
 import AdminProjectReview from '../views/admin/AdminProjectReview.vue'
+import AdminUpcomingEvents from '../views/admin/AdminUpcomingEvents.vue'
+import AdminNotifications from '../views/admin/AdminNotifications.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -173,6 +175,16 @@ const router = createRouter({
           path: 'certificates',
           name: 'AdminCertificateTemplate',
           component: AdminCertificateTemplate
+        },
+        {
+          path: 'upcoming-events',
+          name: 'AdminUpcomingEvents',
+          component: AdminUpcomingEvents
+        },
+        {
+          path: 'notifications',
+          name: 'AdminNotifications',
+          component: AdminNotifications
         }
       ]
     }

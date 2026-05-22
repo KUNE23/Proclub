@@ -22,7 +22,7 @@
 
       <div class="text-center mb-10">
         <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Create Account</h1>
-        <p class="text-gray-500 mt-2 font-medium">Begin your journey start witth the Proclub collective today.</p>
+        <p class="text-gray-500 mt-2 font-medium">Begin your journey with the Proclub collective today.</p>
       </div>
       
       <form @submit.prevent="handleRegister" class="space-y-6">
@@ -59,6 +59,31 @@
             placeholder="••••••••"
             required 
           />
+          <div class="mt-3 rounded-2xl border border-[#E6EFE9] bg-[#F7FBF8] p-4">
+            <p class="text-xs font-bold text-[#1A2E20]">Ketentuan password</p>
+            <div class="mt-3 grid gap-2 text-[12px] font-semibold text-gray-500">
+              <div class="flex items-center gap-2" :class="passwordRules.length ? 'text-[#0D7A42]' : ''">
+                <CheckCircle2 class="h-4 w-4" />
+                Minimal 8 karakter
+              </div>
+              <div class="flex items-center gap-2" :class="passwordRules.uppercase ? 'text-[#0D7A42]' : ''">
+                <CheckCircle2 class="h-4 w-4" />
+                Minimal 1 huruf besar
+              </div>
+              <div class="flex items-center gap-2" :class="passwordRules.lowercase ? 'text-[#0D7A42]' : ''">
+                <CheckCircle2 class="h-4 w-4" />
+                Minimal 1 huruf kecil
+              </div>
+              <div class="flex items-center gap-2" :class="passwordRules.number ? 'text-[#0D7A42]' : ''">
+                <CheckCircle2 class="h-4 w-4" />
+                Minimal 1 angka
+              </div>
+              <div class="flex items-center gap-2" :class="passwordRules.special ? 'text-[#0D7A42]' : ''">
+                <CheckCircle2 class="h-4 w-4" />
+                Minimal 1 karakter spesial
+              </div>
+            </div>
+          </div>
         </div>
         
         <div class="pt-4">
@@ -85,10 +110,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router'; 
 import api from '../api/index.js';
 import { useToast } from "vue-toastification";
+import { CheckCircle2 } from 'lucide-vue-next';
 
 const toast = useToast();
 const isLoading = ref(false);
@@ -97,6 +123,15 @@ const email = ref('');
 const password = ref('');
 const name = ref('');
 const campusEmailPattern = /^[a-zA-Z0-9._%+-]+@student\.sttcipasung\.ac\.id$/;
+const passwordRules = computed(() => ({
+  length: password.value.length >= 8,
+  uppercase: /[A-Z]/.test(password.value),
+  lowercase: /[a-z]/.test(password.value),
+  number: /[0-9]/.test(password.value),
+  special: /[^A-Za-z0-9]/.test(password.value)
+}));
+
+const isPasswordValid = computed(() => Object.values(passwordRules.value).every(Boolean));
 
 const handleRegister = async () => {
   if (!campusEmailPattern.test(email.value.trim())) {
@@ -104,19 +139,22 @@ const handleRegister = async () => {
     return;
   }
 
+  if (!isPasswordValid.value) {
+    toast.warning('Password belum memenuhi ketentuan keamanan.');
+    return;
+  }
+
   isLoading.value = true;
   try {
-    const response = await api.post('auth/register', {
-      name: name.value,
-      email: email.value,
+    await api.post('auth/register', {
+      name: name.value.trim(),
+      email: email.value.trim(),
       password: password.value
     });
-  
-    localStorage.setItem('accessToken', response.data.token);
 
-    toast.success('Register Berhasil! Selamat datang di Proclub.');
+    toast.success('Registrasi berhasil. Akun kamu menunggu aktivasi admin.');
 
-    await router.push('/');
+    await router.push('/login');
     
   } catch (error) {
     const status = error.response?.status;

@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js'
 import xss from 'xss'
 import { generateCertificateForCourse } from '../services/certificateService.js'
+import { notifyAdmins } from '../services/adminNotificationService.js'
 
 const projectSelect = {
   id: true,
@@ -62,7 +63,15 @@ export const submitProject = async (req, res) => {
         courseId,
         moduleId,
         lessonId
-      }
+      },
+      select: projectSelect
+    });
+
+    await notifyAdmins({
+      title: 'Project submission baru',
+      message: `${project.user.name} mengirim project untuk learning path "${project.course.title}".`,
+      type: 'PROJECT_SUBMITTED',
+      link: '/admin/project-review'
     });
 
     return res.status(201).json({ 

@@ -1,6 +1,7 @@
 import prisma from '../config/prisma.js';
 import { generateCertificateForCourse } from '../services/certificateService.js';
 import { assertCourseAccess } from '../services/learningAccessService.js';
+import { notifyAdmins } from '../services/adminNotificationService.js';
 
 const toNumber = (value) => Number(value);
 
@@ -488,6 +489,18 @@ export const updateProgress = async (req, res) => {
     let moduleCompleted = false;
 
     if (currentLesson?.module && existingProgress?.status !== 'COMPLETED') {
+      const user = await prisma.user.findUnique({
+        where: { id: Number(userId) },
+        select: { name: true, email: true }
+      });
+
+      await notifyAdmins({
+        title: 'Lesson diselesaikan',
+        message: `${user?.name || 'Student'} menyelesaikan lesson "${currentLesson.title}" di module "${currentLesson.module.title}".`,
+        type: 'LESSON_COMPLETED',
+        link: `/admin/progress`
+      });
+
       const lessonIds = currentLesson.module.lessons.map((lesson) => lesson.id);
       const completedLessons = await prisma.userProgress.count({
         where: {
@@ -508,6 +521,42 @@ export const updateProgress = async (req, res) => {
             type: 'MODULE_COMPLETED',
             link: `/courses/${currentLesson.module.courseId}`
           }
+        });
+
+        await notifyAdmins({
+          title: 'Module diselesaikan',
+          message: `${user?.name || 'Student'} menyelesaikan module "${currentLesson.module.title}" di learning path "${currentLesson.module.course.title}".`,
+          type: 'MODULE_COMPLETED',
+          link: `/admin/progress`
+        });
+      }
+
+      const courseLessons = await prisma.lesson.findMany({
+        where: {
+          isDeleted: false,
+          module: {
+            courseId: currentLesson.module.courseId,
+            isDeleted: false
+          }
+        },
+        select: { id: true }
+      });
+      const courseLessonIds = courseLessons.map((lesson) => lesson.id);
+      const completedCourseLessons = await prisma.userProgress.count({
+        where: {
+          userId: Number(userId),
+          lessonId: { in: courseLessonIds },
+          status: 'COMPLETED'
+        }
+      });
+      const courseCompleted = courseLessonIds.length > 0 && completedCourseLessons === courseLessonIds.length;
+
+      if (courseCompleted) {
+        await notifyAdmins({
+          title: 'Learning path diselesaikan',
+          message: `${user?.name || 'Student'} menyelesaikan semua lesson di "${currentLesson.module.course.title}".`,
+          type: 'COURSE_COMPLETED',
+          link: `/admin/progress`
         });
       }
     }

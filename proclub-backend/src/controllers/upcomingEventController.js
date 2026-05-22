@@ -1,0 +1,153 @@
+import { z } from 'zod'
+import prisma from '../config/prisma.js'
+
+const eventSchema = z.object({
+  title: z.string().trim().min(3, 'Judul minimal 3 karakter').max(120, 'Judul maksimal 120 karakter'),
+  description: z.string().trim().max(500, 'Deskripsi maksimal 500 karakter').optional().nullable(),
+  location: z.string().trim().max(120, 'Lokasi maksimal 120 karakter').optional().nullable(),
+  eventDate: z.coerce.date(),
+  isActive: z.boolean().optional()
+}).refine((data) => data.eventDate >= new Date(new Date().setHours(0, 0, 0, 0)), {
+  message: 'Tanggal kegiatan tidak boleh sebelum hari ini',
+  path: ['eventDate']
+})
+
+const serializeEvent = (event) => ({
+  id: event.id,
+  title: event.title,
+  description: event.description,
+  location: event.location,
+  eventDate: event.eventDate,
+  isActive: event.isActive,
+  createdAt: event.createdAt,
+  updatedAt: event.updatedAt
+})
+
+export const getUpcomingEvents = async (req, res) => {
+  try {
+    const events = await prisma.upcomingEvent.findMany({
+      where: { isDeleted: false },
+      orderBy: { eventDate: 'asc' }
+    })
+
+    return res.json({
+      status: 'success',
+      data: events.map(serializeEvent)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal memuat jadwal kegiatan' })
+  }
+}
+
+export const getNearestUpcomingEvent = async (req, res) => {
+  try {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const event = await prisma.upcomingEvent.findFirst({
+      where: {
+        isDeleted: false,
+        isActive: true,
+        eventDate: {
+          gte: today
+        }
+      },
+      orderBy: { eventDate: 'asc' }
+    })
+
+    return res.json({
+      status: 'success',
+      data: event ? serializeEvent(event) : null
+    })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal memuat jadwal terdekat' })
+  }
+}
+
+export const createUpcomingEvent = async (req, res) => {
+  try {
+    const parsed = eventSchema.safeParse(req.body)
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message || 'Input jadwal tidak valid'
+      })
+    }
+
+    const event = await prisma.upcomingEvent.create({
+      data: parsed.data
+    })
+
+    return res.status(201).json({
+      message: 'Jadwal kegiatan berhasil dibuat',
+      data: serializeEvent(event)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal membuat jadwal kegiatan' })
+  }
+}
+
+export const updateUpcomingEvent = async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: 'ID jadwal tidak valid' })
+    }
+
+    const parsed = eventSchema.safeParse(req.body)
+
+    if (!parsed.success) {
+      return res.status(400).json({
+        message: parsed.error.issues[0]?.message || 'Input jadwal tidak valid'
+      })
+    }
+
+    const existing = await prisma.upcomingEvent.findFirst({
+      where: { id, isDeleted: false }
+    })
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Jadwal kegiatan tidak ditemukan' })
+    }
+
+    const event = await prisma.upcomingEvent.update({
+      where: { id },
+      data: parsed.data
+    })
+
+    return res.json({
+      message: 'Jadwal kegiatan berhasil diperbarui',
+      data: serializeEvent(event)
+    })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal memperbarui jadwal kegiatan' })
+  }
+}
+
+export const deleteUpcomingEvent = async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ message: 'ID jadwal tidak valid' })
+    }
+
+    const existing = await prisma.upcomingEvent.findFirst({
+      where: { id, isDeleted: false }
+    })
+
+    if (!existing) {
+      return res.status(404).json({ message: 'Jadwal kegiatan tidak ditemukan' })
+    }
+
+    await prisma.upcomingEvent.update({
+      where: { id },
+      data: { isDeleted: true, isActive: false }
+    })
+
+    return res.json({ message: 'Jadwal kegiatan berhasil dihapus' })
+  } catch (error) {
+    return res.status(500).json({ message: 'Gagal menghapus jadwal kegiatan' })
+  }
+}

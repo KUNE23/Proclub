@@ -2,10 +2,11 @@ import prisma from '../config/prisma.js'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { sendPasswordResetOtp } from '../services/emailService.js'
+import { notifyAdmins } from '../services/adminNotificationService.js'
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password} = req.body
+    const { name, email, password } = req.body
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -21,11 +22,27 @@ export const register = async (req, res) => {
       data: {
         name,
         email,
-        password: hashedPassword
+        password: hashedPassword,
+        isActive: false
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        createdAt: true
       }
     })
 
-    res.json({ message: 'Register success', user })
+    await notifyAdmins({
+      title: 'User baru mendaftar',
+      message: `${user.name} mendaftar menggunakan email ${user.email} dan menunggu aktivasi akun.`,
+      type: 'USER_REGISTERED',
+      link: '/admin/users'
+    })
+
+    res.json({ message: 'Registrasi berhasil. Akun kamu menunggu aktivasi admin.', user })
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
@@ -53,6 +70,10 @@ export const login = async (req, res) => {
       return res.status(401).json({ message: 'Wrong Email or Password' });
     }
 
+    if (!user.isActive) {
+      return res.status(403).json({ message: 'Akun kamu belum aktif. Tunggu aktivasi dari admin Proclub.' });
+    }
+
     const token = jwt.sign(
       { id: user.id, role: user.role },
       process.env.JWT_SECRET,
@@ -70,7 +91,8 @@ export const login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        role: user.role 
+        role: user.role,
+        isActive: user.isActive
       }
     });
   } catch (error) {
@@ -211,7 +233,8 @@ export const getMe = async (req, res) => {
       },
       select: {
         id: true,
-        name: true
+        name: true,
+        isActive: true
       }
     })
 

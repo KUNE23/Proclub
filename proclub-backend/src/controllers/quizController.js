@@ -1,5 +1,6 @@
 import prisma from '../config/prisma.js';
 import { generateCertificateForCourse } from '../services/certificateService.js';
+import { notifyAdmins } from '../services/adminNotificationService.js';
 
 export const createQuiz = async (req, res) => {
   try {
@@ -161,6 +162,18 @@ export const submitQuiz = async (req, res) => {
     let moduleCompleted = false;
 
     if (isPassed && existingProgress?.status !== 'COMPLETED') {
+      const user = await prisma.user.findUnique({
+        where: { id: parseInt(userId) },
+        select: { name: true, email: true }
+      });
+
+      await notifyAdmins({
+        title: 'Lesson quiz diselesaikan',
+        message: `${user?.name || 'Student'} menyelesaikan quiz "${lessonData.title}" dengan skor ${score}.`,
+        type: 'LESSON_COMPLETED',
+        link: '/admin/quiz-results'
+      });
+
       const lessonIds = lessonData.module.lessons.map((lesson) => lesson.id);
       const completedLessons = await prisma.userProgress.count({
         where: {
@@ -181,6 +194,42 @@ export const submitQuiz = async (req, res) => {
             type: 'MODULE_COMPLETED',
             link: `/courses/${lessonData.module.courseId}`
           }
+        });
+
+        await notifyAdmins({
+          title: 'Module diselesaikan',
+          message: `${user?.name || 'Student'} menyelesaikan module "${lessonData.module.title}" di learning path "${lessonData.module.course.title}".`,
+          type: 'MODULE_COMPLETED',
+          link: '/admin/progress'
+        });
+      }
+
+      const courseLessons = await prisma.lesson.findMany({
+        where: {
+          isDeleted: false,
+          module: {
+            courseId: lessonData.module.courseId,
+            isDeleted: false
+          }
+        },
+        select: { id: true }
+      });
+      const courseLessonIds = courseLessons.map((lesson) => lesson.id);
+      const completedCourseLessons = await prisma.userProgress.count({
+        where: {
+          userId: parseInt(userId),
+          lessonId: { in: courseLessonIds },
+          status: 'COMPLETED'
+        }
+      });
+      const courseCompleted = courseLessonIds.length > 0 && completedCourseLessons === courseLessonIds.length;
+
+      if (courseCompleted) {
+        await notifyAdmins({
+          title: 'Learning path diselesaikan',
+          message: `${user?.name || 'Student'} menyelesaikan semua lesson di "${lessonData.module.course.title}".`,
+          type: 'COURSE_COMPLETED',
+          link: '/admin/progress'
         });
       }
     }

@@ -10,6 +10,7 @@ export const getProfile = async (req, res) => {
         name: true,
         email: true,
         role: true,
+        isActive: true,
       }
     });
 
@@ -26,7 +27,7 @@ export const getProfile = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, isActive } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email, dan password diperlukan' });
@@ -47,13 +48,15 @@ export const createUser = async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        role: role || 'member'
+        role: role || 'member',
+        isActive: typeof isActive === 'boolean' ? isActive : true
       },
       select: {
         id: true,
         name: true,
         email: true,
         role: true,
+        isActive: true,
         createdAt: true
       }
     });
@@ -78,6 +81,8 @@ export const getUsers = async (req, res) => {
         name: true,
         email: true,
         role: true,   
+        isActive: true,
+        token: true,
         createdAt: true,
         updatedAt: true     
       },
@@ -87,7 +92,11 @@ export const getUsers = async (req, res) => {
     const totalUsers = await prisma.user.count();
 
     return res.json({
-      users,
+      users: users.map((user) => ({
+        ...user,
+        token: undefined,
+        isOnline: Boolean(user.token)
+      })),
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -117,6 +126,7 @@ export const getUserById = async (req, res) => {
         name: true,
         email: true,
         role: true,
+        isActive: true,
         createdAt: true,
         updatedAt: true
       }
@@ -142,7 +152,7 @@ export const updateUser = async (req, res) => {
       return res.status(400).json({ message: 'ID tidak valid' });
     }
 
-    const { name, email, currentPassword, password, role } = req.body;
+    const { name, email, currentPassword, password, role, isActive } = req.body;
 
     const userExists = await prisma.user.findUnique({
       where: { id: userId }
@@ -165,6 +175,10 @@ export const updateUser = async (req, res) => {
     if (name) updateData.name = name;
     if (email) updateData.email = email;
     if (role) updateData.role = role;
+    if (typeof isActive === 'boolean') {
+      updateData.isActive = isActive;
+      if (!isActive) updateData.token = null;
+    }
     
     if (password) {
       if (!currentPassword) {
@@ -187,6 +201,7 @@ export const updateUser = async (req, res) => {
         name: true,
         email: true,
         role: true,
+        isActive: true,
         updatedAt: true
       }
     });
@@ -261,6 +276,7 @@ export const updateProfile = async (req, res) => {
         name: true,
         email: true,
         role: true,
+        isActive: true,
         updatedAt: true
       }
     });
@@ -500,3 +516,54 @@ export const completeLesson = async (req, res) => {
     })
   }
 }
+
+export const updateUserActivation = async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id);
+    const { isActive } = req.body;
+
+    if (isNaN(userId)) {
+      return res.status(400).json({ message: 'ID tidak valid' });
+    }
+
+    if (typeof isActive !== 'boolean') {
+      return res.status(400).json({ message: 'Status aktivasi tidak valid' });
+    }
+
+    if (req.user.id === userId && !isActive) {
+      return res.status(400).json({ message: 'Admin tidak bisa menonaktifkan akun sendiri' });
+    }
+
+    const userExists = await prisma.user.findUnique({
+      where: { id: userId }
+    });
+
+    if (!userExists) {
+      return res.status(404).json({ message: 'User tidak ditemukan' });
+    }
+
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        isActive,
+        token: isActive ? userExists.token : null
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        updatedAt: true
+      }
+    });
+
+    return res.json({
+      message: isActive ? 'Akun berhasil diaktifkan' : 'Akun berhasil dinonaktifkan',
+      user
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: 'Internal Server Error' });
+  }
+};

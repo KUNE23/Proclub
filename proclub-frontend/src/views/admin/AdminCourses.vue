@@ -31,47 +31,49 @@
       </div>
 
       <template v-else>
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-white border-b border-[#E6EFE9]">
-              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest w-[40%]">Title</th>
-  
-              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Created </th>
-              <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-[#E6EFE9]">
-            <tr v-if="filteredCourses.length === 0">
-              <td colspan="5" class="py-16 text-center text-[13px] text-gray-400">No courses found.</td>
-            </tr>
-            <tr v-for="course in paginatedCourses" :key="course.id" class="hover:bg-gray-50 transition-colors">
-              <td class="py-4 px-6">
-                <div>
-                  <p class="text-[14px] font-bold text-[#1A2E20] leading-snug">{{ course.title }}</p>
-                  <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-1 max-w-xs">{{ course.description }}</p>
-                </div>
-              </td>
-             
-              <td class="py-4 px-6">
-                <span class="text-[12px] text-gray-500">{{ formatDate(course.createdAt) }}</span>
-              </td>
-              <td class="py-4 px-6 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <router-link :to="`/admin/courses/${course.id}/modules`" class="px-3 py-1.5 text-[11px] font-semibold text-[#0A733F] bg-[#F0FDF4] rounded-lg hover:bg-[#dcfce7] transition-colors flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-                    Modules
-                  </router-link>
-                  <button @click="openEditModal(course)" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
-                  </button>
-                  <button @click="confirmDelete(course)" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="overflow-x-auto w-full">
+          <table class="w-full text-left border-collapse min-w-[600px]">
+            <thead>
+              <tr class="bg-white border-b border-[#E6EFE9]">
+                <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest w-[40%]">Title</th>
+    
+                <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Created </th>
+                <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#E6EFE9]">
+              <tr v-if="filteredCourses.length === 0">
+                <td colspan="5" class="py-16 text-center text-[13px] text-gray-400">No courses found.</td>
+              </tr>
+              <tr v-for="course in paginatedCourses" :key="course.id" class="hover:bg-gray-50 transition-colors">
+                <td class="py-4 px-6">
+                  <div>
+                    <p class="text-[14px] font-bold text-[#1A2E20] leading-snug">{{ course.title }}</p>
+                    <p class="text-[11px] text-gray-500 mt-0.5 line-clamp-1 max-w-xs">{{ course.description }}</p>
+                  </div>
+                </td>
+               
+                <td class="py-4 px-6">
+                  <span class="text-[12px] text-gray-500">{{ formatDate(course.createdAt) }}</span>
+                </td>
+                <td class="py-4 px-6 text-right">
+                  <div class="flex items-center justify-end gap-2">
+                    <router-link :to="`/admin/courses/${course.id}/modules`" class="px-3 py-1.5 text-[11px] font-semibold text-[#0A733F] bg-[#F0FDF4] rounded-lg hover:bg-[#dcfce7] transition-colors flex items-center gap-1.5">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+                      Modules
+                    </router-link>
+                    <button @click="openEditModal(course)" class="p-1.5 text-gray-400 hover:text-blue-600 transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                    </button>
+                    <button @click="confirmDelete(course)" class="p-1.5 text-gray-400 hover:text-red-600 transition-colors">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
 
         <div class="p-4 border-t border-[#E6EFE9] flex items-center justify-between bg-white">
           <span class="text-[12px] text-gray-500 font-medium">

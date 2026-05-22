@@ -13,6 +13,7 @@ import userRoutes from './routes/userRoutes.js';
 import memberDashboardRoutes from './routes/memberDashboardROutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
+import upcomingEventRoutes from './routes/upcomingEventRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api', moduleRoutes);
 app.use('/api', quizRoutes);
 app.use('/api', notificationRoutes);
 app.use('/api', certificateRoutes);
+app.use('/api', upcomingEventRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 

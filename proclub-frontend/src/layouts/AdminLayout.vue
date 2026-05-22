@@ -1,127 +1,184 @@
 <template>
-  <div class="flex h-screen bg-[#FAFCFB] font-sans antialiased text-gray-800 overflow-hidden">
-    <aside class="w-64 bg-white border-r border-[#E6EFE9] flex flex-col shrink-0">
-      <div class="px-6 py-5 flex flex-col items-center text-center">
-        <img src="/proclub.png" alt="Proclub Logo" class="w-14 h-14 object-contain mb-3">
-        <div>
-          <h1 class="text-lg font-bold text-[#1A2E20] leading-tight">Proclub Learning Hub</h1>
-          <span class="text-[12px] font-medium text-gray-400 mt-1 block">Admin Console</span>
-        </div>
-      </div>
-      <nav class="flex-1 px-4 space-y-5 overflow-y-auto custom-scrollbar">
-        <div>
-          <p class="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Overview</p>
-          <div class="space-y-1.5">
-        <router-link to="/admin" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path === '/admin' ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path === '/admin'" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
-          Dashboard
-        </router-link>
-          </div>
-        </div>
-        <div>
-          <p class="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Learning CMS</p>
-          <div class="space-y-1.5">
-        <router-link to="/admin/courses" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/courses') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/courses')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          Courses / Quizzes
-        </router-link>
+  <div class="flex h-screen overflow-hidden bg-[#FAFCFB] font-sans text-gray-800">
+    <div
+      v-if="isSidebarOpen"
+      class="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-sm lg:hidden"
+      @click="closeSidebar"
+    ></div>
 
-        <router-link to="/admin/quiz-results" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/quiz-results') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/quiz-results')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-          Quiz Result
-        </router-link>
-        <router-link to="/admin/project-review" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/project-review') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/project-review')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <ClipboardCheck class="w-5 h-5" />
-          Project Review
-        </router-link>
-        <router-link to="/admin/certificates" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/certificates') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/certificates')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.75L11.25 15 15 9.75M12 3l7 4v5c0 5-3.5 8.5-7 9-3.5-.5-7-4-7-9V7l7-4z"></path></svg>
-          Certificates
-        </router-link>
-          </div>
-        </div>
-        <div>
-          <p class="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">Members</p>
+    <aside
+      class="fixed inset-y-0 left-0 z-40 flex w-64 shrink-0 flex-col border-r border-[#E6EFE9] bg-white transition-transform duration-300 lg:static lg:translate-x-0"
+      :class="isSidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    >
+      <div class="px-6 py-5 text-center">
+        <img src="/proclub.png" alt="Proclub Logo" class="mx-auto mb-3 h-14 w-14 object-contain">
+        <h1 class="text-lg font-bold leading-tight text-[#1A2E20]">Proclub Learning Hub</h1>
+        <span class="mt-1 block text-[12px] font-medium text-gray-400">Admin Console</span>
+      </div>
+
+      <nav class="custom-scrollbar flex-1 space-y-5 overflow-y-auto px-4">
+        <div v-for="group in navGroups" :key="group.title">
+          <p class="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-gray-300">{{ group.title }}</p>
           <div class="space-y-1.5">
-        <router-link to="/admin/users" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/users') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/users')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-          Users
-        </router-link>
-        <router-link to="/admin/progress" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/progress') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/progress')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
-          User Progress
-        </router-link>
-        <router-link to="/admin/settings" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-semibold transition-colors relative" :class="route.path.startsWith('/admin/settings') ? 'text-[#0D7A42] bg-[#F2F7F4]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'">
-          <div v-if="route.path.startsWith('/admin/settings')" class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-[#16A34A] rounded-r-full -ml-4"></div>
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          Account Settings
-        </router-link>
+            <router-link
+              v-for="item in group.items"
+              :key="item.to"
+              :to="item.to"
+              class="relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-semibold transition-colors"
+              :class="item.active(route.path) ? 'bg-[#F2F7F4] text-[#0D7A42]' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'"
+            >
+              <div v-if="item.active(route.path)" class="absolute left-0 top-1/2 -ml-4 h-6 w-1 -translate-y-1/2 rounded-r-full bg-[#16A34A]"></div>
+              <component :is="item.icon" class="h-5 w-5" />
+              {{ item.label }}
+            </router-link>
           </div>
         </div>
       </nav>
-      <div class="relative p-4 mx-4 mb-6 mt-auto" ref="profileRef">
+
+      <div class="relative mx-4 mb-6 mt-auto p-4" ref="profileRef">
         <button
+          type="button"
+          class="flex w-full items-center gap-3 rounded-xl bg-[#0A733F] px-3 py-2.5 text-white shadow-lg shadow-[#0A733F]/20 transition-colors hover:bg-[#085a31]"
           @click="toggleProfileMenu"
-          class="w-full bg-[#0A733F] rounded-xl flex items-center gap-3 text-white shadow-lg shadow-[#0A733F]/20 px-3 py-2.5 hover:bg-[#085a31] transition-colors"
         >
-          <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center shrink-0 text-[13px] font-bold tracking-wide">
+          <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-white/20 text-[13px] font-bold tracking-wide">
             {{ initials }}
           </div>
           <div class="min-w-0 flex-1 text-left">
-            <p class="text-[13px] font-bold truncate text-white">{{ user.name || 'Admin' }}</p>
-            <p class="text-[10px] text-green-100 truncate capitalize">{{ user.role || 'Administrator' }}</p>
+            <p class="truncate text-[13px] font-bold text-white">{{ user.name || 'Admin' }}</p>
+            <p class="truncate text-[10px] capitalize text-green-100">{{ user.role || 'Administrator' }}</p>
           </div>
-          <svg class="w-4 h-4 text-white/60 shrink-0 transition-transform duration-200" :class="showProfileMenu ? '-rotate-180' : ''" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          <ChevronDown class="h-4 w-4 shrink-0 text-white/60 transition-transform duration-200" :class="showProfileMenu ? '-rotate-180' : ''" />
         </button>
 
         <Transition
           enter-active-class="transition-all duration-200 ease-out"
-          enter-from-class="opacity-0 translate-y-2"
-          enter-to-class="opacity-100 translate-y-0"
+          enter-from-class="translate-y-2 opacity-0"
+          enter-to-class="translate-y-0 opacity-100"
           leave-active-class="transition-all duration-150 ease-in"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 translate-y-2"
+          leave-from-class="translate-y-0 opacity-100"
+          leave-to-class="translate-y-2 opacity-0"
         >
-          <div v-if="showProfileMenu" class="absolute bottom-full left-0 right-0 mb-2 mx-0 bg-white rounded-xl shadow-xl border border-[#E6EFE9] overflow-hidden z-50">
-            <div class="px-4 py-3 border-b border-[#E6EFE9]">
-              <p class="text-[12px] font-bold text-[#1A2E20] truncate">{{ user.name || 'Admin' }}</p>
-              <p class="text-[11px] text-gray-400 truncate">{{ user.email || '' }}</p>
+          <div v-if="showProfileMenu" class="absolute bottom-full left-0 right-0 z-50 mb-2 overflow-hidden rounded-xl border border-[#E6EFE9] bg-white shadow-xl">
+            <div class="border-b border-[#E6EFE9] px-4 py-3">
+              <p class="truncate text-[12px] font-bold text-[#1A2E20]">{{ user.name || 'Admin' }}</p>
+              <p class="truncate text-[11px] text-gray-400">{{ user.email || '' }}</p>
             </div>
             <button
+              type="button"
+              class="flex w-full items-center gap-2.5 px-4 py-3 text-[13px] font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-60"
+              :disabled="isLoggingOut"
               @click="handleLogout"
-              class="w-full flex items-center gap-2.5 px-4 py-3 text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-colors"
             >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-              Logout
+              <Loader2 v-if="isLoggingOut" class="h-4 w-4 animate-spin" />
+              <LogOut v-else class="h-4 w-4" />
+              {{ isLoggingOut ? 'Logout...' : 'Logout' }}
             </button>
           </div>
         </Transition>
       </div>
     </aside>
 
-    <div class="flex-1 flex flex-col overflow-hidden bg-[#FAFCFB]">
-  
-      <header class="h-16 border-b border-[#E6EFE9] flex items-center justify-between px-8 shrink-0 bg-white shadow-sm z-10">
-        <div class="flex-1 max-w-xl">
-          <div class="relative group">
-          <h2 class="text-sm font-medium text-gray-500 uppercase tracking-wider">
-            STT Cipasung • Informatics Engineering
+    <div class="flex min-w-0 flex-1 flex-col overflow-hidden bg-[#FAFCFB]">
+      <header class="z-10 flex h-16 shrink-0 items-center justify-between border-b border-[#E6EFE9] bg-white px-4 shadow-sm sm:px-6 lg:px-8">
+        <div class="flex min-w-0 items-center gap-3">
+          <button
+            type="button"
+            class="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6EFE9] text-[#0D7A42] lg:hidden"
+            @click="toggleSidebar"
+          >
+            <X v-if="isSidebarOpen" class="h-5 w-5" />
+            <Menu v-else class="h-5 w-5" />
+          </button>
+          <h2 class="truncate text-xs font-bold uppercase tracking-wider text-gray-500 sm:text-sm">
+            STT Cipasung - Informatics Engineering
           </h2>
-           
-          </div>
         </div>
-        
-        <div></div>
+
+        <div class="relative" ref="notificationRef">
+          <button
+            type="button"
+            class="relative inline-flex h-10 w-10 items-center justify-center rounded-xl border border-[#E6EFE9] text-[#0D7A42] transition hover:bg-[#F2F7F4]"
+            @click="toggleNotificationMenu"
+          >
+            <Bell class="h-5 w-5" />
+            <span
+              v-if="unreadCount > 0"
+              class="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-black text-white"
+            >
+              {{ unreadCount > 9 ? '9+' : unreadCount }}
+            </span>
+          </button>
+
+          <Transition
+            enter-active-class="transition-all duration-200 ease-out"
+            enter-from-class="translate-y-2 opacity-0"
+            enter-to-class="translate-y-0 opacity-100"
+            leave-active-class="transition-all duration-150 ease-in"
+            leave-from-class="translate-y-0 opacity-100"
+            leave-to-class="translate-y-2 opacity-0"
+          >
+            <div v-if="showNotificationMenu" class="absolute right-0 top-12 z-50 w-[min(92vw,380px)] overflow-hidden rounded-2xl border border-[#E6EFE9] bg-white shadow-2xl">
+              <div class="flex items-center justify-between border-b border-[#E6EFE9] px-4 py-3">
+                <div>
+                  <p class="text-sm font-black text-[#07111F]">Notifikasi Admin</p>
+                  <p class="text-xs text-gray-400">{{ unreadCount }} belum dibaca</p>
+                </div>
+                <button
+                  type="button"
+                  class="text-xs font-black text-[#0D7A42] disabled:text-gray-300"
+                  :disabled="unreadCount === 0"
+                  @click="readAllNotifications"
+                >
+                  Baca semua
+                </button>
+              </div>
+
+              <div v-if="isLoadingNotifications" class="flex items-center justify-center py-10">
+                <Loader2 class="h-6 w-6 animate-spin text-[#0D7A42]" />
+              </div>
+
+              <div v-else-if="notifications.length === 0" class="flex flex-col items-center justify-center gap-2 px-6 py-10 text-center">
+                <Inbox class="h-8 w-8 text-gray-300" />
+                <p class="text-sm font-semibold text-gray-400">Belum ada notifikasi</p>
+              </div>
+
+              <div v-else class="max-h-[360px] overflow-y-auto">
+                <button
+                  v-for="notification in notifications"
+                  :key="notification.id"
+                  type="button"
+                  class="flex w-full items-start gap-3 border-b border-[#F1F5F2] px-4 py-3 text-left transition hover:bg-[#F8FBF9]"
+                  @click="readNotification(notification)"
+                >
+                  <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl" :class="iconStyle(notification.type)">
+                    <component :is="notificationIcon(notification.type)" class="h-4 w-4" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-start justify-between gap-2">
+                      <p class="line-clamp-1 text-[13px] font-bold text-[#1A2E20]">{{ notification.title }}</p>
+                      <Circle v-if="!notification.isRead" class="mt-1 h-2.5 w-2.5 shrink-0 fill-red-500 text-red-500" />
+                    </div>
+                    <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{{ notification.message }}</p>
+                    <p class="mt-2 text-[11px] font-semibold text-gray-400">{{ formatNotificationDate(notification.createdAt) }}</p>
+                  </div>
+                </button>
+              </div>
+
+              <router-link
+                to="/admin/notifications"
+                class="flex items-center justify-center gap-2 bg-[#F8FBF9] px-4 py-3 text-xs font-black text-[#0D7A42]"
+                @click="showNotificationMenu = false"
+              >
+                Lihat semua notifikasi
+                <ArrowRight class="h-3.5 w-3.5" />
+              </router-link>
+            </div>
+          </Transition>
+        </div>
       </header>
-      
-      <main class="flex-1 overflow-y-auto custom-scrollbar">
+
+      <main class="custom-scrollbar min-w-0 flex-1 overflow-y-auto">
         <router-view></router-view>
       </main>
     </div>
@@ -129,15 +186,78 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { ClipboardCheck } from 'lucide-vue-next'
-const route  = useRoute()
-const router = useRouter()
+import { useToast } from 'vue-toastification'
+import api from '../api/index.js'
+import { getNotifications, markAllNotificationsAsRead, markNotificationAsRead } from '../services/notificationService.js'
+import {
+  ArrowRight,
+  BarChart3,
+  Bell,
+  BookOpen,
+  BookCheck,
+  CalendarDays,
+  ChevronDown,
+  CheckCircle2,
+  Circle,
+  ClipboardCheck,
+  FolderGit2,
+  Gauge,
+  Inbox,
+  LayoutDashboard,
+  Loader2,
+  LogOut,
+  Menu,
+  Settings,
+  ShieldCheck,
+  TrendingUp,
+  UserPlus,
+  Users,
+  X
+} from 'lucide-vue-next'
 
+const route = useRoute()
+const router = useRouter()
+const toast = useToast()
 const user = ref({ name: '', email: '', role: '' })
 const showProfileMenu = ref(false)
+const showNotificationMenu = ref(false)
+const isSidebarOpen = ref(false)
+const isLoggingOut = ref(false)
 const profileRef = ref(null)
+const notificationRef = ref(null)
+const notifications = ref([])
+const unreadCount = ref(0)
+const isLoadingNotifications = ref(false)
+
+const navGroups = [
+  {
+    title: 'Overview',
+    items: [
+      { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, active: (path) => path === '/admin' }
+    ]
+  },
+  {
+    title: 'Learning CMS',
+    items: [
+      { to: '/admin/courses', label: 'Courses / Quizzes', icon: BookOpen, active: (path) => path.startsWith('/admin/courses') },
+      { to: '/admin/quiz-results', label: 'Quiz Result', icon: BarChart3, active: (path) => path.startsWith('/admin/quiz-results') },
+      { to: '/admin/project-review', label: 'Project Review', icon: ClipboardCheck, active: (path) => path.startsWith('/admin/project-review') },
+      { to: '/admin/certificates', label: 'Certificates', icon: ShieldCheck, active: (path) => path.startsWith('/admin/certificates') },
+      { to: '/admin/upcoming-events', label: 'Upcoming Events', icon: CalendarDays, active: (path) => path.startsWith('/admin/upcoming-events') }
+    ]
+  },
+  {
+    title: 'Members',
+    items: [
+      { to: '/admin/users', label: 'Users', icon: Users, active: (path) => path.startsWith('/admin/users') },
+      { to: '/admin/progress', label: 'User Progress', icon: TrendingUp, active: (path) => path.startsWith('/admin/progress') },
+      { to: '/admin/notifications', label: 'Notifications', icon: Bell, active: (path) => path.startsWith('/admin/notifications') },
+      { to: '/admin/settings', label: 'Account Settings', icon: Settings, active: (path) => path.startsWith('/admin/settings') }
+    ]
+  }
+]
 
 const initials = computed(() => {
   const name = user.value.name || ''
@@ -147,36 +267,156 @@ const initials = computed(() => {
   return 'AD'
 })
 
-function loadUser() {
+const toggleSidebar = () => {
+  isSidebarOpen.value = !isSidebarOpen.value
+}
+
+const closeSidebar = () => {
+  isSidebarOpen.value = false
+}
+
+const toggleProfileMenu = () => {
+  showProfileMenu.value = !showProfileMenu.value
+  showNotificationMenu.value = false
+}
+
+const toggleNotificationMenu = async () => {
+  showNotificationMenu.value = !showNotificationMenu.value
+  showProfileMenu.value = false
+
+  if (showNotificationMenu.value) {
+    await fetchNotifications()
+  }
+}
+
+const handleClickOutside = (event) => {
+  if (profileRef.value && !profileRef.value.contains(event.target)) {
+    showProfileMenu.value = false
+  }
+
+  if (notificationRef.value && !notificationRef.value.contains(event.target)) {
+    showNotificationMenu.value = false
+  }
+}
+
+const loadUser = () => {
   try {
     const raw = localStorage.getItem('user')
     if (raw && raw !== 'undefined') user.value = JSON.parse(raw)
   } catch {}
 }
 
-function toggleProfileMenu() {
-  showProfileMenu.value = !showProfileMenu.value
-}
+const handleLogout = async () => {
+  isLoggingOut.value = true
 
-function handleClickOutside(e) {
-  if (profileRef.value && !profileRef.value.contains(e.target)) {
+  try {
+    await api.post('/auth/logout')
+  } catch (error) {
+    console.warn('Logout API error:', error)
+  } finally {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
     showProfileMenu.value = false
+    toast.success('Logout berhasil. Sampai jumpa!')
+    isLoggingOut.value = false
+    router.push('/login')
   }
 }
 
-function handleLogout() {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
-  router.push('/login')
+const fetchNotifications = async () => {
+  isLoadingNotifications.value = true
+
+  try {
+    const response = await getNotifications({ limit: 8 })
+    notifications.value = Array.isArray(response.data?.data) ? response.data.data : []
+    unreadCount.value = response.data?.unreadCount || 0
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memuat notifikasi admin')
+  } finally {
+    isLoadingNotifications.value = false
+  }
 }
+
+const readNotification = async (notification) => {
+  try {
+    if (!notification.isRead) {
+      await markNotificationAsRead(notification.id)
+      notification.isRead = true
+      unreadCount.value = Math.max(unreadCount.value - 1, 0)
+    }
+
+    showNotificationMenu.value = false
+
+    if (notification.link) {
+      router.push(notification.link)
+    }
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal membuka notifikasi')
+  }
+}
+
+const readAllNotifications = async () => {
+  if (!unreadCount.value) return
+
+  try {
+    await markAllNotificationsAsRead()
+    notifications.value = notifications.value.map((notification) => ({
+      ...notification,
+      isRead: true
+    }))
+    unreadCount.value = 0
+    toast.success('Semua notifikasi admin sudah dibaca')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal memperbarui notifikasi admin')
+  }
+}
+
+const notificationIcon = (type) => {
+  const icons = {
+    USER_REGISTERED: UserPlus,
+    LESSON_COMPLETED: BookCheck,
+    MODULE_COMPLETED: CheckCircle2,
+    COURSE_COMPLETED: Gauge,
+    PROJECT_SUBMITTED: FolderGit2
+  }
+
+  return icons[type] || Bell
+}
+
+const iconStyle = (type) => {
+  if (type === 'USER_REGISTERED') return 'bg-blue-50 text-blue-600'
+  if (type === 'PROJECT_SUBMITTED') return 'bg-amber-50 text-amber-600'
+  if (type === 'COURSE_COMPLETED') return 'bg-emerald-100 text-emerald-700'
+  return 'bg-[#EAF7EF] text-[#0D7A42]'
+}
+
+const formatNotificationDate = (date) => {
+  if (!date) return ''
+
+  return new Intl.DateTimeFormat('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit'
+  }).format(new Date(date))
+}
+
+watch(() => route.path, () => {
+  closeSidebar()
+  showProfileMenu.value = false
+  showNotificationMenu.value = false
+})
 
 onMounted(() => {
   loadUser()
+  fetchNotifications()
   document.addEventListener('click', handleClickOutside)
+  window.addEventListener('notification:refresh', fetchNotifications)
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
+  window.removeEventListener('notification:refresh', fetchNotifications)
 })
 </script>
 

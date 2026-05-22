@@ -33,7 +33,7 @@
             type="email" 
             autofocus
             class="block w-full border border-gray-200 rounded-2xl shadow-sm p-4 focus:ring-2 focus:ring-[#2C7047]/20 focus:border-[#2C7047] transition-all bg-gray-50/50 focus:bg-white text-gray-900 outline-none" 
-            placeholder="name@example.com" 
+            placeholder="name@student.sttcipasung.ac.id"
             required 
           />
         </div>

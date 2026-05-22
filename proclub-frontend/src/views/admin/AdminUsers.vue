@@ -33,13 +33,14 @@
       </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-[#E6EFE9] overflow-hidden shadow-sm">
-      <table class="w-full text-left border-collapse">
+    <div class="overflow-x-auto rounded-xl border border-[#E6EFE9] bg-white shadow-sm">
+      <table class="min-w-[900px] w-full text-left border-collapse">
         <thead>
           <tr class="bg-white border-b border-[#E6EFE9]">
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Name</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Email</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Role</th>
+            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Status</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
           </tr>
         </thead>
@@ -47,7 +48,14 @@
           <tr v-for="user in paginatedUsers" :key="user.id" class="hover:bg-gray-50 transition-colors">
             <td class="py-4 px-6">
               <div class="flex items-center gap-3">
-                <img :src="user.avatar" :alt="user.name" class="w-10 h-10 rounded-full object-cover border border-[#E6EFE9]">
+                <div class="relative h-10 w-10 shrink-0">
+                  <img :src="user.avatar" :alt="user.name" class="h-10 w-10 rounded-full border border-[#E6EFE9] object-cover">
+                  <span
+                    v-if="user.isOnline"
+                    class="absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white bg-emerald-500"
+                    title="Sedang login"
+                  ></span>
+                </div>
                 <div>
                   <p class="text-[14px] font-bold text-[#1A2E20]">{{ user.name }}</p>
                   <p class="text-[11px] text-gray-400 mt-0.5">Joined {{ user.joinedAt }}</p>
@@ -66,6 +74,26 @@
                 }">
                 {{ user.role }}
               </span>
+            </td>
+            <td class="py-4 px-6">
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  :disabled="activatingUserId === user.id"
+                  class="relative h-7 w-12 rounded-full transition disabled:opacity-60"
+                  :class="user.isActive ? 'bg-[#0D7A42]' : 'bg-gray-300'"
+                  :title="user.isActive ? 'Nonaktifkan akun' : 'Aktifkan akun'"
+                  @click="toggleActivation(user)"
+                >
+                  <span
+                    class="absolute top-1 h-5 w-5 rounded-full bg-white shadow transition"
+                    :class="user.isActive ? 'left-6' : 'left-1'"
+                  ></span>
+                </button>
+                <span class="text-[12px] font-bold" :class="user.isActive ? 'text-[#0D7A42]' : 'text-gray-400'">
+                  {{ user.isActive ? 'Aktif' : 'Menunggu' }}
+                </span>
+              </div>
             </td>
             <td class="py-4 px-6 text-right">
               <div class="flex items-center justify-end gap-2">
@@ -169,6 +197,7 @@ const selectedRole = ref('All Roles');
 const toast = useToast()
 const userToDelete = ref(null)
 const deleting = ref(false)
+const activatingUserId = ref(null)
 
 const currentPage = ref(1);
 const itemsPerPage = ref(5);
@@ -194,6 +223,29 @@ const deleteSelectedUser = async () => {
   }
 }
 
+const toggleActivation = async (user) => {
+  try {
+    activatingUserId.value = user.id
+    const nextStatus = !user.isActive
+    const response = await api.patch(`/${user.id}/activation`, { isActive: nextStatus })
+    const updatedUser = response.data?.user
+
+    users.value = users.value.map((item) => {
+      if (item.id !== user.id) return item
+      return {
+        ...item,
+        isActive: updatedUser?.isActive ?? nextStatus
+      }
+    })
+
+    toast.success(nextStatus ? 'Akun berhasil diaktifkan' : 'Akun berhasil dinonaktifkan')
+  } catch (error) {
+    toast.error(error.response?.data?.message || 'Gagal mengubah status akun')
+  } finally {
+    activatingUserId.value = null
+  }
+}
+
 const fetchUsers = async () => {
   try {
     const response = await api.get('/')
@@ -212,6 +264,8 @@ const fetchUsers = async () => {
           name: u.name || 'Unknown User',
           email: u.email || '-',
           role: u.role || 'member',
+          isActive: u.isActive ?? true,
+          isOnline: Boolean(u.isOnline),
           progress: u.progress || 0, 
           joinedAt: joinedAt,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&background=random`

@@ -23,7 +23,8 @@ import {
   Inbox,
   Loader2,
   Music2,
-  Settings
+  Settings,
+  Zap
 } from 'lucide-vue-next'
 
 const route = useRoute()
@@ -40,6 +41,11 @@ const unreadCount = ref(0)
 const isLoadingNotifications = ref(false)
 const profileRef = ref(null)
 const notificationRef = ref(null)
+const learningStats = ref({
+  level: 1,
+  currentLevelXp: 0,
+  nextLevelXp: 1200
+})
 
 const toggleProfileMenu = () => {
   showProfileMenu.value = !showProfileMenu.value
@@ -188,14 +194,33 @@ const accountNavigation = [
   { name: 'Settings', href: '/edit-profile', icon: Settings }
 ]
 
+const xpProgress = computed(() => {
+  const current = learningStats.value.currentLevelXp || 0
+  const next = learningStats.value.nextLevelXp || 1200
+
+  return Math.min(Math.round((current / next) * 100), 100)
+})
+
 const toggleSidebar = () => {
   isSidebarOpen.value = !isSidebarOpen.value
+}
+
+const fetchLearningStats = async () => {
+  try {
+    const response = await api.get('/member/dashboard')
+    const data = response.data?.data || response.data
+
+    if (data.learningStats) {
+      learningStats.value = data.learningStats
+    }
+  } catch {}
 }
 
 onMounted(() => {
   loadFromStorage();
   fetchUserProfile();
   fetchNotifications();
+  fetchLearningStats();
   document.addEventListener('click', handleClickOutside)
   window.addEventListener('notification:refresh', fetchNotifications)
 });
@@ -279,6 +304,21 @@ onUnmounted(() => {
                 <component :is="item.icon" class="w-5 h-5" />
                 {{ item.name }}
               </RouterLink>
+            </div>
+          </div>
+
+          <div class="mx-2 rounded-2xl border border-[#E6EFE9] bg-[#F8FBF9] p-4">
+            <div class="mb-3 flex items-center justify-between">
+              <div>
+                <p class="text-sm font-black text-[#1A2E20]">Level {{ learningStats.level || 1 }}</p>
+                <p class="text-[11px] font-semibold text-gray-400">{{ learningStats.currentLevelXp || 0 }} / {{ learningStats.nextLevelXp || 1200 }} XP</p>
+              </div>
+              <div class="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
+                <Zap class="h-5 w-5" />
+              </div>
+            </div>
+            <div class="h-2 overflow-hidden rounded-full bg-white">
+              <div class="h-full rounded-full bg-[#2C7047] transition-all duration-700" :style="{ width: `${xpProgress}%` }"></div>
             </div>
           </div>
         </nav>
@@ -384,7 +424,7 @@ onUnmounted(() => {
                         <p class="line-clamp-1 text-[13px] font-bold text-[#1A2E20]">{{ notification.title }}</p>
                         <Circle v-if="!notification.isRead" class="mt-1 h-2.5 w-2.5 shrink-0 fill-red-500 text-red-500" />
                       </div>
-                      <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{{ notification.message }}</p>
+                      <p class="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500 break-all sm:break-words">{{ notification.message }}</p>
                       <p class="mt-2 text-[10px] font-semibold uppercase tracking-wider text-gray-300">
                         {{ formatNotificationDate(notification.createdAt) }}
                       </p>

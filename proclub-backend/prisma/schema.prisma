@@ -14,6 +14,7 @@ model User {
   password  String
   role      Role           @default(member)
   token     String?
+  isActive  Boolean        @default(true)
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   projects  Project[]
@@ -23,6 +24,7 @@ model User {
   passwordResetOtps PasswordResetOtp[]
 
   @@index([role])
+  @@index([isActive])
 }
 
 model Course {
@@ -239,6 +241,21 @@ model Certificate {
   @@index([courseId])
 }
 
+model UpcomingEvent {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  location    String?
+  eventDate   DateTime
+  isActive    Boolean  @default(true)
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([eventDate])
+  @@index([isActive, isDeleted])
+}
+
 enum Role {
   admin
   mentor
@@ -276,4 +293,8 @@ enum NotificationType {
   INFO
   MODULE_CREATED
   MODULE_COMPLETED
+  USER_REGISTERED
+  LESSON_COMPLETED
+  COURSE_COMPLETED
+  PROJECT_SUBMITTED
 }
