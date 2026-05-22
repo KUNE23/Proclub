@@ -114,6 +114,7 @@ import { computed, defineComponent, h, onMounted, reactive, ref } from 'vue'
 import { Image as ImageIcon, Loader2, Save, Upload } from 'lucide-vue-next'
 import { useToast } from 'vue-toastification'
 import { getCertificateTemplate, saveCertificateTemplate } from '../../services/certificateService.js'
+import { assetUrl } from '../../config/api.js'
 
 const NumberInput = defineComponent({
   props: {
@@ -165,7 +166,7 @@ const errors = reactive({
 
 const previewUrl = computed(() => {
   if (localPreview.value) return localPreview.value
-  if (template.value?.backgroundUrl) return `http://localhost:3000${template.value.backgroundUrl}`
+  if (template.value?.backgroundUrl) return assetUrl(template.value.backgroundUrl)
   return ''
 })
 

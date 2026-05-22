@@ -50,7 +50,7 @@
 
           <a
             v-if="certificate"
-            :href="`http://localhost:3000${certificate.pdfUrl}`"
+            :href="assetUrl(certificate.pdfUrl)"
             target="_blank"
             class="mt-8 inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-bold text-[#0A733F]"
           >
@@ -68,6 +68,7 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { BadgeCheck, Download } from 'lucide-vue-next'
 import { verifyCertificate } from '../services/certificateService.js'
+import { assetUrl } from '../config/api.js'
 
 const route = useRoute()
 const loading = ref(true)

@@ -221,7 +221,7 @@
               <p class="mt-1 text-xs text-gray-400">Terbit {{ formatDate(certificate.issuedAt) }}</p>
               <div class="mt-5 flex gap-3">
                 <a
-                  :href="`http://localhost:3000${certificate.pdfUrl}`"
+                  :href="assetUrl(certificate.pdfUrl)"
                   target="_blank"
                   class="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#0A733F] px-4 py-2.5 text-[13px] font-bold text-white"
                 >
@@ -247,6 +247,7 @@ import { ref, computed, onMounted } from 'vue'
 import api from '../api/index.js'
 import { useToast } from 'vue-toastification'
 import { getMyCertificates } from '../services/certificateService.js'
+import { assetUrl } from '../config/api.js'
 
 const isLoading = ref(true)
 const toast = useToast()

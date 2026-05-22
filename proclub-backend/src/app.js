@@ -10,7 +10,7 @@ import moduleRoutes from './routes/modulesRoutes.js';
 import projectRoutes from './routes/projectRoutes.js';
 import quizRoutes from './routes/quizRoutes.js';
 import userRoutes from './routes/userRoutes.js';
-import memberDashboardRoutes from './routes/memberDashboardROutes.js';
+import memberDashboardRoutes from './routes/memberDashboardRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
 import upcomingEventRoutes from './routes/upcomingEventRoutes.js';
@@ -18,13 +18,25 @@ import contactRoutes from './routes/contactRoutes.js';
 import path from 'path';
 
 const app = express();
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.FRONTEND_URL,
+  process.env.APP_URL
+].filter(Boolean);
 
 app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Not allowed by CORS'));
+  },
   allowedHeaders: ['Content-Type', 'Authorization'], 
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   credentials: true
@@ -46,6 +58,11 @@ app.use('/api', contactRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 
-app.listen(3000, () => {
-  console.log('Server running on port 3000');
-});
+if (!process.env.VERCEL) {
+  const port = process.env.PORT || 3000;
+  app.listen(port, () => {
+    console.log(`Server running on port ${port}`);
+  });
+}
+
+export default app;

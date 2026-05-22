@@ -7,7 +7,11 @@ const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const uploadDirectory = path.join(__dirname, '..', 'uploads', 'courses')
-fs.mkdirSync(uploadDirectory, { recursive: true })
+const isVercel = Boolean(process.env.VERCEL)
+
+if (!isVercel) {
+  fs.mkdirSync(uploadDirectory, { recursive: true })
+}
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -29,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 }
 
 const upload = multer({
-  storage,
+  storage: isVercel ? multer.memoryStorage() : storage,
   fileFilter,
   limits: {
     fileSize: 2 * 1024 * 1024 
