@@ -11,6 +11,7 @@ import EditProfileView from '../views/EditProfileView.vue'
 import LearningPath from '../views/LearningPath.vue'
 import CertificateVerifyView from '../views/CertificateVerifyView.vue'
 import ForgotPassword from '../views/ForgotPassword.vue'
+import LandingPage from '../views/landing/LandingPage.vue'
 
 import AdminLayout from '../layouts/AdminLayout.vue'
 import AdminDashboard from '../views/admin/AdminDashboard.vue'
@@ -27,12 +28,18 @@ import AdminCertificateTemplate from '../views/admin/AdminCertificateTemplate.vu
 import AdminProjectReview from '../views/admin/AdminProjectReview.vue'
 import AdminUpcomingEvents from '../views/admin/AdminUpcomingEvents.vue'
 import AdminNotifications from '../views/admin/AdminNotifications.vue'
+import AdminContactMessages from '../views/admin/AdminContactMessages.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
       path: '/',
+      name: 'LandingPage',
+      component: LandingPage
+    },
+    {
+      path: '/dashboard',
       component: MainLayout,
       meta: { requiresAuth: true },
       children: [
@@ -185,6 +192,11 @@ const router = createRouter({
           path: 'notifications',
           name: 'AdminNotifications',
           component: AdminNotifications
+        },
+        {
+          path: 'contacts',
+          name: 'AdminContactMessages',
+          component: AdminContactMessages
         }
       ]
     }
@@ -215,12 +227,13 @@ router.beforeEach((to) => {
     const role = userData?.role?.toLowerCase()
 
     if (role !== 'admin') {
-      return '/'
+      return '/dashboard'
     }
   }
 
   if (to.path === '/login' && token) {
-    return '/'
+    const role = userData?.role?.toLowerCase()
+    return role === 'admin' ? '/admin' : '/dashboard'
   }
 
   return true

@@ -208,6 +208,7 @@ import {
   LayoutDashboard,
   Loader2,
   LogOut,
+  Mail,
   Menu,
   Settings,
   ShieldCheck,
@@ -253,6 +254,7 @@ const navGroups = [
     items: [
       { to: '/admin/users', label: 'Users', icon: Users, active: (path) => path.startsWith('/admin/users') },
       { to: '/admin/progress', label: 'User Progress', icon: TrendingUp, active: (path) => path.startsWith('/admin/progress') },
+      { to: '/admin/contacts', label: 'Contact Messages', icon: Mail, active: (path) => path.startsWith('/admin/contacts') },
       { to: '/admin/notifications', label: 'Notifications', icon: Bell, active: (path) => path.startsWith('/admin/notifications') },
       { to: '/admin/settings', label: 'Account Settings', icon: Settings, active: (path) => path.startsWith('/admin/settings') }
     ]

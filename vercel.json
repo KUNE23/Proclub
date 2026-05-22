@@ -1,0 +1,11 @@
+{
+  "installCommand": "cd proclub-frontend && npm install",
+  "buildCommand": "cd proclub-frontend && npm run build",
+  "outputDirectory": "proclub-frontend/dist",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}

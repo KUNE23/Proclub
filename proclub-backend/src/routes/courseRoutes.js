@@ -7,6 +7,7 @@ import { createCourseSchema, updateCourseSchema } from '../schema/courseSchema.j
 import {
   createCourse,
   getCourses,
+  getPublicCourses,
   getCourseById,
   updateCourse,
   deleteCourse
@@ -22,6 +23,7 @@ router.post(
   validate(createCourseSchema),
   createCourse
 )
+router.get('/public/courses', getPublicCourses)
 router.get('/courses', authMiddleware, getCourses)
 router.get('/courses/:id', authMiddleware, getCourseById)
 router.put(

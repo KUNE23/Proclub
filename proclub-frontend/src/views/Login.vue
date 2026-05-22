@@ -103,7 +103,7 @@ const handleLogin = async () => {
     if (response.data.user.role === 'admin') {
       router.push('/admin');
     } else {
-      router.push('/');
+      router.push('/dashboard');
     }
   } catch (error) {
     const status = error.response?.status;

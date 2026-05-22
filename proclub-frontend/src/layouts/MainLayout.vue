@@ -184,7 +184,7 @@ const fetchUserProfile = async () => {
 };
 
 const navigation = [
-  { name: 'Dashboard', href: '/', icon: LayoutDashboard },
+  { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Learning Path', href: '/learning-path', icon: BookOpen },
   { name: 'Projects', href: '/project-submission', icon: CheckSquare },
 ]
@@ -498,10 +498,10 @@ onUnmounted(() => {
             © 2026 Proclub STT Cipasung. Built with 💚 for the community.
           </p>
           <div class="flex gap-3 text-gray-400">
-            <a href="#" aria-label="Instagram Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
+            <a href="https://www.instagram.com/proclub.sttc/" aria-label="Instagram Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
               <Instagram class="h-5 w-5" />
             </a>
-            <a href="#" aria-label="TikTok Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
+            <a href="https://www.tiktok.com/@proclub.sttc" aria-label="TikTok Proclub" class="rounded-xl border border-gray-100 p-2 transition hover:border-[#2C7047]/30 hover:text-[#2C7047]">
               <Music2 class="h-5 w-5" />
             </a>
           </div>

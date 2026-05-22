@@ -168,6 +168,50 @@ export const getCourses = async (req, res) => {
   }
 }
 
+export const getPublicCourses = async (req, res) => {
+  try {
+    const courses = await prisma.course.findMany({
+      where: {
+        isDeleted: false
+      },
+      orderBy: {
+        createdAt: 'asc'
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        _count: {
+          select: {
+            modules: {
+              where: {
+                isDeleted: false
+              }
+            }
+          }
+        }
+      }
+    })
+
+    return res.status(200).json({
+      status: 'success',
+      data: courses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        totalModules: course._count.modules
+      }))
+    })
+  } catch (error) {
+    console.error('GET PUBLIC COURSES ERROR:', error)
+
+    return res.status(500).json({
+      status: 'error',
+      message: 'Gagal memuat learning path'
+    })
+  }
+}
+
 export const getCourseById = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
