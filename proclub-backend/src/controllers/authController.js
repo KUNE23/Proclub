@@ -110,7 +110,7 @@ export const requestPasswordReset = async (req, res) => {
     })
 
     if (!user) {
-      return res.json({ status: 'success', message: 'Jika email terdaftar, kode OTP akan dikirim.' })
+      return res.status(404).json({ status: 'fail', message: 'Email tidak terdaftar di database.' })
     }
 
     const code = String(Math.floor(100000 + Math.random() * 900000))
