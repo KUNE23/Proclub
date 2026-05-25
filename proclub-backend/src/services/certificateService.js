@@ -5,7 +5,9 @@ import QRCode from 'qrcode'
 import prisma from '../config/prisma.js'
 
 const baseUrl = process.env.APP_URL || 'http://localhost:5173'
-const uploadRoot = path.join(process.cwd(), 'src', 'uploads', 'certificates')
+const uploadRoot = process.env.VERCEL
+  ? path.join('/tmp', 'proclub', 'certificates')
+  : path.join(process.cwd(), 'src', 'uploads', 'certificates')
 
 const ensureDirectory = (dir) => {
   fs.mkdirSync(dir, { recursive: true })
@@ -121,7 +123,7 @@ export const generateCertificateForCourse = async (userId, courseId) => {
   const code = generateCode(certificate.id)
   const fileName = `${code}.pdf`
   const pdfPath = path.join(uploadRoot, fileName)
-  const pdfUrl = `/uploads/certificates/${fileName}`
+  const pdfUrl = `/api/certificates/${code}/download`
   const verificationUrl = `${baseUrl}/certificate/${code}`
 
   await renderCertificatePdf({
@@ -162,7 +164,11 @@ export const renderCertificatePdf = async ({ certificate, template, pdfPath }) =
 
   const stream = fs.createWriteStream(pdfPath)
   doc.pipe(stream)
-  doc.image(template.backgroundPath, 0, 0, {
+  const backgroundSource = template.backgroundData
+    ? Buffer.from(template.backgroundData, 'base64')
+    : template.backgroundPath
+
+  doc.image(backgroundSource, 0, 0, {
     width: template.imageWidth,
     height: template.imageHeight
   })

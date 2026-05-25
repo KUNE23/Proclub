@@ -42,7 +42,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));
 
 app.use('/api/auth', authRoutes);

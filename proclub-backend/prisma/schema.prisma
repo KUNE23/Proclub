@@ -198,6 +198,7 @@ model CertificateTemplate {
   name         String
   backgroundPath String
   backgroundUrl  String
+  backgroundData String?
   imageWidth   Int
   imageHeight  Int
   nameX        Int           @default(420)

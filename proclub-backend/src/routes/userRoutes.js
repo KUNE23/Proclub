@@ -3,18 +3,13 @@ import authMiddleware from '../middleware/authMiddleware.js';
 import roleMiddleware from '../middleware/roleMiddleware.js';
 import { validate } from '../middleware/validate.js';
 import { createUserSchema, updateUserSchema, updateProfileSchema } from '../schema/userSchema.js';
-import { getProfile, createUser, getUsers, getUserById, updateUser, deleteUser, updateProfile, getAllUserProgress, getMyProgress, completeLesson, updateUserActivation } from '../controllers/userController.js';
+import { getProfile, createUser, getUsers, getUserById, updateUser, deleteUser, updateProfile, getAllUserProgress, getMyProgress, updateUserActivation } from '../controllers/userController.js';
 
 const router = express.Router();
 
 router.get('/profile', authMiddleware, getProfile);
 router.put('/profile', authMiddleware, validate(updateProfileSchema), updateProfile);
 router.get('/progress', authMiddleware, getMyProgress)
- router.patch(
-  '/lessons/:lessonId/complete',
-  authMiddleware,
-  completeLesson
-)
 
 router.post('/', authMiddleware, roleMiddleware(['admin']), validate(createUserSchema), createUser);
 router.get('/', authMiddleware, roleMiddleware(['admin']), getUsers);

@@ -2,6 +2,16 @@ import prisma from '../config/prisma.js';
 import { generateCertificateForCourse } from '../services/certificateService.js';
 import { notifyAdmins } from '../services/adminNotificationService.js';
 
+const quizSelectForRole = (role) => ({
+  id: true,
+  question: true,
+  options: true,
+  lessonId: true,
+  createdAt: true,
+  updatedAt: true,
+  ...(role === 'admin' || role === 'mentor' ? { correctAnswer: true } : {})
+});
+
 export const createQuiz = async (req, res) => {
   try {
     const { question, options, correctAnswer, lessonId } = req.body
@@ -256,7 +266,8 @@ export const getQuizByLesson = async (req, res) => {
   try {
     const { lessonId } = req.params
     const quizzes = await prisma.quiz.findMany({
-      where: { lessonId: parseInt(lessonId), isDeleted: false }
+      where: { lessonId: parseInt(lessonId), isDeleted: false },
+      select: quizSelectForRole(req.user.role)
     });
     return res.status(200).json({ status: 'success', data: quizzes || [] })
   } catch (error) {

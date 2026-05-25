@@ -6,6 +6,6 @@ export const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, '')
 
 export const assetUrl = (path) => {
   if (!path) return ''
-  if (/^https?:\/\//i.test(path)) return path
+  if (/^(https?:|data:)/i.test(path)) return path
   return `${API_ORIGIN}${path.startsWith('/') ? path : `/${path}`}`
 }

@@ -2,9 +2,11 @@ import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
 import prisma from '../config/prisma.js'
-import { generateCertificateForCourse } from '../services/certificateService.js'
+import { generateCertificateForCourse, renderCertificatePdf } from '../services/certificateService.js'
 
-const uploadRoot = path.join(process.cwd(), 'src', 'uploads', 'certificates')
+const uploadRoot = process.env.VERCEL
+  ? path.join('/tmp', 'proclub', 'certificates')
+  : path.join(process.cwd(), 'src', 'uploads', 'certificates')
 const templateRoot = path.join(uploadRoot, 'templates')
 
 const parseInteger = (value, fallback) => {
@@ -18,6 +20,7 @@ const templateSelect = {
   id: true,
   name: true,
   backgroundUrl: true,
+  backgroundData: true,
   imageWidth: true,
   imageHeight: true,
   nameX: true,
@@ -85,6 +88,7 @@ export const uploadCertificateTemplate = async (req, res) => {
 
     let backgroundPath = currentTemplate?.backgroundPath
     let backgroundUrl = currentTemplate?.backgroundUrl
+    let backgroundData = currentTemplate?.backgroundData
     let imageWidth = currentTemplate?.imageWidth || 1200
     let imageHeight = currentTemplate?.imageHeight || 850
 
@@ -94,17 +98,23 @@ export const uploadCertificateTemplate = async (req, res) => {
       const originalWidth = metadata.width || 1200
       const fileName = `template-${Date.now()}.jpg`
       backgroundPath = path.join(templateRoot, fileName)
-      backgroundUrl = `/uploads/certificates/templates/${fileName}`
 
-      await image
+      const compressedBuffer = await image
         .resize({
           width: Math.min(originalWidth, 1600),
           withoutEnlargement: true
         })
         .jpeg({ quality: 82, mozjpeg: true })
-        .toFile(backgroundPath)
+        .toBuffer()
 
-      const compressed = await sharp(backgroundPath).metadata()
+      if (!process.env.VERCEL) {
+        await fs.promises.writeFile(backgroundPath, compressedBuffer)
+      }
+
+      backgroundData = compressedBuffer.toString('base64')
+      backgroundUrl = `data:image/jpeg;base64,${backgroundData}`
+
+      const compressed = await sharp(compressedBuffer).metadata()
       imageWidth = compressed.width || originalWidth
       imageHeight = compressed.height || metadata.height || 850
     }
@@ -119,6 +129,7 @@ export const uploadCertificateTemplate = async (req, res) => {
         name,
         backgroundPath,
         backgroundUrl,
+        backgroundData,
         imageWidth,
         imageHeight,
         nameX: parseInteger(req.body.nameX, Math.round(imageWidth * 0.25)),
@@ -205,7 +216,10 @@ export const verifyCertificate = async (req, res) => {
 export const downloadCertificate = async (req, res) => {
   try {
     const certificate = await prisma.certificate.findUnique({
-      where: { code: req.params.code }
+      where: { code: req.params.code },
+      include: {
+        template: true
+      }
     })
 
     if (!certificate) {
@@ -216,7 +230,19 @@ export const downloadCertificate = async (req, res) => {
       return res.status(403).json({ message: 'Tidak memiliki akses ke sertifikat ini.' })
     }
 
-    return res.download(certificate.pdfPath, `${certificate.code}.pdf`)
+    const pdfPath = certificate.pdfPath && !process.env.VERCEL
+      ? certificate.pdfPath
+      : path.join(uploadRoot, `${certificate.code}.pdf`)
+
+    if (!fs.existsSync(pdfPath)) {
+      await renderCertificatePdf({
+        certificate,
+        template: certificate.template,
+        pdfPath
+      })
+    }
+
+    return res.download(pdfPath, `${certificate.code}.pdf`)
   } catch (error) {
     return res.status(500).json({ message: 'Gagal mengunduh sertifikat', error: error.message })
   }

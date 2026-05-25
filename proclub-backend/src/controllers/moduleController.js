@@ -22,6 +22,16 @@ const buildQuizzesCreate = (quizzes = []) => ({
   }))
 });
 
+const quizSelectForRole = (role) => ({
+  id: true,
+  question: true,
+  options: true,
+  lessonId: true,
+  createdAt: true,
+  updatedAt: true,
+  ...(role === 'admin' || role === 'mentor' ? { correctAnswer: true } : {})
+});
+
 export const createModule = async (req, res) => {
   try {
     const courseId = toNumber(req.params.courseId);
@@ -111,7 +121,8 @@ export const getModulesByCourse = async (req, res) => {
               orderBy: { order: 'asc' }
             },
             quizzes: {
-              where: { isDeleted: false }
+              where: { isDeleted: false },
+              select: quizSelectForRole(req.user.role)
             }
           },
           orderBy: { order: 'asc' }
@@ -273,6 +284,21 @@ export const getLessonsByModule = async (req, res) => {
       return res.status(400).json({ message: 'Invalid module ID' });
     }
 
+    const moduleItem = await prisma.module.findFirst({
+      where: { id: moduleId, isDeleted: false },
+      select: { courseId: true }
+    });
+
+    if (!moduleItem) {
+      return res.status(404).json({ message: 'Module not found' });
+    }
+
+    await assertCourseAccess({
+      userId: req.user.id,
+      courseId: moduleItem.courseId,
+      role: req.user.role
+    });
+
     const lessons = await prisma.lesson.findMany({
       where: { moduleId, isDeleted: false },
       include: {
@@ -281,7 +307,8 @@ export const getLessonsByModule = async (req, res) => {
           orderBy: { order: 'asc' }
         },
         quizzes: {
-          where: { isDeleted: false }
+          where: { isDeleted: false },
+          select: quizSelectForRole(req.user.role)
         }
       },
       orderBy: { order: 'asc' }
@@ -289,6 +316,10 @@ export const getLessonsByModule = async (req, res) => {
 
     return res.status(200).json({ status: 'success', lessons });
   } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ status: 'fail', message: error.message });
+    }
+
     return res.status(500).json({ error: error.message });
   }
 };
@@ -313,7 +344,8 @@ export const getLessonDetail = async (req, res) => {
           orderBy: { order: 'asc' }
         },
         quizzes: {
-          where: { isDeleted: false }
+          where: { isDeleted: false },
+          select: quizSelectForRole(req.user.role)
         },
         module: {
           include: {

@@ -326,38 +326,39 @@ export const getAllUserProgress = async (req, res) => {
       }
     })
 
-    const formatted = await Promise.all(
-      users.map(async (user) => {
-        const courses = await prisma.course.findMany({
+    const courses = await prisma.course.findMany({
+      where: {
+        isDeleted: false
+      },
+      include: {
+        modules: {
           where: {
             isDeleted: false
           },
           include: {
-            modules: {
+            lessons: {
               where: {
                 isDeleted: false
-              },
-              include: {
-                lessons: {
-                  where: {
-                    isDeleted: false
-                  }
-                }
               }
             }
           }
-        })
+        }
+      }
+    })
+
+    const formatted = users.map((user) => {
+        const completedLessonIds = new Set(
+          user.progress
+            .filter((progress) => progress.status === 'COMPLETED')
+            .map((progress) => progress.lessonId)
+        )
 
         const progressByCourse = courses.map((course) => {
           const lessons = course.modules.flatMap((module) => module.lessons)
           const totalLessons = lessons.length
 
           const completedLessons = lessons.filter((lesson) =>
-            user.progress.some(
-              (p) =>
-                p.lessonId === lesson.id &&
-                p.status === 'COMPLETED'
-            )
+            completedLessonIds.has(lesson.id)
           ).length
 
           const percentage =
@@ -410,7 +411,6 @@ export const getAllUserProgress = async (req, res) => {
           courses: progressByCourse
         }
       })
-    )
 
     return res.status(200).json({
       status: 'success',
