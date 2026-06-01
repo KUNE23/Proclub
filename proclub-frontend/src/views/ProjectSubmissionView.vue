@@ -49,6 +49,25 @@
               <span class="rounded-full border border-[#E6EFE9] bg-[#F2F7F4] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-[#2C7047]">Final Project</span>
             </div>
 
+            <div class="mb-5 rounded-xl border border-[#E6EFE9] bg-[#FAFCFB] p-4">
+              <div class="flex items-start gap-3">
+                <div
+                  class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
+                  :class="finalModuleCompleted ? 'bg-[#D1E6DA] text-[#2C7047]' : 'bg-slate-100 text-slate-400'"
+                >
+                  <CheckCircle2 v-if="finalModuleCompleted" class="h-5 w-5" />
+                  <Lock v-else class="h-5 w-5" />
+                </div>
+                <div>
+                  <p class="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Module Akhir</p>
+                  <h3 class="mt-1 text-sm font-bold text-[#1A2E20]">{{ finalModule?.title || 'Belum tersedia' }}</h3>
+                  <p class="mt-1 text-xs leading-relaxed text-gray-500">
+                    {{ finalModuleCompleted ? 'Module akhir sudah selesai. Kamu bisa submit repository project.' : 'Project baru bisa dikirim setelah seluruh lesson pada module akhir selesai.' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div v-if="requirements.length === 0" class="rounded-xl border border-dashed border-[#D9E7DF] bg-[#FAFCFB] p-6 text-center">
               <ListChecks class="mx-auto h-10 w-10 text-gray-300" />
               <p class="mt-3 text-sm font-bold text-[#1A2E20]">Requirement belum dibuat</p>
@@ -99,13 +118,16 @@
               <button
                 type="button"
                 class="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2C7047] py-4 text-sm font-bold text-white shadow-lg shadow-[#2C7047]/20 transition hover:bg-[#235838] disabled:cursor-wait disabled:opacity-70"
-                :disabled="submitting || !selectedCourseId"
+                :disabled="submitting || !selectedCourseId || !finalModuleCompleted"
                 @click="submitProject"
               >
                 <Loader2 v-if="submitting" class="h-4 w-4 animate-spin" />
                 <Send v-else class="h-4 w-4" />
                 {{ submitting ? 'Mengirim...' : 'Submit Project for Review' }}
               </button>
+              <p v-if="!finalModuleCompleted" class="text-center text-xs font-semibold text-gray-500">
+                Selesaikan module akhir terlebih dahulu sebelum submit project.
+              </p>
 
               <div v-if="currentSubmission" class="rounded-xl border p-4" :class="submissionClass(currentSubmission.status)">
                 <div class="flex items-start gap-3">
@@ -137,6 +159,7 @@ import {
   ClipboardCheck,
   Clock,
   Github,
+  Lock,
   ListChecks,
   Loader2,
   Send,
@@ -153,6 +176,7 @@ const pageError = ref('')
 const courses = ref([])
 const requirements = ref([])
 const projects = ref([])
+const progressMap = ref({})
 const selectedCourseId = ref(null)
 
 const form = reactive({
@@ -164,6 +188,15 @@ const errors = reactive({
 })
 
 const selectedCourse = computed(() => courses.value.find((course) => course.id === selectedCourseId.value) || null)
+const finalModule = computed(() => {
+  const modules = selectedCourse.value?.modules || []
+  return [...modules].sort((a, b) => (a.order ?? 0) - (b.order ?? 0) || a.id - b.id).at(-1) || null
+})
+const finalModuleCompleted = computed(() => {
+  const lessons = finalModule.value?.lessons || []
+
+  return lessons.length > 0 && lessons.every((lesson) => progressMap.value[lesson.id]?.status === 'COMPLETED')
+})
 const currentSubmission = computed(() => projects.value.find((project) => project.course?.id === selectedCourseId.value || project.courseId === selectedCourseId.value) || null)
 
 watch(selectedCourseId, async (courseId) => {
@@ -175,9 +208,10 @@ async function fetchInitialData() {
   pageError.value = ''
 
   try {
-    const [coursesRes, projectsRes] = await Promise.allSettled([
+    const [coursesRes, projectsRes, progressRes] = await Promise.allSettled([
       api.get('/courses'),
-      api.get('/projects')
+      api.get('/projects'),
+      api.get('/progress')
     ])
 
     if (coursesRes.status === 'fulfilled') {
@@ -188,6 +222,14 @@ async function fetchInitialData() {
       projects.value = projectsRes.value.data?.data || []
     } else {
       projects.value = []
+    }
+
+    if (progressRes.status === 'fulfilled') {
+      const progress = Array.isArray(progressRes.value.data?.data) ? progressRes.value.data.data : []
+      progressMap.value = progress.reduce((acc, item) => {
+        acc[item.lessonId] = item
+        return acc
+      }, {})
     }
 
     const routeCourseId = Number(route.params.id)
@@ -237,12 +279,18 @@ function validateForm() {
 async function submitProject() {
   if (!validateForm()) return
 
+  if (!finalModuleCompleted.value) {
+    toast.warning('Selesaikan semua lesson di module akhir sebelum submit project.')
+    return
+  }
+
   submitting.value = true
 
   try {
     await submitProjectRepository({
       linkGithub: form.linkGithub,
-      courseId: selectedCourseId.value
+      courseId: selectedCourseId.value,
+      moduleId: finalModule.value.id
     })
 
     toast.success('Project berhasil dikirim dan menunggu approval admin.')

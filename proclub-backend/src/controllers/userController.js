@@ -11,6 +11,8 @@ export const getProfile = async (req, res) => {
         email: true,
         role: true,
         isActive: true,
+        learningCommitmentAccepted: true,
+        learningCommitmentAcceptedAt: true,
       }
     });
 
@@ -27,7 +29,7 @@ export const getProfile = async (req, res) => {
 
 export const createUser = async (req, res) => {
   try {
-    const { name, email, password, role, isActive } = req.body;
+    const { name, email, password, role, isActive, learningCommitmentAccepted } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: 'Name, email, dan password diperlukan' });
@@ -49,7 +51,9 @@ export const createUser = async (req, res) => {
         email,
         password: hashedPassword,
         role: role || 'member',
-        isActive: typeof isActive === 'boolean' ? isActive : true
+        isActive: typeof isActive === 'boolean' ? isActive : true,
+        learningCommitmentAccepted: Boolean(learningCommitmentAccepted),
+        learningCommitmentAcceptedAt: learningCommitmentAccepted ? new Date() : null
       },
       select: {
         id: true,
@@ -57,6 +61,8 @@ export const createUser = async (req, res) => {
         email: true,
         role: true,
         isActive: true,
+        learningCommitmentAccepted: true,
+        learningCommitmentAcceptedAt: true,
         createdAt: true
       }
     });
@@ -82,6 +88,8 @@ export const getUsers = async (req, res) => {
         email: true,
         role: true,   
         isActive: true,
+        learningCommitmentAccepted: true,
+        learningCommitmentAcceptedAt: true,
         token: true,
         createdAt: true,
         updatedAt: true     
@@ -127,6 +135,8 @@ export const getUserById = async (req, res) => {
         email: true,
         role: true,
         isActive: true,
+        learningCommitmentAccepted: true,
+        learningCommitmentAcceptedAt: true,
         createdAt: true,
         updatedAt: true
       }

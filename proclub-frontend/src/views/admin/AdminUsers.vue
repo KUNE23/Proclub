@@ -34,12 +34,13 @@
     </div>
 
     <div class="overflow-x-auto rounded-xl border border-[#E6EFE9] bg-white shadow-sm">
-      <table class="min-w-[900px] w-full text-left border-collapse">
+      <table class="min-w-[1040px] w-full text-left border-collapse">
         <thead>
           <tr class="bg-white border-b border-[#E6EFE9]">
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Name</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Email</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Role</th>
+            <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Komitmen</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest">Status</th>
             <th class="py-4 px-6 text-[11px] font-bold text-gray-500 uppercase tracking-widest text-right">Actions</th>
           </tr>
@@ -76,6 +77,19 @@
               </span>
             </td>
             <td class="py-4 px-6">
+              <div>
+                <span
+                  class="inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-bold"
+                  :class="user.learningCommitmentAccepted ? 'bg-[#F0FDF4] text-[#16A34A]' : 'bg-gray-100 text-gray-400'"
+                >
+                  {{ user.learningCommitmentAccepted ? 'Setuju' : 'Belum ada' }}
+                </span>
+                <p v-if="user.learningCommitmentAcceptedAt" class="mt-1 text-[10px] text-gray-400">
+                  {{ user.learningCommitmentAcceptedAt }}
+                </p>
+              </div>
+            </td>
+            <td class="py-4 px-6">
               <div class="flex items-center gap-3">
                 <button
                   type="button"
@@ -107,7 +121,7 @@
             </td>
           </tr>
           <tr v-if="filteredUsers.length === 0">
-    <td colspan="5" class="py-10 text-center text-gray-400">
+    <td colspan="6" class="py-10 text-center text-gray-400">
       No users found for role "{{ selectedRole }}"
     </td>
   </tr>
@@ -266,6 +280,10 @@ const fetchUsers = async () => {
           role: u.role || 'member',
           isActive: u.isActive ?? true,
           isOnline: Boolean(u.isOnline),
+          learningCommitmentAccepted: Boolean(u.learningCommitmentAccepted),
+          learningCommitmentAcceptedAt: u.learningCommitmentAcceptedAt
+            ? new Date(u.learningCommitmentAcceptedAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
+            : '',
           progress: u.progress || 0, 
           joinedAt: joinedAt,
           avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name || 'U')}&background=random`

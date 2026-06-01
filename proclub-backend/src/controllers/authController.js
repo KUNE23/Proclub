@@ -6,7 +6,7 @@ import { notifyAdmins } from '../services/adminNotificationService.js'
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password, learningCommitmentAccepted } = req.body
 
     const existingUser = await prisma.user.findUnique({
       where: { email }
@@ -23,7 +23,9 @@ export const register = async (req, res) => {
         name,
         email,
         password: hashedPassword,
-        isActive: false
+        isActive: false,
+        learningCommitmentAccepted,
+        learningCommitmentAcceptedAt: new Date()
       },
       select: {
         id: true,
@@ -31,6 +33,8 @@ export const register = async (req, res) => {
         email: true,
         role: true,
         isActive: true,
+        learningCommitmentAccepted: true,
+        learningCommitmentAcceptedAt: true,
         createdAt: true
       }
     })

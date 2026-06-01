@@ -15,6 +15,8 @@ model User {
   role      Role           @default(member)
   token     String?
   isActive  Boolean        @default(true)
+  learningCommitmentAccepted Boolean @default(false)
+  learningCommitmentAcceptedAt DateTime?
   createdAt DateTime       @default(now())
   updatedAt DateTime       @updatedAt
   projects  Project[]

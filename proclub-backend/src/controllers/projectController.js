@@ -18,6 +18,10 @@ const projectSelect = {
   lesson: { select: { id: true, title: true } }
 }
 
+const getFinalModule = (course) => {
+  return [...course.modules].sort((a, b) => a.order - b.order || a.id - b.id).at(-1) || null
+}
+
 export const submitProject = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -32,8 +36,36 @@ export const submitProject = async (req, res) => {
       return res.status(400).json({ message: 'GitHub repository dan course wajib diisi.' });
     }
 
-    const course = await prisma.course.findUnique({ where: { id: courseId } });
+    const course = await prisma.course.findFirst({
+      where: { id: courseId, isDeleted: false },
+      include: {
+        modules: {
+          where: { isDeleted: false },
+          include: {
+            lessons: {
+              where: { isDeleted: false },
+              orderBy: { order: 'asc' }
+            }
+          },
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
     if (!course) return res.status(404).json({ message: 'Course not found' });
+
+    const finalModule = getFinalModule(course);
+
+    if (!finalModule) {
+      return res.status(400).json({ message: 'Course ini belum memiliki module final.' });
+    }
+
+    if (!finalModule.lessons.length) {
+      return res.status(400).json({ message: 'Module final belum memiliki lesson.' });
+    }
+
+    if (moduleId && moduleId !== finalModule.id) {
+      return res.status(400).json({ message: 'Project hanya bisa dikirim pada module terakhir.' });
+    }
 
     if (moduleId) {
       const moduleItem = await prisma.module.findUnique({ where: { id: moduleId } });
@@ -52,7 +84,44 @@ export const submitProject = async (req, res) => {
         return res.status(404).json({ message: 'Lesson not found in this course' });
       }
 
+      if (lesson.moduleId !== finalModule.id) {
+        return res.status(400).json({ message: 'Project hanya bisa dikirim pada module terakhir.' });
+      }
+
       moduleId = lesson.moduleId;
+    }
+
+    moduleId = finalModule.id;
+
+    const finalLessonIds = finalModule.lessons.map((lesson) => lesson.id);
+    const completedLessons = await prisma.userProgress.count({
+      where: {
+        userId,
+        lessonId: { in: finalLessonIds },
+        status: 'COMPLETED'
+      }
+    });
+
+    if (completedLessons !== finalLessonIds.length) {
+      return res.status(403).json({ message: 'Selesaikan semua lesson di module terakhir sebelum submit project.' });
+    }
+
+    const activeProject = await prisma.project.findFirst({
+      where: {
+        userId,
+        courseId,
+        status: { in: ['pending', 'approved'] }
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { status: true }
+    });
+
+    if (activeProject) {
+      return res.status(409).json({
+        message: activeProject.status === 'approved'
+          ? 'Project kamu sudah disetujui.'
+          : 'Project kamu sedang menunggu review admin.'
+      });
     }
 
     const project = await prisma.project.create({

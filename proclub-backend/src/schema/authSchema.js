@@ -22,7 +22,11 @@ const registerSchema = z.object({
     .refine((value) => value.endsWith('@student.sttcipasung.ac.id'), {
       message: "Email harus menggunakan domain kampus student.sttcipasung.ac.id"
     }),
-  password: passwordSchema
+  password: passwordSchema,
+  learningCommitmentAccepted: z.boolean()
+    .refine((value) => value === true, {
+      message: "Kamu harus menyetujui komitmen menyelesaikan modul."
+    })
 })
 
 const loginSchema = z.object({

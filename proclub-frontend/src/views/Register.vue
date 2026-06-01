@@ -85,6 +85,20 @@
             </div>
           </div>
         </div>
+
+        <label
+          class="flex cursor-pointer items-start gap-3 rounded-2xl border p-4 transition-all"
+          :class="learningCommitmentAccepted ? 'border-[#2C7047] bg-[#F2F7F4]' : 'border-gray-200 bg-gray-50/60 hover:border-[#2C7047]/40'"
+        >
+          <input
+            v-model="learningCommitmentAccepted"
+            type="checkbox"
+            class="mt-1 h-4 w-4 rounded border-gray-300 text-[#2C7047] focus:ring-[#2C7047]"
+          />
+          <span class="text-sm font-semibold leading-relaxed text-gray-700">
+            Saya bersedia membereskan seluruh modul Proclub Learning Hub sampai selesai.
+          </span>
+        </label>
         
         <div class="pt-4">
           <button 
@@ -122,6 +136,7 @@ const router = useRouter();
 const email = ref('');  
 const password = ref('');
 const name = ref('');
+const learningCommitmentAccepted = ref(false);
 const campusEmailPattern = /^[a-zA-Z0-9._%+-]+@student\.sttcipasung\.ac\.id$/;
 const passwordRules = computed(() => ({
   length: password.value.length >= 8,
@@ -144,12 +159,18 @@ const handleRegister = async () => {
     return;
   }
 
+  if (!learningCommitmentAccepted.value) {
+    toast.warning('Kamu wajib menyetujui komitmen menyelesaikan modul.');
+    return;
+  }
+
   isLoading.value = true;
   try {
     await api.post('auth/register', {
       name: name.value.trim(),
       email: email.value.trim(),
-      password: password.value
+      password: password.value,
+      learningCommitmentAccepted: learningCommitmentAccepted.value
     });
 
     toast.success('Registrasi berhasil. Akun kamu menunggu aktivasi admin.');

@@ -195,6 +195,71 @@
 
             <div class="hidden md:block w-[47%]"></div>
           </div>
+
+          <div
+            v-if="sortedModules.length"
+            class="relative flex w-full items-center justify-center md:justify-between"
+            :class="sortedModules.length % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'"
+          >
+            <div class="absolute left-6 top-1/2 z-10 flex h-4 w-4 -translate-y-1/2 items-center justify-center rounded-full bg-white ring-2 ring-slate-200 md:left-1/2 md:-translate-x-1/2">
+              <div
+                class="h-2 w-2 rounded-full transition-all duration-500"
+                :class="isCourseCompleted ? 'scale-150 bg-emerald-600 shadow-[0_0_12px_rgba(5,150,105,0.4)]' : 'bg-slate-200'"
+              ></div>
+            </div>
+
+            <div class="w-full pl-14 md:w-[47%] md:pl-0">
+              <div
+                class="group relative rounded-[1.5rem] border bg-white p-6 transition-all duration-500"
+                :class="isCourseCompleted ? 'border-emerald-500 ring-4 ring-emerald-50/50 hover:-translate-y-1 hover:shadow-xl' : 'border-slate-100 opacity-60 grayscale-[0.5]'"
+              >
+                <div class="mb-4 flex items-center justify-between">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <div
+                      class="flex h-9 w-9 items-center justify-center rounded-xl border"
+                      :class="isCourseCompleted ? 'border-emerald-100 bg-emerald-50 text-emerald-600' : 'border-slate-100 bg-slate-50 text-slate-400'"
+                    >
+                      <Rocket v-if="isCourseCompleted" class="h-4 w-4" />
+                      <Lock v-else class="h-4 w-4" />
+                    </div>
+
+                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 whitespace-nowrap">
+                      {{ isCourseCompleted ? 'Siap Submit' : 'Project Terkunci' }}
+                    </span>
+                  </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-slate-900 leading-tight transition-colors group-hover:text-emerald-700">
+                  Final Project
+                </h3>
+
+                <p class="mt-2 text-xs leading-relaxed text-slate-500 line-clamp-2">
+                  Submit repository GitHub setelah seluruh module pada learning path ini selesai.
+                </p>
+
+                <div class="mt-6">
+                  <button
+                    v-if="isCourseCompleted"
+                    @click="goToProjectSubmission"
+                    class="w-full lg:w-auto flex items-center justify-center gap-2 rounded-xl bg-emerald-950 px-6 py-3 text-[11px] font-black text-white hover:bg-emerald-900 transition-all shadow-lg shadow-emerald-950/20"
+                  >
+                    Submit Project
+                    <ArrowRight class="w-3.5 h-3.5" />
+                  </button>
+
+                  <div
+                    v-else
+                    class="flex items-center gap-2 text-[9px] font-bold text-slate-400 uppercase"
+                  >
+                    <Lock class="w-3 h-3" />
+                    Terbuka setelah semua module selesai
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="hidden md:block w-[47%]"></div>
+          </div>
         </div>
       </div>
 
@@ -213,7 +278,8 @@ import {
   Layout,
   ArrowRight,
   FileText,
-  Lock
+  Lock,
+  Rocket
 } from 'lucide-vue-next'
 
 const router = useRouter()
@@ -247,6 +313,10 @@ const flattenedLessons = computed(() => {
       moduleId: module.id
     }))
   )
+})
+
+const isCourseCompleted = computed(() => {
+  return sortedModules.value.length > 0 && sortedModules.value.every(isCompleted)
 })
 
 const getProgress = (module) => {
@@ -357,6 +427,10 @@ const reviewArchive = (module) => {
   }
 
   router.push(`/courses/${courseId.value}/lessons/${lesson.id}`)
+}
+
+const goToProjectSubmission = () => {
+  router.push(`/project-submission/${courseId.value}`)
 }
 
 onMounted(() => {
