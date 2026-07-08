@@ -1,8 +1,18 @@
 import prisma from '../config/prisma.js'
+import redisService from '../services/redisService.js'
+import { CACHE_KEYS, CACHE_TTL } from '../config/cache.js'
 
 export const getDashboard = async (req, res) => {
   try {
     const userId = req.user.id
+
+    const cacheKey = `${CACHE_KEYS.DASHBOARD_MEMBER}:${userId}`
+
+    const cached = await redisService.getCache(cacheKey)
+
+    if (cached) {
+      return res.json(cached)
+    }
 
     const user = await prisma.user.findUnique({
       where: { id: userId }
@@ -65,30 +75,52 @@ export const getDashboard = async (req, res) => {
       })
     )
 
-    res.json({
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        role: user.role
-      },
-      courses: coursesWithProgress
-    })
+    const response = {
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      role: user.role
+    },
+    courses: coursesWithProgress
+  }
+
+  await redisService.setCache(
+    cacheKey,
+    response,
+    CACHE_TTL.DASHBOARD
+  )
+
+  return res.json(response)
   } catch (error) {
     return res.status(500).json({ error: error.message })
   }
 }
 
 export const getCourseModulesWithProgress = async (req, res) => {
-  try {
-    const userId = req.user.id
-    const courseId = Number(req.params.courseId)
+ try {
+  const userId = req.user.id
+  const courseId = Number(req.params.courseId)
 
-    if (Number.isNaN(courseId)) {
-      return res.status(400).json({ message: 'Invalid course ID' })
-    }
+  if (Number.isNaN(courseId)) {
+    return res.status(400).json({
+      message: 'Invalid course ID'
+    })
+  }
 
-    const course = await prisma.course.findUnique({
+  const cacheKey =
+    `${CACHE_KEYS.COURSE_MODULES}:${courseId}:user:${userId}`
+
+  console.log('Course Modules endpoint dipanggil')
+  console.log('Cache Key:', cacheKey)
+
+  const cached = await redisService.getCache(cacheKey)
+
+  if (cached) {
+    return res.json(cached)
+  }
+
+  const course = await prisma.course.findUnique({
       where: { id: courseId },
       include: {
         modules: {
@@ -149,14 +181,22 @@ export const getCourseModulesWithProgress = async (req, res) => {
       })
     )
 
-    res.json({
+      const response = {
       course: {
         id: course.id,
         title: course.title,
         description: course.description
       },
       modules: modulesWithProgress
-    })
+    }
+
+    await redisService.setCache(
+      cacheKey,
+      response,
+      CACHE_TTL.COURSE
+    )
+
+    return res.json(response)
   } catch (error) {
     res.status(500).json({ error: error.message })
   }
@@ -164,6 +204,13 @@ export const getCourseModulesWithProgress = async (req, res) => {
 
 export const getDashboardAnalytics = async (req, res) => {
   try {
+    const cacheKey = CACHE_KEYS.DASHBOARD_ADMIN
+
+const cached = await redisService.getCache(cacheKey)
+
+if (cached) {
+  return res.status(200).json(cached)
+}
     const totalUsers = await prisma.user.count()
 
     const totalCourses = await prisma.course.count({
@@ -267,20 +314,28 @@ export const getDashboardAnalytics = async (req, res) => {
       }
     })
 
-    return res.status(200).json({
-      status: 'success',
-      data: {
-        statistics: {
-          totalUsers,
-          totalCourses,
-          totalModules,
-          totalLessons,
-          averageProgress
-        },
-        engagement: engagementData,
-        recentActivities
-      }
-    })
+    const response = {
+  status: 'success',
+  data: {
+    statistics: {
+      totalUsers,
+      totalCourses,
+      totalModules,
+      totalLessons,
+      averageProgress
+    },
+    engagement: engagementData,
+    recentActivities
+  }
+}
+
+await redisService.setCache(
+  cacheKey,
+  response,
+  CACHE_TTL.DASHBOARD
+)
+
+return res.status(200).json(response)
   } catch (error) {
     return res.status(500).json({
       status: 'error',

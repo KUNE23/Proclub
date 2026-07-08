@@ -60,6 +60,54 @@ class RedisService {
 
     return true;
   }
+  
+  async getCache(key) {
+      console.log("getCache called with key:", key);
+  if (!this.isConnected()) return null;
+
+  const data = await redisClient.get(key);
+
+  if (!data) {
+    console.log('Cache miss for key:', key);
+    return null;
+  }
+
+  console.log('Cache hit for key:', key);
+  return JSON.parse(data);
+}
+
+async setCache(key, value, ttl = 300) {
+  if (!this.isConnected()) return false;
+
+  await redisClient.setEx(
+    key,
+    ttl,
+    JSON.stringify(value)
+  );
+
+  console.log('Cache set for key:', key);
+  return true;
+}
+
+async deleteCache(key) {
+  if (!this.isConnected()) return false;
+
+  await redisClient.del(key);
+
+  return true;
+}
+
+async deleteByPattern(pattern) {
+  if (!this.isConnected()) return false;
+
+  const keys = await redisClient.keys(pattern);
+
+  if (keys.length > 0) {
+    await redisClient.del(keys);
+  }
+
+  return true;
+}
 }
 
 export default new RedisService();
