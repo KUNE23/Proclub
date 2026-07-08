@@ -15,6 +15,9 @@ import notificationRoutes from './routes/notificationRoutes.js';
 import certificateRoutes from './routes/certificateRoutes.js';
 import upcomingEventRoutes from './routes/upcomingEventRoutes.js';
 import contactRoutes from './routes/contactRoutes.js';
+import redisService from './services/redisService.js';
+import redisRoutes from './routes/redisRoutes.js';
+import healthRoutes from './routes/healthRoutes.js';
 import path from 'path';
 
 const app = express();
@@ -45,6 +48,7 @@ app.use(cors({
 app.use(express.json({ limit: '1mb' }));
 app.use('/uploads', express.static(path.join(process.cwd(), 'src', 'uploads')));
 
+app.use('/health', healthRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api', dashboardRoutes);
 app.use('/api', projectRoutes);
@@ -57,12 +61,18 @@ app.use('/api', upcomingEventRoutes);
 app.use('/api', contactRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
+app.use('/api/redis', redisRoutes);
 
 if (!process.env.VERCEL) {
   const port = process.env.PORT || 3000;
-  app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-  });
+
+  (async () => {
+    await redisService.connect();
+
+    app.listen(port, () => {
+      console.log(`Server running on port ${port}`);
+    });
+  })();
 }
 
 export default app;
