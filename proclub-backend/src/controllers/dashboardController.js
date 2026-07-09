@@ -111,9 +111,6 @@ export const getCourseModulesWithProgress = async (req, res) => {
   const cacheKey =
     `${CACHE_KEYS.COURSE_MODULES}:${courseId}:user:${userId}`
 
-  console.log('Course Modules endpoint dipanggil')
-  console.log('Cache Key:', cacheKey)
-
   const cached = await redisService.getCache(cacheKey)
 
   if (cached) {
@@ -206,11 +203,11 @@ export const getDashboardAnalytics = async (req, res) => {
   try {
     const cacheKey = CACHE_KEYS.DASHBOARD_ADMIN
 
-const cached = await redisService.getCache(cacheKey)
+    const cached = await redisService.getCache(cacheKey)
 
-if (cached) {
-  return res.status(200).json(cached)
-}
+    if (cached) {
+      return res.status(200).json(cached)
+    }
     const totalUsers = await prisma.user.count()
 
     const totalCourses = await prisma.course.count({
@@ -315,18 +312,18 @@ if (cached) {
     })
 
     const response = {
-  status: 'success',
-  data: {
-    statistics: {
-      totalUsers,
-      totalCourses,
-      totalModules,
-      totalLessons,
-      averageProgress
-    },
-    engagement: engagementData,
-    recentActivities
-  }
+    status: 'success',
+    data: {
+      statistics: {
+        totalUsers,
+        totalCourses,
+        totalModules,
+        totalLessons,
+        averageProgress
+      },
+      engagement: engagementData,
+      recentActivities
+    }
 }
 
 await redisService.setCache(

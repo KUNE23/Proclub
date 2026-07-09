@@ -1,5 +1,7 @@
 import prisma from '../config/prisma.js'
 import { assertCourseAccess } from '../services/learningAccessService.js'
+import redisService from '../services/redisService.js'
+import { CACHE_KEYS, CACHE_TTL } from '../config/cache.js'
 
 export const createCourse = async (req, res) => {
   try {
@@ -16,6 +18,23 @@ export const createCourse = async (req, res) => {
       },
     })
 
+    await redisService.deleteCache(
+      CACHE_KEYS.COURSE_LIST,
+      CACHE_KEYS.COURSE_LIST_PUBLIC
+    )
+
+    await redisService.deleteCache(
+      CACHE_KEYS.DASHBOARD_ADMIN
+    )
+
+    await redisService.deleteByPattern(
+      `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    )
+
+    await redisService.deleteByPattern(
+      `${CACHE_KEYS.COURSE_MODULES}:*`
+    )
+
     return res.status(201).json({
       message: 'Course created successfully',
       course
@@ -31,6 +50,18 @@ export const createCourse = async (req, res) => {
 
 export const getCourses = async (req, res) => {
   try {
+    const page = Number(req.query.page) || 1
+    const limit = Number(req.query.limit) || 10
+
+    const cacheKey =
+    `${CACHE_KEYS.COURSE_LIST}:${page}:${limit}:${req.user.id}`
+
+    const cached = await redisService.getCache(cacheKey)
+
+    if (cached) {
+        return res.status(200).json(cached)
+    }
+
     const userId = req.user.id
 
     const page = Number(req.query.page) || 1
@@ -147,16 +178,24 @@ export const getCourses = async (req, res) => {
       })
     )
 
-    return res.status(200).json({
-      status: 'success',
-      data: coursesWithProgress,
-      pagination: {
+  const response = {
+    status: 'success',
+    data: coursesWithProgress,
+    pagination: {
         totalData,
         totalPages: Math.ceil(totalData / limit),
         currentPage: page,
         limit
-      }
-    })
+    }
+  }
+
+  await redisService.setCache(
+      cacheKey,
+      response,
+      CACHE_TTL.COURSE
+  )
+
+return res.status(200).json(response)
 
   } catch (error) {
     console.error(error)
@@ -170,6 +209,14 @@ export const getCourses = async (req, res) => {
 
 export const getPublicCourses = async (req, res) => {
   try {
+    const cacheKey = CACHE_KEYS.COURSE_LIST_PUBLIC;
+
+    const cached = await redisService.getCache(cacheKey)
+
+    if (cached) {
+        return res.status(200).json(cached)
+    }
+    
     const courses = await prisma.course.findMany({
       where: {
         isDeleted: false
@@ -193,15 +240,23 @@ export const getPublicCourses = async (req, res) => {
       }
     })
 
-    return res.status(200).json({
-      status: 'success',
-      data: courses.map((course) => ({
-        id: course.id,
-        title: course.title,
-        description: course.description,
-        totalModules: course._count.modules
-      }))
-    })
+   const response = {
+    status: 'success',
+    data: courses.map((course) => ({
+      id: course.id,
+      title: course.title,
+      description: course.description,
+      totalModules: course._count.modules
+    }))
+  }
+
+  await redisService.setCache(
+    cacheKey,
+    response,
+    CACHE_TTL.COURSE
+)
+
+  return res.status(200).json(response)
   } catch (error) {
     console.error('GET PUBLIC COURSES ERROR:', error)
 
@@ -215,6 +270,15 @@ export const getPublicCourses = async (req, res) => {
 export const getCourseById = async (req, res) => {
   try {
     const courseId = Number(req.params.id)
+
+    const cacheKey =
+    `${CACHE_KEYS.COURSE_DETAIL}:${courseId}:${req.user.role}`
+
+    const cached = await redisService.getCache(cacheKey)
+
+    if (cached) {
+        return res.status(200).json(cached)
+    }
 
     if (Number.isNaN(courseId)) {
       return res.status(400).json({
@@ -285,10 +349,18 @@ export const getCourseById = async (req, res) => {
       role: req.user.role
     })
 
-    return res.status(200).json({
-      status: 'success',
-      course
-    })
+   const response = {
+    status: 'success',
+    course
+}
+
+await redisService.setCache(
+    cacheKey,
+    response,
+    CACHE_TTL.COURSE
+)
+
+return res.status(200).json(response)
 
   } catch (error) {
   console.error('GET COURSE DETAIL ERROR:', error)
@@ -345,6 +417,26 @@ export const updateCourse = async (req, res) => {
       data,
     })
 
+    await redisService.deleteCache(
+        CACHE_KEYS.COURSE_LIST,
+        CACHE_KEYS.COURSE_LIST_PUBLIC
+      )
+
+      await redisService.deleteCache(
+        CACHE_KEYS.DASHBOARD_ADMIN
+      )
+
+      await redisService.deleteByPattern(
+        `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+      )
+
+      await redisService.deleteByPattern(
+        `${CACHE_KEYS.COURSE_MODULES}:*`
+      )
+      await redisService.deleteByPattern(
+      `${CACHE_KEYS.COURSE_DETAIL}:*`
+      )
+
     return res.status(200).json({ message: 'Course updated', course })
   } catch (error) {
     console.error('Error updateCourse:', error)
@@ -376,6 +468,27 @@ export const deleteCourse = async (req, res) => {
       data: { isDeleted: true }
     })
 
+    await redisService.deleteCache(
+      CACHE_KEYS.COURSE_LIST,
+      CACHE_KEYS.COURSE_LIST_PUBLIC
+    )
+
+    await redisService.deleteCache(
+      CACHE_KEYS.DASHBOARD_ADMIN
+    )
+
+    await redisService.deleteByPattern(
+      `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    )
+
+    await redisService.deleteByPattern(
+      `${CACHE_KEYS.COURSE_MODULES}:*`
+    )
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.COURSE_DETAIL}:*`
+    )
+    
     return res.status(200).json({ message: 'Course deleted' })
   } catch (error) {
     return res.status(500).json({ error: error.message })

@@ -62,17 +62,14 @@ class RedisService {
   }
   
   async getCache(key) {
-      console.log("getCache called with key:", key);
   if (!this.isConnected()) return null;
 
   const data = await redisClient.get(key);
 
   if (!data) {
-    console.log('Cache miss for key:', key);
     return null;
   }
 
-  console.log('Cache hit for key:', key);
   return JSON.parse(data);
 }
 

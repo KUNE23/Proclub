@@ -12,7 +12,7 @@ export const notifyAdmins = async ({ title, message, type = 'INFO', link = null 
   if (admins.length === 0) return
 
   await client.notification.createMany({
-    data: admins.map((admin) => ({
+  data: admins.map((admin) => ({
       userId: admin.id,
       title,
       message,
