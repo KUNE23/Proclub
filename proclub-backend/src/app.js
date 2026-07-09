@@ -64,7 +64,7 @@ app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 app.use('/api/redis', redisRoutes);
 
-app.get("/health/db", async (req, res) => {
+app.get("/api/db-test", async (req, res) => {
   try {
     const result = await prisma.$queryRaw`SELECT NOW()`;
 
