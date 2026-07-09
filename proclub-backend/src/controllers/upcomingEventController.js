@@ -1,5 +1,7 @@
 import { z } from 'zod'
 import prisma from '../config/prisma.js'
+import redisService from '../services/redisService.js'
+import { CACHE_KEYS, CACHE_TTL } from '../config/cache.js'
 
 const eventSchema = z.object({
   title: z.string().trim().min(3, 'Judul minimal 3 karakter').max(120, 'Judul maksimal 120 karakter'),
@@ -25,15 +27,32 @@ const serializeEvent = (event) => ({
 
 export const getUpcomingEvents = async (req, res) => {
   try {
+    const cacheKey = CACHE_KEYS.UPCOMING_EVENTS;
+
+    const cached = await redisService.getCache(cacheKey);
+
+    if (cached) {
+      return res.status(200).json(cached);
+    }
+    
     const events = await prisma.upcomingEvent.findMany({
       where: { isDeleted: false },
       orderBy: { eventDate: 'asc' }
     })
 
-    return res.json({
+   const response = {
       status: 'success',
       data: events.map(serializeEvent)
-    })
+    };
+
+    await redisService.setCache(
+      cacheKey,
+      response,
+      CACHE_TTL.EVENT
+    );
+
+    return res.status(200).json(response);
+
   } catch (error) {
     return res.status(500).json({ message: 'Gagal memuat jadwal kegiatan' })
   }
@@ -41,6 +60,14 @@ export const getUpcomingEvents = async (req, res) => {
 
 export const getNearestUpcomingEvent = async (req, res) => {
   try {
+    const cacheKey = `${CACHE_KEYS.UPCOMING_EVENTS}:nearest`;
+
+      const cached = await redisService.getCache(cacheKey);
+
+      if (cached) {
+        return res.status(200).json(cached);
+      }
+
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
@@ -55,10 +82,19 @@ export const getNearestUpcomingEvent = async (req, res) => {
       orderBy: { eventDate: 'asc' }
     })
 
-    return res.json({
+   const response = {
       status: 'success',
       data: event ? serializeEvent(event) : null
-    })
+    };
+
+    await redisService.setCache(
+      cacheKey,
+      response,
+      CACHE_TTL.EVENT
+    );
+
+    return res.status(200).json(response);
+
   } catch (error) {
     return res.status(500).json({ message: 'Gagal memuat jadwal terdekat' })
   }
@@ -77,6 +113,14 @@ export const createUpcomingEvent = async (req, res) => {
     const event = await prisma.upcomingEvent.create({
       data: parsed.data
     })
+
+    await redisService.deleteCache(
+  CACHE_KEYS.UPCOMING_EVENTS
+    );
+
+    await redisService.deleteCache(
+      `${CACHE_KEYS.UPCOMING_EVENTS}:nearest`
+    );
 
     return res.status(201).json({
       message: 'Jadwal kegiatan berhasil dibuat',
@@ -116,6 +160,14 @@ export const updateUpcomingEvent = async (req, res) => {
       data: parsed.data
     })
 
+    await redisService.deleteCache(
+  CACHE_KEYS.UPCOMING_EVENTS
+    );
+
+    await redisService.deleteCache(
+      `${CACHE_KEYS.UPCOMING_EVENTS}:nearest`
+    );
+
     return res.json({
       message: 'Jadwal kegiatan berhasil diperbarui',
       data: serializeEvent(event)
@@ -145,6 +197,14 @@ export const deleteUpcomingEvent = async (req, res) => {
       where: { id },
       data: { isDeleted: true, isActive: false }
     })
+
+    await redisService.deleteCache(
+  CACHE_KEYS.UPCOMING_EVENTS
+    );
+
+    await redisService.deleteCache(
+      `${CACHE_KEYS.UPCOMING_EVENTS}:nearest`
+    );
 
     return res.json({ message: 'Jadwal kegiatan berhasil dihapus' })
   } catch (error) {

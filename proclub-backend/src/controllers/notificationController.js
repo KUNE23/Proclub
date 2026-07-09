@@ -1,4 +1,6 @@
 import prisma from '../config/prisma.js'
+import redisService from '../services/redisService.js'
+import { CACHE_KEYS, CACHE_TTL } from '../config/cache.js'
 
 export const getNotifications = async (req, res) => {
   try {
@@ -6,6 +8,16 @@ export const getNotifications = async (req, res) => {
     const page = Number(req.query.page) || 1
     const limit = Math.min(Number(req.query.limit) || 10, 50)
     const skip = (page - 1) * limit
+
+     const cacheKey =
+      `${CACHE_KEYS.NOTIFICATIONS}:${userId}:${page}:${limit}`;
+
+      const cached =
+      await redisService.getCache(cacheKey);
+
+      if (cached) {
+          return res.status(200).json(cached);
+      }
 
     const [notifications, unreadCount, total] = await Promise.all([
       prisma.notification.findMany({
@@ -22,17 +34,25 @@ export const getNotifications = async (req, res) => {
       })
     ])
 
-    return res.json({
-      status: 'success',
-      data: notifications,
-      unreadCount,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit)
-      }
-    })
+    const response = {
+     status: 'success',
+  notifications,
+  unreadCount,
+  pagination: {
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit)
+    }
+  };
+
+    await redisService.setCache(
+        cacheKey,
+        response,
+        CACHE_TTL.NOTIFICATION
+    );
+
+    return res.status(200).json(response);
   } catch (error) {
     return res.status(500).json({
       message: 'Gagal mengambil notifikasi',
@@ -66,6 +86,10 @@ export const markNotificationAsRead = async (req, res) => {
       data: { isRead: true }
     })
 
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.NOTIFICATIONS}:${userId}:*`
+    );
+
     return res.json({
       status: 'success',
       data: updatedNotification
@@ -89,6 +113,10 @@ export const markAllNotificationsAsRead = async (req, res) => {
       },
       data: { isRead: true }
     })
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.NOTIFICATIONS}:${userId}:*`
+    );
 
     return res.json({
       status: 'success',

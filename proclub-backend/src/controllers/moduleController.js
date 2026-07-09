@@ -2,6 +2,8 @@ import prisma from '../config/prisma.js';
 import { generateCertificateForCourse } from '../services/certificateService.js';
 import { assertCourseAccess } from '../services/learningAccessService.js';
 import { notifyAdmins } from '../services/adminNotificationService.js';
+import redisService from '../services/redisService.js'
+import { CACHE_KEYS, CACHE_TTL } from '../config/cache.js'
 
 const toNumber = (value) => Number(value);
 
@@ -90,6 +92,22 @@ export const createModule = async (req, res) => {
       });
     }
 
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.MODULE_LIST}:*`
+    );
+
+    await redisService.deleteByPattern(
+        `${CACHE_KEYS.COURSE_MODULES}:*`
+    );
+
+    await redisService.deleteByPattern(
+        `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    );
+
+    await redisService.deleteCache(
+        CACHE_KEYS.DASHBOARD_ADMIN
+    );
+
     return res.status(201).json({ message: 'Module created', module: moduleItem });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -100,9 +118,19 @@ export const getModulesByCourse = async (req, res) => {
   try {
     const courseId = toNumber(req.params.courseId);
 
+    const cacheKey =
+    `${CACHE_KEYS.MODULE_LIST}:${courseId}:${req.user.role}`
+
     if (Number.isNaN(courseId)) {
       return res.status(400).json({ message: 'Invalid course ID' });
     }
+
+    const cached =
+await redisService.getCache(cacheKey);
+
+if (cached) {
+    return res.status(200).json(cached);
+}
 
     await assertCourseAccess({
       userId: req.user.id,
@@ -131,7 +159,18 @@ export const getModulesByCourse = async (req, res) => {
       orderBy: { order: 'asc' }
     });
 
-    return res.status(200).json({ status: 'success', modules });
+        const response = {
+        status: 'success',
+        modules
+    }
+    await redisService.setCache(
+        cacheKey,
+        response,
+        CACHE_TTL.COURSE
+    );
+
+    return res.status(200).json(response);
+
   } catch (error) {
     if (error.statusCode) {
       return res.status(error.statusCode).json({ status: 'fail', message: error.message });
@@ -186,6 +225,22 @@ export const updateModule = async (req, res) => {
       }
     });
 
+    await redisService.deleteByPattern(
+        `${CACHE_KEYS.MODULE_LIST}:${existingModule.courseId}:*`
+      );
+
+      await redisService.deleteByPattern(
+        `${CACHE_KEYS.COURSE_MODULES}:*`
+      );
+
+      await redisService.deleteByPattern(
+        `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+      );
+
+      await redisService.deleteCache(
+        CACHE_KEYS.DASHBOARD_ADMIN
+      );
+
     return res.json({ status: 'success', message: 'Module updated successfully', module: moduleItem });
   } catch (error) {
     return res.status(500).json({ status: 'fail', message: 'Gagal memperbarui modul', error: error.message });
@@ -204,6 +259,22 @@ export const deleteModule = async (req, res) => {
       where: { id: moduleId },
       data: { isDeleted: true }
     });
+
+  await redisService.deleteByPattern(
+          `${CACHE_KEYS.MODULE_LIST}:${existingModule.courseId}:*`
+        );
+
+        await redisService.deleteByPattern(
+          `${CACHE_KEYS.COURSE_MODULES}:*`
+        );
+
+        await redisService.deleteByPattern(
+          `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+        );
+
+        await redisService.deleteCache(
+          CACHE_KEYS.DASHBOARD_ADMIN
+        );
 
     return res.json({ message: 'Module deleted' });
   } catch (error) {
@@ -270,6 +341,22 @@ export const createLesson = async (req, res) => {
       }
     });
 
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.LESSON_LIST}:${moduleId}:*`
+    );
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.COURSE_MODULES}:*`
+    );
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    );
+
+    await redisService.deleteCache(
+    CACHE_KEYS.DASHBOARD_ADMIN
+    );
+
     return res.status(201).json({ message: 'Lesson created', lesson });
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -279,6 +366,15 @@ export const createLesson = async (req, res) => {
 export const getLessonsByModule = async (req, res) => {
   try {
     const moduleId = toNumber(req.params.moduleId);
+
+    const cacheKey =
+      `${CACHE_KEYS.LESSON_LIST}:${moduleId}:${req.user.role}`;
+
+      const cached = await redisService.getCache(cacheKey);
+
+      if (cached) {
+        return res.status(200).json(cached);
+      }
 
     if (Number.isNaN(moduleId)) {
       return res.status(400).json({ message: 'Invalid module ID' });
@@ -314,7 +410,18 @@ export const getLessonsByModule = async (req, res) => {
       orderBy: { order: 'asc' }
     });
 
-    return res.status(200).json({ status: 'success', lessons });
+    const response = {
+    status: 'success',
+    lessons
+      };
+
+      await redisService.setCache(
+          cacheKey,
+          response,
+          CACHE_TTL.LESSON
+      );
+
+      return res.status(200).json(response);
   } catch (error) {
     if (error.statusCode) {
       return res.status(error.statusCode).json({ status: 'fail', message: error.message });
@@ -374,8 +481,7 @@ export const getLessonDetail = async (req, res) => {
       progress: userProgress
     });
   } catch (error) {
-    console.log('ERROR LESSON DETAIL:');
-    console.log(error);
+    console.error(error);
 
     return res.status(500).json({
       error: error.message
@@ -439,6 +545,22 @@ export const updateLesson = async (req, res) => {
       });
     });
 
+    await redisService.deleteByPattern(
+      `${CACHE_KEYS.LESSON_LIST}:${existingLesson.moduleId}:*`
+    );
+    
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.COURSE_MODULES}:*`
+    );
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    );
+
+    await redisService.deleteCache(
+    CACHE_KEYS.DASHBOARD_ADMIN
+    );
+
     return res.json({ status: 'success', message: 'Lesson updated successfully', lesson: result });
   } catch (error) {
     return res.status(500).json({ status: 'fail', message: 'Gagal memperbarui lesson', error: error.message });
@@ -449,14 +571,43 @@ export const deleteLesson = async (req, res) => {
   try {
     const lessonId = toNumber(req.params.id);
 
+    if (!lesson) {
+      return res.status(404).json({
+        message: 'Lesson not found'
+      });
+    }
+
     if (Number.isNaN(lessonId)) {
       return res.status(400).json({ message: 'Invalid lesson ID' });
     }
+
+     const lesson = await prisma.lesson.findFirst({
+      where: {
+        id: lessonId,
+        isDeleted: false
+          }
+        });
 
     await prisma.lesson.update({
       where: { id: lessonId },
       data: { isDeleted: true }
     });
+
+        await redisService.deleteByPattern(
+      `${CACHE_KEYS.LESSON_LIST}:${lesson.moduleId}:*`
+    );
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.COURSE_MODULES}:*`
+    );
+
+    await redisService.deleteByPattern(
+    `${CACHE_KEYS.DASHBOARD_MEMBER}:*`
+    );
+
+    await redisService.deleteCache(
+    CACHE_KEYS.DASHBOARD_ADMIN
+    );
 
     return res.json({ message: 'Lesson deleted' });
   } catch (error) {
