@@ -12,7 +12,13 @@
     <div class="grid gap-6 md:grid-cols-3">
       <article v-for="member in members" :key="member.name" class="overflow-hidden rounded-[1.5rem] border border-white bg-white/85 shadow-[0_20px_80px_rgba(15,23,42,0.07)]">
         <div class="flex aspect-[4/3] items-end justify-center bg-gradient-to-br from-slate-200 via-slate-100 to-emerald-50">
-          <div class="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-[#07111F] text-4xl font-black text-white shadow-2xl">
+          <img
+            v-if="member.image"
+            :src="member.image"
+            :alt="`Foto ${member.name}`"
+            class="h-full w-full object-cover object-[center_42%]"
+          />
+          <div v-else class="mb-8 flex h-28 w-28 items-center justify-center rounded-full bg-[#07111F] text-4xl font-black text-white shadow-2xl">
             {{ member.initials }}
           </div>
         </div>
@@ -27,8 +33,8 @@
 
 <script setup>
 const members = [
-  { name: 'Alfiansyah Sibyanurrizki', role: 'Ketua', initials: 'AS' },
-  { name: 'Iffah', role: 'Sekretaris', initials: 'IS' },
+  { name: 'Alfiansyah Sibyanurrizki', role: 'Ketua', initials: 'AS', image: '/Alfiansyah.jpeg' },
+  { name: 'Iffah', role: 'Sekretaris', initials: 'IS', image: '/Ipeh.jpeg' },
   { name: 'Abdul Rojak', role: 'Bendahara', initials: 'AR' }
 ]
 </script>

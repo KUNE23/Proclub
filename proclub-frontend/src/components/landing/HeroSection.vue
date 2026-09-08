@@ -24,7 +24,7 @@
 
       <div class="relative animate-float lg:scale-105 lg:translate-x-4">
         <img
-          src="../../assets/hero.png"
+          src="/hero-section.png"
           alt="Proclub Learning Hub Mockup"
           class="h-auto w-full object-contain transition-transform duration-500 hover:scale-[1.01]"
         />

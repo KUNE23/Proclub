@@ -18,11 +18,11 @@
       </div>
 
       <div class="relative overflow-hidden rounded-[1.5rem] border border-white bg-white/80 p-2.5 shadow-[0_22px_80px_rgba(15,23,42,0.07)]">
-        <div class="grid min-h-80 place-items-center rounded-[1rem] bg-gradient-to-br from-emerald-50 via-white to-slate-100 p-8">
+        <div class="relative aspect-[12/7] overflow-hidden rounded-[1rem] bg-gradient-to-br from-emerald-50 via-white to-slate-100">
           <img
-            src="/proclub.png"
+            src="/foto_A24.png"
             alt="Perjalanan Proclub"
-            class="h-auto w-full max-w-sm object-contain transition-transform duration-500 hover:scale-[1.02]"
+            class="absolute left-0 top-0 w-full -translate-y-[15%] transition-transform duration-500 hover:scale-[1.02]"
           />
         </div>
       </div>

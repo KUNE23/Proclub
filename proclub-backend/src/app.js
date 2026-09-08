@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import 'dotenv/config';
-import prisma from "./config/prisma.js";
 
 import authRoutes from './routes/authRoutes.js';
 import courseRoutes from './routes/courseRoutes.js';
@@ -63,25 +62,6 @@ app.use('/api', contactRoutes);
 app.use('/api', userRoutes);
 app.use('/api', memberDashboardRoutes);
 app.use('/api/redis', redisRoutes);
-
-app.get("/api/db-test", async (req, res) => {
-  try {
-    const result = await prisma.$queryRaw`SELECT NOW()`;
-
-    return res.json({
-      status: "ok",
-      result
-    });
-  } catch (err) {
-    console.error("DB ERROR:", err);
-
-    return res.status(500).json({
-      message: err.message,
-      code: err.code,
-      name: err.name
-    });
-  }
-});
 
 if (!process.env.VERCEL) {
   const port = process.env.PORT || 3000;
